@@ -7,23 +7,25 @@ import (
 	"encoding/asn1"
 	"math/big"
 	"crypto/sha256"
+	"crypto/x509"
+	"encoding/pem"
 )
 
-type rsaSigner struct{}
+type RsaSigner struct{}
 
-func (s *rsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error) {
+func (s *RsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	if opts == nil {
 		return nil, errors.New("invalid options")
 	}
 
-	return key.(*rsaPrivateKey).priv.Sign(rand.Reader, digest, opts)
+	return key.(*RsaPrivateKey).priv.Sign(rand.Reader, digest, opts)
 
 }
 
-type rsaVerifier struct{}
+type RsaVerifier struct{}
 
-func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
+func (v *RsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if opts == nil {
 		return false, errors.New("invalid options")
@@ -31,7 +33,7 @@ func (v *rsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts)
 
 	switch opts.(type) {
 	case *rsa.PSSOptions:
-		err := rsa.VerifyPSS(key.(*rsaPublicKey).pub,
+		err := rsa.VerifyPSS(key.(*RsaPublicKey).pub,
 			(opts.(*rsa.PSSOptions)).Hash,
 				digest, signature, opts.(*rsa.PSSOptions))
 
@@ -51,11 +53,11 @@ type rsaKeyMarshalOpt struct {
 	E int
 }
 
-type rsaPrivateKey struct {
+type RsaPrivateKey struct {
 	priv *rsa.PrivateKey
 }
 
-func (key *rsaPrivateKey) SKI() ([]byte) {
+func (key *RsaPrivateKey) SKI() ([]byte) {
 
 	if key.priv == nil {
 		return nil
@@ -71,19 +73,34 @@ func (key *rsaPrivateKey) SKI() ([]byte) {
 
 }
 
-func (key *rsaPrivateKey) Algorithm() string {
+func (key *RsaPrivateKey) Algorithm() string {
 	return RSA
 }
 
-func (key *rsaPrivateKey) PublicKey() (pub Key, err error) {
-	return &rsaPublicKey{&key.priv.PublicKey}, nil
+func (key *RsaPrivateKey) PublicKey() (pub *RsaPublicKey, err error) {
+	return &RsaPublicKey{&key.priv.PublicKey}, nil
 }
 
-type rsaPublicKey struct {
+func (key *RsaPrivateKey) ToPEM() ([]byte,error) {
+	keyData := x509.MarshalPKCS1PrivateKey(key.priv)
+
+	return pem.EncodeToMemory(
+		&pem.Block{
+			Type: "RSA PRIVATE KEY",
+			Bytes: keyData,
+		},
+	), nil
+}
+
+func (key *RsaPrivateKey) Type() (keyType){
+	return PRIVATE_KEY
+}
+
+type RsaPublicKey struct {
 	pub *rsa.PublicKey
 }
 
-func (key *rsaPublicKey) SKI() ([]byte) {
+func (key *RsaPublicKey) SKI() ([]byte) {
 
 	if key.pub == nil {
 		return nil
@@ -98,6 +115,25 @@ func (key *rsaPublicKey) SKI() ([]byte) {
 	return hash.Sum(nil)
 }
 
-func (key *rsaPublicKey) Algorithm() string {
+func (key *RsaPublicKey) Algorithm() string {
 	return RSA
+}
+
+func (key *RsaPublicKey) ToPEM() ([]byte,error) {
+	keyData, err := x509.MarshalPKIXPublicKey(key.pub)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return pem.EncodeToMemory(
+		&pem.Block{
+			Type: "RSA PUBLIC KEY",
+			Bytes: keyData,
+		},
+	), nil
+}
+
+func (key *RsaPublicKey) Type() (keyType){
+	return PUBLIC_KEY
 }

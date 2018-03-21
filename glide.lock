@@ -1,5 +1,5 @@
-hash: 84203c36934b19143be2a6789be29b8f3ccb299887ccec3e04a664c5a85853ac
-updated: 2018-03-20T02:00:16.73742+09:00
+hash: ad86eb65134de7e7958cc79b6b4d3c548a756476e2af3796b151a4b297ea767f
+updated: 2018-03-21T02:25:10.00787+09:00
 imports:
 - name: github.com/golang/protobuf
   version: bbd03ef6da3a115852eaf24c8a1c46aeb39aa175
@@ -11,11 +11,11 @@ imports:
   - ptypes/duration
   - ptypes/timestamp
 - name: github.com/it-chain/heimdall
-  version: 8d426f50cee50f3cbb27820ab80bf0a2064220e2
+  version: 46632c9d039ca4f8b19fb4e768e711547c4f828b
 - name: github.com/jbenet/go-base58
   version: 6237cf65f3a6f7111cd8a42be3590df99a66bc7d
 - name: golang.org/x/net
-  version: e0c57d8f86c17f0724497efcb3bc617e82834821
+  version: 6078986fec03a1dcc236c34816c71b0e05018fda
   subpackages:
   - context
   - http2

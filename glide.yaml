@@ -2,6 +2,6 @@ package: github.com/it-chain/Bifrost
 import:
 - package: google.golang.org/grpc
   version: v1.10.0
-- package: github.com/it-chain/heimdall
 - package: github.com/jbenet/go-base58
   version: 1.0.0
+- package: github.com/it-chain/heimdall

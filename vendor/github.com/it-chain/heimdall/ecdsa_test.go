@@ -13,7 +13,7 @@ func TestMarshalECDSASignature(t *testing.T) {
 	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 
-	privateKey := &ecdsaPrivateKey{generatedKey}
+	privateKey := &EcdsaPrivateKey{generatedKey}
 
 	rawData := []byte("Now I'm ECDSA Signature Testing!")
 
@@ -41,14 +41,14 @@ func TestMarshalECDSASignature(t *testing.T) {
 
 func TestECDSASigner_Sign(t *testing.T) {
 
-	signer := &ecdsaSigner{}
-	verifier := &ecdsaVerifier{}
+	signer := &EcdsaSigner{}
+	verifier := &EcdsaVerifier{}
 
 	// Generate Keys
 	generatedKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 
-	privateKey := &ecdsaPrivateKey{generatedKey}
+	privateKey := &EcdsaPrivateKey{generatedKey}
 	publicKey, err := privateKey.PublicKey()
 	assert.NoError(t, err)
 

@@ -13,7 +13,7 @@ func PublicKeyToPEM(pub Key) ([]byte, error) {
 	}
 
 	switch k := pub.(type) {
-	case *rsaPublicKey:
+	case *RsaPublicKey:
 
 		keyData, err := x509.MarshalPKIXPublicKey(k.pub)
 		if err != nil {
@@ -27,7 +27,7 @@ func PublicKeyToPEM(pub Key) ([]byte, error) {
 			},
 		), nil
 
-	case *ecdsaPublicKey:
+	case *EcdsaPublicKey:
 
 		keyData, err := x509.MarshalPKIXPublicKey(k.pub)
 		if err != nil {
@@ -54,7 +54,7 @@ func PrivateKeyToPEM(pri Key) ([]byte, error) {
 	}
 
 	switch k := pri.(type) {
-	case *rsaPrivateKey:
+	case *RsaPrivateKey:
 		keyData := x509.MarshalPKCS1PrivateKey(k.priv)
 
 		return pem.EncodeToMemory(
@@ -64,7 +64,7 @@ func PrivateKeyToPEM(pri Key) ([]byte, error) {
 			},
 		), nil
 
-	case *ecdsaPrivateKey:
+	case *EcdsaPrivateKey:
 		keyData, err := x509.MarshalECPrivateKey(k.priv)
 		if err != nil {
 			return nil, err

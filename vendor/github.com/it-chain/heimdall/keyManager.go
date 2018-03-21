@@ -49,42 +49,33 @@ func (km *keyManager) Store(keys... Key) (err error) {
 	}
 
 	for _, key := range keys {
-		switch k := key.(type) {
-		case *rsaPrivateKey:
-			err = km.storeKey(k, PRIVATE_KEY)
-		case *rsaPublicKey:
-			err = km.storeKey(k, PUBLIC_KEY)
-		case *ecdsaPrivateKey:
-			err = km.storeKey(k, PRIVATE_KEY)
-		case *ecdsaPublicKey:
-			err = km.storeKey(k, PUBLIC_KEY)
-		default:
-			return errors.New("Unspported Key Type.")
+		err := km.storeKey(key)
+
+		if err != nil{
+			return err
 		}
 	}
 
 	return nil
 }
 
-func (km *keyManager) storeKey(key Key, keyType keyType) (error) {
+func (km *keyManager) storeKey(key Key) (error) {
 
 	var data []byte
 	var err error
 
-	switch keyType {
-	case PRIVATE_KEY:
-		data, err = PrivateKeyToPEM(key)
-	case PUBLIC_KEY:
-		data, err = PublicKeyToPEM(key)
-	default:
-		return errors.New("Unsupported Key Type")
+	if key == nil{
+		return errors.New("No Key Errors")
 	}
+
+	data, err = key.ToPEM()
 
 	if err != nil {
 		return err
 	}
 
-	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), string(keyType))
+	path, err := km.getFullPath(hex.EncodeToString(key.SKI()), string(key.Type()))
+
 	if err != nil {
 		return err
 	}
@@ -97,7 +88,6 @@ func (km *keyManager) storeKey(key Key, keyType keyType) (error) {
 	}
 
 	return nil
-
 }
 
 func (km *keyManager) Load() (pri, pub Key, err error) {
@@ -126,9 +116,9 @@ func (km *keyManager) Load() (pri, pub Key, err error) {
 
 				switch key.(type) {
 				case *rsa.PrivateKey:
-					pri = &rsaPrivateKey{key.(*rsa.PrivateKey)}
+					pri = &RsaPrivateKey{key.(*rsa.PrivateKey)}
 				case *ecdsa.PrivateKey:
-					pri = &ecdsaPrivateKey{key.(*ecdsa.PrivateKey)}
+					pri = &EcdsaPrivateKey{key.(*ecdsa.PrivateKey)}
 				default:
 					return nil, nil, errors.New("Failed to load Key")
 				}
@@ -141,9 +131,9 @@ func (km *keyManager) Load() (pri, pub Key, err error) {
 
 				switch key.(type) {
 				case *rsa.PublicKey:
-					pub = &rsaPublicKey{key.(*rsa.PublicKey)}
+					pub = &RsaPublicKey{key.(*rsa.PublicKey)}
 				case *ecdsa.PublicKey:
-					pub = &ecdsaPublicKey{key.(*ecdsa.PublicKey)}
+					pub = &EcdsaPublicKey{key.(*ecdsa.PublicKey)}
 				default:
 					return nil, nil, errors.New("Failed to load Key")
 				}

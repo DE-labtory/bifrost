@@ -125,11 +125,11 @@ func TestCollector_RSAGenerateKey(t *testing.T) {
 	assert.NotNil(t, pri)
 	assert.NotNil(t, pub)
 
-	rsaPriKey, valid := pri.(*rsaPrivateKey)
+	rsaPriKey, valid := pri.(*RsaPrivateKey)
 	assert.True(t, valid)
 	assert.NotNil(t, rsaPriKey)
 
-	rsaPubKey, valid := pub.(*rsaPublicKey)
+	rsaPubKey, valid := pub.(*RsaPublicKey)
 	assert.True(t, valid)
 	assert.NotNil(t, rsaPubKey)
 
@@ -149,11 +149,11 @@ func TestCollector_ECDSAGenerateKey(t *testing.T) {
 	assert.NotNil(t, pri)
 	assert.NotNil(t, pub)
 
-	ecdsaPriKey, valid := pri.(*ecdsaPrivateKey)
+	ecdsaPriKey, valid := pri.(*EcdsaPrivateKey)
 	assert.True(t, valid)
 	assert.NotNil(t, ecdsaPriKey)
 
-	ecdsaPubKey, valid := pub.(*ecdsaPublicKey)
+	ecdsaPubKey, valid := pub.(*EcdsaPublicKey)
 	assert.True(t, valid)
 	assert.NotNil(t, ecdsaPubKey)
 

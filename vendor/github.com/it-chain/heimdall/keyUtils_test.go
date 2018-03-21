@@ -17,12 +17,12 @@ func TestRSAPublicKeyToPEM(t *testing.T) {
 	generatedRSAKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	assert.NoError(t, err)
 
-	rsaKey := &rsaPrivateKey{generatedRSAKey}
+	rsaKey := &RsaPrivateKey{generatedRSAKey}
 	pub, err := rsaKey.PublicKey()
 	assert.NoError(t, err)
 	assert.NotNil(t, pub)
 
-	data, err := PublicKeyToPEM(pub.(*rsaPublicKey))
+	data, err := PublicKeyToPEM(pub.(*RsaPublicKey))
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 
@@ -33,7 +33,7 @@ func TestRSAPrivateKeyToPEM(t *testing.T) {
 	generatedRSAKey, err := rsa.GenerateKey(rand.Reader, 1024)
 	assert.NoError(t, err)
 
-	rsaKey := &rsaPrivateKey{generatedRSAKey}
+	rsaKey := &RsaPrivateKey{generatedRSAKey}
 
 	data, err := PrivateKeyToPEM(rsaKey)
 	assert.NoError(t, err)
@@ -46,12 +46,12 @@ func TestECDSAPublicKeyToPEM(t *testing.T) {
 	generatedECDSAKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 
-	ecdsaKey := &ecdsaPrivateKey{generatedECDSAKey}
+	ecdsaKey := &EcdsaPrivateKey{generatedECDSAKey}
 	pub, err := ecdsaKey.PublicKey()
 	assert.NoError(t, err)
 	assert.NotNil(t, pub)
 
-	data, err := PublicKeyToPEM(pub.(*ecdsaPublicKey))
+	data, err := PublicKeyToPEM(pub.(*EcdsaPublicKey))
 	assert.NoError(t, err)
 	assert.NotNil(t, data)
 
@@ -62,7 +62,7 @@ func TestECDSAPrivateKeyToPEM(t *testing.T) {
 	generatedECDSAKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 
-	rsaKey := &ecdsaPrivateKey{generatedECDSAKey}
+	rsaKey := &EcdsaPrivateKey{generatedECDSAKey}
 
 	data, err := PrivateKeyToPEM(rsaKey)
 	assert.NoError(t, err)

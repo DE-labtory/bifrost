@@ -11,13 +11,13 @@ import (
 
 func TestRsaSigner_Sign(t *testing.T) {
 
-	signer := &rsaSigner{}
-	verifier := &rsaVerifier{}
+	signer := &RsaSigner{}
+	verifier := &RsaVerifier{}
 
 	// Generate keys
 	generatedKey, err := rsa.GenerateKey(rand.Reader, 1024)
 	assert.NoError(t, err)
-	privateKey := &rsaPrivateKey{generatedKey}
+	privateKey := &RsaPrivateKey{generatedKey}
 	publicKey, err := privateKey.PublicKey()
 
 

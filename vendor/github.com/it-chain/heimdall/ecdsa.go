@@ -8,20 +8,22 @@ import (
 	"crypto/rand"
 	"crypto/elliptic"
 	"crypto/sha256"
+	"crypto/x509"
+	"encoding/pem"
 )
 
-type ecdsaSignature struct {
+type EcdsaSignature struct {
 	R, S *big.Int
 }
 
-type ecdsaSigner struct{}
+type EcdsaSigner struct{}
 
 func marshalECDSASignature(r, s *big.Int) ([]byte, error) {
-	return asn1.Marshal(ecdsaSignature{r, s})
+	return asn1.Marshal(EcdsaSignature{r, s})
 }
 
 func unmarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
-	ecdsaSig := new(ecdsaSignature)
+	ecdsaSig := new(EcdsaSignature)
 	_, err := asn1.Unmarshal(signature, ecdsaSig)
 	if err != nil {
 		return nil, nil, errors.New("failed to unmarshal")
@@ -44,9 +46,9 @@ func unmarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
 	return ecdsaSig.R, ecdsaSig.S, nil
 }
 
-func (signer *ecdsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error) {
+func (signer *EcdsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
-	r, s, err := ecdsa.Sign(rand.Reader, key.(*ecdsaPrivateKey).priv, digest)
+	r, s, err := ecdsa.Sign(rand.Reader, key.(*EcdsaPrivateKey).priv, digest)
 	if err != nil {
 		return nil, err
 	}
@@ -59,16 +61,16 @@ func (signer *ecdsaSigner) Sign(key Key, digest []byte, opts SignerOpts) ([]byte
 	return signature, nil
 }
 
-type ecdsaVerifier struct{}
+type EcdsaVerifier struct{}
 
-func (v *ecdsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
+func (v *EcdsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	r, s, err := unmarshalECDSASignature(signature)
 	if err != nil {
 		return false, err
 	}
 
-	valid := ecdsa.Verify(key.(*ecdsaPublicKey).pub, digest, r, s)
+	valid := ecdsa.Verify(key.(*EcdsaPublicKey).pub, digest, r, s)
 	if !valid {
 		return valid, errors.New("failed to verify")
 	}
@@ -76,11 +78,11 @@ func (v *ecdsaVerifier) Verify(key Key, signature, digest []byte, opts SignerOpt
 	return valid, nil
 }
 
-type ecdsaPrivateKey struct {
+type EcdsaPrivateKey struct {
 	priv *ecdsa.PrivateKey
 }
 
-func (key *ecdsaPrivateKey) SKI() ([]byte) {
+func (key *EcdsaPrivateKey) SKI() ([]byte) {
 
 	if key.priv == nil {
 		return nil
@@ -94,19 +96,37 @@ func (key *ecdsaPrivateKey) SKI() ([]byte) {
 
 }
 
-func (key *ecdsaPrivateKey) Algorithm() string {
+func (key *EcdsaPrivateKey) Algorithm() string {
 	return ECDSA
 }
 
-func (key *ecdsaPrivateKey) PublicKey() (Key, error) {
-	return &ecdsaPublicKey{&key.priv.PublicKey}, nil
+func (key *EcdsaPrivateKey) PublicKey() (Key, error) {
+	return &EcdsaPublicKey{&key.priv.PublicKey}, nil
 }
 
-type ecdsaPublicKey struct {
+func (key *EcdsaPrivateKey) ToPEM() ([]byte,error){
+	keyData, err := x509.MarshalECPrivateKey(key.priv)
+	if err != nil {
+		return nil, err
+	}
+
+	return pem.EncodeToMemory(
+		&pem.Block{
+			Type: "ECDSA PRIVATE KEY",
+			Bytes: keyData,
+		},
+	), nil
+}
+
+func (key *EcdsaPrivateKey) Type() (keyType){
+	return PRIVATE_KEY
+}
+
+type EcdsaPublicKey struct {
 	pub *ecdsa.PublicKey
 }
 
-func (key *ecdsaPublicKey) SKI() ([]byte) {
+func (key *EcdsaPublicKey) SKI() ([]byte) {
 
 	if key.pub == nil {
 		return nil
@@ -120,6 +140,24 @@ func (key *ecdsaPublicKey) SKI() ([]byte) {
 
 }
 
-func (key *ecdsaPublicKey) Algorithm() string {
+func (key *EcdsaPublicKey) Algorithm() string {
 	return ECDSA
+}
+
+func (key *EcdsaPublicKey) ToPEM() ([]byte,error){
+	keyData, err := x509.MarshalPKIXPublicKey(key.pub)
+	if err != nil {
+		return nil, err
+	}
+
+	return pem.EncodeToMemory(
+		&pem.Block{
+			Type: "RSA PUBLIC KEY",
+			Bytes: keyData,
+		},
+	), nil
+}
+
+func (key *EcdsaPublicKey) Type() (keyType){
+	return PUBLIC_KEY
 }

@@ -1,19 +1,20 @@
 package main
 
 import (
-	"heimdall"
 	"log"
 	"crypto/rsa"
 	"crypto"
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"github.com/it-chain/heimdall"
 )
 
 /*
 This sample shows data to be transmitted
 is signed and verified by RSA Key.
 */
+
 func main() {
 
 	cryp, err := heimdall.NewCryptoImpl(".myKeys", &heimdall.RSAKeyGenOpts{})

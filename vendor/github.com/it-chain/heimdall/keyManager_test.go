@@ -20,21 +20,21 @@ func TestKeyManager_StoreKey(t *testing.T) {
 
 	rsaRawKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
-	rsaPriKey := &rsaPrivateKey{rsaRawKey}
+	rsaPriKey := &RsaPrivateKey{rsaRawKey}
 	err = km.Store(rsaPriKey)
 	assert.NoError(t, err)
 
-	rsaPubKey := &rsaPublicKey{&rsaPriKey.priv.PublicKey}
+	rsaPubKey := &RsaPublicKey{&rsaPriKey.priv.PublicKey}
 	err = km.Store(rsaPubKey)
 	assert.NoError(t, err)
 
 	ecdsaRawKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 
-	ecdsaPriKey := &ecdsaPrivateKey{ecdsaRawKey}
+	ecdsaPriKey := &EcdsaPrivateKey{ecdsaRawKey}
 	err = km.Store(ecdsaPriKey)
 	assert.NoError(t, err)
 
-	ecdsaPubKey := &ecdsaPublicKey{&ecdsaPriKey.priv.PublicKey}
+	ecdsaPubKey := &EcdsaPublicKey{&ecdsaPriKey.priv.PublicKey}
 	err = km.Store(ecdsaPubKey)
 	assert.NoError(t, err)
 
@@ -56,6 +56,7 @@ func TestKeyManager_StoreKey(t *testing.T) {
 	assert.Error(t, err)
 }
 
+//test fail 이유?!!
 func TestKeyManager_StoreInvalidInput(t *testing.T) {
 
 	km := &keyManager{}
@@ -65,24 +66,23 @@ func TestKeyManager_StoreInvalidInput(t *testing.T) {
 
 	rsaRawKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
-	rsaPriKey := &rsaPrivateKey{rsaRawKey}
-	err = km.storeKey(rsaPriKey, PUBLIC_KEY)
+	rsaPriKey := &RsaPrivateKey{rsaRawKey}
+	err = km.storeKey(rsaPriKey)
 	assert.Error(t, err)
 
-	rsaPubKey := &rsaPublicKey{&rsaPriKey.priv.PublicKey}
-	err = km.storeKey(rsaPubKey, PRIVATE_KEY)
+	rsaPubKey := &RsaPublicKey{&rsaPriKey.priv.PublicKey}
+	err = km.storeKey(rsaPubKey)
 	assert.Error(t, err)
 
 	ecdsaRawKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 
-	ecdsaPriKey := &ecdsaPrivateKey{ecdsaRawKey}
-	err = km.storeKey(ecdsaPriKey, PUBLIC_KEY)
+	ecdsaPriKey := &EcdsaPrivateKey{ecdsaRawKey}
+	err = km.storeKey(ecdsaPriKey)
 	assert.Error(t, err)
 
-	ecdsaPubKey := &ecdsaPublicKey{&ecdsaPriKey.priv.PublicKey}
-	err = km.storeKey(ecdsaPubKey, PRIVATE_KEY)
+	ecdsaPubKey := &EcdsaPublicKey{&ecdsaPriKey.priv.PublicKey}
+	err = km.storeKey(ecdsaPubKey)
 	assert.Error(t, err)
-
 }
 
 func TestKeyManager_LoadKey(t *testing.T) {
@@ -94,11 +94,11 @@ func TestKeyManager_LoadKey(t *testing.T) {
 
 	rsaRawKey, err := rsa.GenerateKey(rand.Reader, 1024)
 
-	rsaPriKey := &rsaPrivateKey{rsaRawKey}
+	rsaPriKey := &RsaPrivateKey{rsaRawKey}
 	err = km.Store(rsaPriKey)
 	assert.NoError(t, err)
 
-	rsaPubKey := &rsaPublicKey{&rsaPriKey.priv.PublicKey}
+	rsaPubKey := &RsaPublicKey{&rsaPriKey.priv.PublicKey}
 	err = km.Store(rsaPubKey)
 	assert.NoError(t, err)
 
@@ -107,7 +107,7 @@ func TestKeyManager_LoadKey(t *testing.T) {
 	assert.NotNil(t, pri)
 	assert.NotNil(t, pub)
 
-	assert.Equal(t, rsaPriKey, pri.(*rsaPrivateKey))
-	assert.Equal(t, rsaPubKey, pub.(*rsaPublicKey))
+	assert.Equal(t, rsaPriKey, pri.(*RsaPrivateKey))
+	assert.Equal(t, rsaPubKey, pub.(*RsaPublicKey))
 
 }
