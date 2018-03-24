@@ -31,13 +31,17 @@ func NewStreamHandler(streamWrapper StreamWrapper, handle ReceivedMessageHandle)
 		return nil, errors.New("fail to create streamHandler streamWrapper or handle is nil")
 	}
 
-	return &StreamHandlerImpl{
+	sh := &StreamHandlerImpl{
 		streamWrapper: streamWrapper,
 		handle: handle,
 		outChannl: make(chan *msg.InnerMessage,200),
 		readChannel: make(chan *pb.Envelope,200),
 		stopChannel: make(chan struct{},1),
-	}, nil
+	}
+
+	go sh.listen()
+
+	return sh, nil
 }
 
 func (sh *StreamHandlerImpl) toDie() bool {
