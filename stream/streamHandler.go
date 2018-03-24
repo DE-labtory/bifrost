@@ -5,27 +5,46 @@ import (
 	"sync/atomic"
 	"github.com/it-chain/bifrost/msg"
 	"errors"
+	"github.com/it-chain/bifrost/pb"
 )
 
 type ReceivedMessageHandle func(message msg.OutterMessage)
 
-type StreamHandler struct {
+type StreamHandler interface{
+	Send(envelope *pb.Envelope, successCallBack func(interface{}),errCallBack func(error))
+	Close()
+}
+
+type StreamHandlerImpl struct {
 	streamWrapper StreamWrapper
 	stopFlag      int32
 	handle        ReceivedMessageHandle
-	outChannl     chan msg.InnerMessage
-	readChannel   chan interface{}
+	outChannl     chan *msg.InnerMessage
+	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
 	sync.RWMutex
 }
 
+func NewStreamHandler(streamWrapper StreamWrapper, handle ReceivedMessageHandle) (StreamHandler, error){
 
+	if streamWrapper == nil || handle == nil{
+		return nil, errors.New("fail to create streamHandler streamWrapper or handle is nil")
+	}
 
-func (sh *StreamHandler) toDie() bool {
+	return &StreamHandlerImpl{
+		streamWrapper: streamWrapper,
+		handle: handle,
+		outChannl: make(chan *msg.InnerMessage,200),
+		readChannel: make(chan *pb.Envelope,200),
+		stopChannel: make(chan struct{},1),
+	}, nil
+}
+
+func (sh *StreamHandlerImpl) toDie() bool {
 	return atomic.LoadInt32(&(sh.stopFlag)) == int32(1)
 }
 
-func (sh *StreamHandler) WriteStream(){
+func (sh *StreamHandlerImpl) writeStream(){
 
 	for !sh.toDie() {
 
@@ -55,7 +74,7 @@ func (sh *StreamHandler) WriteStream(){
 	}
 }
 
-func (sh *StreamHandler) ReadStream(errChan chan error){
+func (sh *StreamHandlerImpl) readStream(errChan chan error){
 
 	defer func() {
 		recover()
@@ -83,4 +102,38 @@ func (sh *StreamHandler) ReadStream(errChan chan error){
 
 		sh.readChannel <- envelope
 	}
+}
+
+func (sh *StreamHandlerImpl) Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)){
+
+	sh.Lock()
+	defer sh.Unlock()
+
+	m := &msg.InnerMessage{
+		Envelope: envelope,
+		OnErr:    errCallBack,
+		OnSuccess: successCallBack,
+	}
+
+	sh.outChannl <- m
+}
+
+func (sh *StreamHandlerImpl) Close(){
+
+	if sh.toDie() {
+		return
+	}
+
+	amIFirst := atomic.CompareAndSwapInt32(&sh.stopFlag, int32(0), int32(1))
+
+	if !amIFirst {
+		return
+	}
+
+	sh.stopChannel <- struct{}{}
+	sh.Lock()
+
+	sh.streamWrapper.Close()
+
+	sh.Unlock()
 }
