@@ -14,17 +14,16 @@ type InnerMessage struct{
 type OutterMessage struct {
 	Envelope     *pb.Envelope
 	Data         []byte
-	ConnectionID string
-	//Conn         connection
+	Stream       stream
 	sync.Mutex
 }
 
-type connection interface {
+type stream interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
 }
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl
-//func (m *OutterMessage) Respond(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
-//
-//	m.Conn.Send(envelope, successCallBack, errCallBack)
-//}
+func (m *OutterMessage) Respond(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
+
+	m.Stream.Send(envelope, successCallBack, errCallBack)
+}

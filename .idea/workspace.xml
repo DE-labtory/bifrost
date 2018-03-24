@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fcf6b981-352c-496e-a9b1-7adcb20e5c67" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/stream/streamHandler_test.go" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/stream/streamHandler.go" afterPath="$PROJECT_DIR$/stream/streamHandler.go" />
+      <change beforePath="$PROJECT_DIR$/msg/message.go" afterPath="$PROJECT_DIR$/msg/message.go" />
+      <change beforePath="$PROJECT_DIR$/peer/peerStore.go" afterPath="$PROJECT_DIR$/peer/peer_store.go" />
+      <change beforePath="$PROJECT_DIR$/stream/streamHandler.go" afterPath="$PROJECT_DIR$/stream/stream_handler.go" />
+      <change beforePath="$PROJECT_DIR$/stream/streamHandler_test.go" afterPath="$PROJECT_DIR$/stream/stream_handler_test.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -18,18 +20,30 @@
       <file leaf-file-name="peer.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/peer/peer.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="15">
-              <caret line="21" column="0" lean-forward="true" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+            <state relative-caret-position="124">
+              <caret line="44" column="0" lean-forward="true" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="conn.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/conn.go">
+      <file leaf-file-name="message.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/msg/message.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
+            <state relative-caret-position="180">
+              <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+              <folding>
+                <element signature="e#13#65#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stream.pb.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pb/stream.pb.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="225">
+              <caret line="140" column="17" lean-forward="true" selection-start-line="140" selection-start-column="17" selection-end-line="140" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -45,11 +59,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="streamHandler.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/stream/streamHandler.go">
+      <file leaf-file-name="conn.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/conn.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" column="1" lean-forward="false" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
+            <state relative-caret-position="0">
+              <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stream_handler.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/stream/stream_handler.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
               <folding>
                 <element signature="e#16#128#0" expanded="true" />
               </folding>
@@ -57,8 +81,8 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="streamHandler_test.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/stream/streamHandler_test.go">
+      <file leaf-file-name="stream_handler_test.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/stream/stream_handler_test.go">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="14" lean-forward="false" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
@@ -75,28 +99,6 @@
               <folding>
                 <element signature="e#16#114#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="message.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/msg/message.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="17" column="29" lean-forward="true" selection-start-line="17" selection-start-column="29" selection-end-line="17" selection-end-column="29" />
-              <folding>
-                <element signature="e#13#65#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="peerStore.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/peer/peerStore.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="12" lean-forward="false" selection-start-line="0" selection-start-column="12" selection-end-line="0" selection-end-column="12" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -132,11 +134,11 @@
         <option value="$PROJECT_DIR$/peer/peer_test.go" />
         <option value="$PROJECT_DIR$/peer/peerStore.go" />
         <option value="$PROJECT_DIR$/msg.go" />
-        <option value="$PROJECT_DIR$/msg/message.go" />
         <option value="$PROJECT_DIR$/stream/StreamHandler.go" />
         <option value="$PROJECT_DIR$/conn.go" />
         <option value="$PROJECT_DIR$/stream/stream.go" />
         <option value="$PROJECT_DIR$/stream/streamHandler_test.go" />
+        <option value="$PROJECT_DIR$/msg/message.go" />
         <option value="$PROJECT_DIR$/stream/streamHandler.go" />
       </list>
     </option>
@@ -272,9 +274,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="975" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2032967" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2032967" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -472,14 +473,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pb/stream.pb.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="140" column="17" lean-forward="true" selection-start-line="140" selection-start-column="17" selection-end-line="140" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pb/stream.proto">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
@@ -520,25 +513,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conn.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/msg/message.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="29" lean-forward="true" selection-start-line="17" selection-start-column="29" selection-end-line="17" selection-end-column="29" />
-          <folding>
-            <element signature="e#13#65#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/peer/peerStore.go">
+    <entry file="file://$PROJECT_DIR$/peer/peer_store.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="12" lean-forward="false" selection-start-line="0" selection-start-column="12" selection-end-line="0" selection-end-column="12" />
@@ -556,9 +531,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/peer/peer.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="21" column="0" lean-forward="true" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        <state relative-caret-position="124">
+          <caret line="44" column="0" lean-forward="true" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pb/stream.pb.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="140" column="17" lean-forward="true" selection-start-line="140" selection-start-column="17" selection-end-line="140" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conn.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="15" lean-forward="false" selection-start-line="0" selection-start-column="15" selection-end-line="0" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/msg/message.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding>
+            <element signature="e#13#65#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -572,7 +573,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/stream/streamHandler_test.go">
+    <entry file="file://$PROJECT_DIR$/stream/stream_handler_test.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="14" lean-forward="false" selection-start-line="0" selection-start-column="14" selection-end-line="0" selection-end-column="14" />
@@ -580,10 +581,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/stream/streamHandler.go">
+    <entry file="file://$PROJECT_DIR$/stream/stream_handler.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="1" lean-forward="false" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
+        <state relative-caret-position="390">
+          <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
           <folding>
             <element signature="e#16#128#0" expanded="true" />
           </folding>

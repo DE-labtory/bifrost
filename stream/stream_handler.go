@@ -137,3 +137,27 @@ func (sh *StreamHandlerImpl) Close(){
 
 	sh.Unlock()
 }
+
+func (sh *StreamHandlerImpl) listen() error{
+
+	errChan := make(chan error, 1)
+
+	go sh.readStream(errChan)
+	go sh.writeStream()
+
+	for !sh.toDie(){
+		select{
+		case stop := <-sh.stopChannel:
+			sh.stopChannel <- stop
+			return nil
+		case err := <-errChan:
+			return err
+		case message := <-sh.readChannel:
+			if sh.handle != nil{
+				sh.handle(msg.OutterMessage{Envelope:message,Stream:sh})
+			}
+		}
+	}
+
+	return nil
+}
