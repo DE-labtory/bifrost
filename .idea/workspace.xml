@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fcf6b981-352c-496e-a9b1-7adcb20e5c67" name="Default" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/mux/mux_test.go" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change beforePath="$PROJECT_DIR$/mux/mux.go" afterPath="$PROJECT_DIR$/mux/mux.go" />
-      <change beforePath="$PROJECT_DIR$/pb/stream.pb.go" afterPath="$PROJECT_DIR$/pb/stream.pb.go" />
-      <change beforePath="$PROJECT_DIR$/stream/stream_handler.go" afterPath="$PROJECT_DIR$/stream/stream_handler.go" />
-      <change beforePath="$PROJECT_DIR$/stream/stream_handler_test.go" afterPath="$PROJECT_DIR$/stream/stream_handler_test.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -20,10 +18,10 @@
       <file leaf-file-name="mux.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mux/mux.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+            <state relative-caret-position="298">
+              <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
               <folding>
-                <element signature="e#13#67#0" expanded="true" />
+                <element signature="e#13#78#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -75,9 +73,10 @@
         <option value="$PROJECT_DIR$/host/host.go" />
         <option value="$PROJECT_DIR$/pb/stream.proto" />
         <option value="$PROJECT_DIR$/msg/message.go" />
-        <option value="$PROJECT_DIR$/mux/mux.go" />
         <option value="$PROJECT_DIR$/stream/stream_handler.go" />
         <option value="$PROJECT_DIR$/stream/stream_handler_test.go" />
+        <option value="$PROJECT_DIR$/mux/mux.go" />
+        <option value="$PROJECT_DIR$/mux/mux_test.go" />
       </list>
     </option>
   </component>
@@ -87,9 +86,9 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
+  <component name="ProjectFrameBounds">
     <option name="y" value="24" />
-    <option name="width" value="840" />
+    <option name="width" value="1680" />
     <option name="height" value="973" />
   </component>
   <component name="ProjectView">
@@ -182,7 +181,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.go test github.com/it-chain/bifrost/stream">
+  <component name="RunManager" selected="Go Test.TestMux_ServeRequest in mux_test.go">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="Bifrost" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -192,14 +191,32 @@
       <package value="github.com/it-chain/Bifrost" />
       <directory value="$PROJECT_DIR$/" />
     </configuration>
-    <configuration name="TestFromPubkey in peer_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+    <configuration name="TestMux_Handle in mux_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="Bifrost" />
-      <working_directory value="$PROJECT_DIR$/peer" />
+      <working_directory value="$PROJECT_DIR$/mux" />
       <go_parameters value="-i" />
       <framework value="gotest" />
       <kind value="PACKAGE" />
-      <package value="github.com/it-chain/bifrost/peer" />
-      <pattern value="^TestFromPubkey$" />
+      <package value="github.com/it-chain/bifrost/mux" />
+      <pattern value="^TestMux_Handle$" />
+    </configuration>
+    <configuration name="TestMux_ServeRequest in mux_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+      <module name="Bifrost" />
+      <working_directory value="$PROJECT_DIR$/mux" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/it-chain/bifrost/mux" />
+      <pattern value="^TestMux_ServeRequest$" />
+    </configuration>
+    <configuration name="TestNewMux in mux_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+      <module name="Bifrost" />
+      <working_directory value="$PROJECT_DIR$/mux" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/it-chain/bifrost/mux" />
+      <pattern value="^TestNewMux$" />
     </configuration>
     <configuration name="TestNewStreamHandler in stream_handler_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
       <module name="Bifrost" />
@@ -209,24 +226,6 @@
       <kind value="PACKAGE" />
       <package value="github.com/it-chain/bifrost/stream" />
       <pattern value="^TestNewStreamHandler$" />
-    </configuration>
-    <configuration name="TestStreamHandler_Close in stream_handler_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
-      <module name="Bifrost" />
-      <working_directory value="$PROJECT_DIR$/stream" />
-      <go_parameters value="-i" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="github.com/it-chain/bifrost/stream" />
-      <pattern value="^TestStreamHandler_Close$" />
-    </configuration>
-    <configuration name="TestStreamHandler_Send in stream_handler_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
-      <module name="Bifrost" />
-      <working_directory value="$PROJECT_DIR$/stream" />
-      <go_parameters value="-i" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="github.com/it-chain/bifrost/stream" />
-      <pattern value="^TestStreamHandler_Send$" />
     </configuration>
     <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
       <module name="Bifrost" />
@@ -245,19 +244,19 @@
       <package value="github.com/it-chain/bifrost/stream" />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Go Test.TestFromPubkey in peer_test.go" />
-      <item index="1" class="java.lang.String" itemvalue="Go Test.TestNewStreamHandler in stream_handler_test.go" />
-      <item index="2" class="java.lang.String" itemvalue="Go Test.TestStreamHandler_Send in stream_handler_test.go" />
-      <item index="3" class="java.lang.String" itemvalue="Go Test.TestStreamHandler_Close in stream_handler_test.go" />
-      <item index="4" class="java.lang.String" itemvalue="Go Test.go test github.com/it-chain/bifrost/stream" />
+      <item index="0" class="java.lang.String" itemvalue="Go Test.TestNewStreamHandler in stream_handler_test.go" />
+      <item index="1" class="java.lang.String" itemvalue="Go Test.go test github.com/it-chain/bifrost/stream" />
+      <item index="2" class="java.lang.String" itemvalue="Go Test.TestNewMux in mux_test.go" />
+      <item index="3" class="java.lang.String" itemvalue="Go Test.TestMux_Handle in mux_test.go" />
+      <item index="4" class="java.lang.String" itemvalue="Go Test.TestMux_ServeRequest in mux_test.go" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Go Test.go test github.com/it-chain/bifrost/stream" />
-        <item index="1" class="java.lang.String" itemvalue="Go Test.TestNewStreamHandler in stream_handler_test.go" />
-        <item index="2" class="java.lang.String" itemvalue="Go Test.TestStreamHandler_Send in stream_handler_test.go" />
-        <item index="3" class="java.lang.String" itemvalue="Go Test.TestStreamHandler_Close in stream_handler_test.go" />
-        <item index="4" class="java.lang.String" itemvalue="Go Test.TestFromPubkey in peer_test.go" />
+        <item index="0" class="java.lang.String" itemvalue="Go Test.TestMux_ServeRequest in mux_test.go" />
+        <item index="1" class="java.lang.String" itemvalue="Go Test.TestMux_Handle in mux_test.go" />
+        <item index="2" class="java.lang.String" itemvalue="Go Test.TestNewMux in mux_test.go" />
+        <item index="3" class="java.lang.String" itemvalue="Go Test.go test github.com/it-chain/bifrost/stream" />
+        <item index="4" class="java.lang.String" itemvalue="Go Test.TestNewStreamHandler in stream_handler_test.go" />
       </list>
     </recent_temporary>
   </component>
@@ -265,41 +264,42 @@
     <option name="remove_strategy" value="false" />
   </component>
   <component name="TestHistory">
-    <history-entry file="TestNewStreamHandler_in_stream_handler_test_go - 2018.03.27 at 17h 23m 27s.xml">
-      <configuration name="TestNewStreamHandler in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestMux_Handle_in_mux_test_go - 2018.03.27 at 21h 30m 24s.xml">
+      <configuration name="TestMux_Handle in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestStreamHandler_Close_in_stream_handler_test_go - 2018.03.27 at 17h 08m 54s.xml">
-      <configuration name="TestStreamHandler_Close in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestMux_Handle_in_mux_test_go - 2018.03.27 at 21h 30m 52s.xml">
+      <configuration name="TestMux_Handle in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestStreamHandler_Close_in_stream_handler_test_go - 2018.03.27 at 17h 09m 21s.xml">
-      <configuration name="TestStreamHandler_Close in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestMux_ServeRequest_in_mux_test_go - 2018.03.27 at 21h 33m 04s.xml">
+      <configuration name="TestMux_ServeRequest in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestStreamHandler_Close_in_stream_handler_test_go - 2018.03.27 at 17h 09m 50s.xml">
-      <configuration name="TestStreamHandler_Close in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 27m 16s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestStreamHandler_Send_in_stream_handler_test_go - 2018.03.27 at 17h 23m 03s.xml">
-      <configuration name="TestStreamHandler_Send in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 27m 28s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestStreamHandler_Send_in_stream_handler_test_go - 2018.03.27 at 17h 23m 19s.xml">
-      <configuration name="TestStreamHandler_Send in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 27m 33s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_it-chain_bifrost_stream - 2018.03.27 at 17h 23m 52s.xml">
-      <configuration name="go test github.com/it-chain/bifrost/stream" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 27m 45s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_it-chain_bifrost_stream - 2018.03.27 at 17h 24m 15s.xml">
-      <configuration name="go test github.com/it-chain/bifrost/stream" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 28m 19s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_it-chain_bifrost_stream - 2018.03.27 at 17h 24m 37s.xml">
-      <configuration name="go test github.com/it-chain/bifrost/stream" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 28m 51s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="go_test_github_com_it-chain_bifrost_stream - 2018.03.27 at 21h 11m 49s.xml">
-      <configuration name="go test github.com/it-chain/bifrost/stream" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestNewMux_in_mux_test_go - 2018.03.27 at 21h 29m 12s.xml">
+      <configuration name="TestNewMux in mux_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="24" width="1680" height="973" extended-state="6" />
+    <frame x="0" y="24" width="1680" height="973" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20573871" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20573871" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -331,14 +331,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/peer/peer_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="15" column="1" lean-forward="false" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/vendor/github.com/it-chain/heimdall/rsa.go" />
     <entry file="file://$PROJECT_DIR$/host/host_test.go">
       <provider selected="true" editor-type-id="text-editor">
@@ -544,16 +536,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/msg/message.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="13" column="0" lean-forward="true" selection-start-line="13" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
-          <folding>
-            <element signature="e#13#66#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/stream/stream_handler_test.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
@@ -616,12 +598,32 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/msg/message.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="5" lean-forward="false" selection-start-line="14" selection-start-column="5" selection-end-line="14" selection-end-column="5" />
+          <folding>
+            <element signature="e#13#66#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mux/mux_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="61" column="29" lean-forward="true" selection-start-line="61" selection-start-column="29" selection-end-line="61" selection-end-column="29" />
+          <folding>
+            <element signature="e#13#142#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/mux/mux.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="630">
-          <caret line="42" column="0" lean-forward="true" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+        <state relative-caret-position="298">
+          <caret line="53" column="0" lean-forward="true" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
           <folding>
-            <element signature="e#13#67#0" expanded="true" />
+            <element signature="e#13#78#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -3,6 +3,8 @@ package mux
 import (
 	"sync"
 
+	"errors"
+
 	"github.com/it-chain/bifrost/msg"
 )
 
@@ -13,14 +15,19 @@ type HandlerFunc func(message msg.OutterMessage)
 type Mux struct {
 	sync.RWMutex
 	registerHandled map[Protocol]*Handle
-	handles         []*Handle
 }
 
 type Handle struct {
 	handlerFunc HandlerFunc
 }
 
-func (mux *Mux) Handle(protocol Protocol, handler HandlerFunc) {
+func NewMux() *Mux {
+	return &Mux{
+		registerHandled: make(map[Protocol]*Handle),
+	}
+}
+
+func (mux *Mux) Handle(protocol Protocol, handler HandlerFunc) error {
 
 	mux.Lock()
 	defer mux.Unlock()
@@ -28,10 +35,11 @@ func (mux *Mux) Handle(protocol Protocol, handler HandlerFunc) {
 	_, ok := mux.registerHandled[protocol]
 
 	if ok {
-		panic("already exist protocol!")
+		return errors.New("already exist protocol")
 	}
 
 	mux.registerHandled[protocol] = &Handle{handler}
+	return nil
 }
 
 func (mux *Mux) match(protocol Protocol) HandlerFunc {
