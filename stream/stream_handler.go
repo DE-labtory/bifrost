@@ -10,7 +10,9 @@ import (
 	"github.com/it-chain/bifrost/pb"
 )
 
-type ReceivedMessageHandler func(message msg.OutterMessage)
+type ReceivedMessageHandler interface {
+	ServeRequest(msg msg.OutterMessage)
+}
 
 type StreamHandler interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
@@ -160,7 +162,7 @@ func (sh *StreamHandlerImpl) listen() error {
 			return err
 		case message := <-sh.readChannel:
 			if sh.handle != nil {
-				sh.handle(msg.OutterMessage{Envelope: message, Stream: sh})
+				sh.handle.ServeRequest(msg.OutterMessage{Envelope: message, Stream: sh})
 			}
 		}
 	}

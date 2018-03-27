@@ -28,6 +28,12 @@ type MockServer struct {
 	clh MockCloseHandler
 }
 
+type Handler struct{}
+
+func (h Handler) ServeRequest(message msg.OutterMessage) {
+
+}
+
 func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 
 	if ms.ch != nil {
@@ -141,11 +147,7 @@ func TestStreamHandler_Send(t *testing.T) {
 		log.Fatal(err.Error())
 	}
 
-	var recvhandler = func(message msg.OutterMessage) {
-
-	}
-
-	streamHandler, err := NewStreamHandler(streamWrapper, recvhandler)
+	streamHandler, err := NewStreamHandler(streamWrapper, Handler{})
 
 	if err != nil {
 		fmt.Errorf("error")
@@ -207,12 +209,8 @@ func TestStreamHandler_Close(t *testing.T) {
 		log.Fatal(err.Error())
 	}
 
-	var recvhandler = func(message msg.OutterMessage) {
-
-	}
-
 	time.Sleep(1 * time.Second)
-	streamHandler, err := NewStreamHandler(streamWrapper, recvhandler)
+	streamHandler, err := NewStreamHandler(streamWrapper, Handler{})
 
 	//then
 	streamHandler.Close()
