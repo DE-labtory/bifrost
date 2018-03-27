@@ -2,40 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fcf6b981-352c-496e-a9b1-7adcb20e5c67" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/conn/conn.go" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/mux/mux.go" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/glide.lock" afterPath="$PROJECT_DIR$/glide.lock" />
-      <change beforePath="$PROJECT_DIR$/glide.yaml" afterPath="$PROJECT_DIR$/glide.yaml" />
-      <change beforePath="$PROJECT_DIR$/host.go" afterPath="$PROJECT_DIR$/host.go" />
-      <change beforePath="$PROJECT_DIR$/msg/message.go" afterPath="$PROJECT_DIR$/msg/message.go" />
-      <change beforePath="$PROJECT_DIR$/peer/peer.go" afterPath="$PROJECT_DIR$/peer/peer.go" />
-      <change beforePath="$PROJECT_DIR$/stream/stream.go" afterPath="$PROJECT_DIR$/stream/stream.go" />
+      <change beforePath="$PROJECT_DIR$/host.go" afterPath="$PROJECT_DIR$/host/host.go" />
+      <change beforePath="$PROJECT_DIR$/host_test.go" afterPath="$PROJECT_DIR$/host/host_test.go" />
+      <change beforePath="$PROJECT_DIR$/pb/stream.proto" afterPath="$PROJECT_DIR$/pb/stream.proto" />
       <change beforePath="$PROJECT_DIR$/stream/stream_handler.go" afterPath="$PROJECT_DIR$/stream/stream_handler.go" />
-      <change beforePath="$PROJECT_DIR$/stream/stream_handler_test.go" afterPath="$PROJECT_DIR$/stream/stream_handler_test.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/currency/format.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/currency/format.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/currency/gen.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/currency/gen.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/date/gen_test.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/date/gen_test.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/gen.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/gen.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/plural.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/plural.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/plural_test.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/plural_test.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/tables.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/feature/plural/tables.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/gen.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/gen.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/cldrtree/cldrtree_test.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/cldrtree/cldrtree_test.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/cldrtree/tree.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/cldrtree/tree.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/export/idna/tables10.0.0.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/export/idna/tables10.0.0.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/gen.go" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/gen_test.go" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/internal.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/internal.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/language/compact/gen_index.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/language/compact/gen_index.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/common.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/common.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/format.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/format.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/gen.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/gen.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/gen_common.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/gen_common.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/number.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/number.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/tables_test.go" afterPath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/number/tables_test.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/golang.org/x/text/internal/tables.go" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/vendor/google.golang.org/genproto/googleapis/spanner/v1/spanner.pb.go" afterPath="$PROJECT_DIR$/vendor/google.golang.org/genproto/googleapis/spanner/v1/spanner.pb.go" />
-      <change beforePath="$PROJECT_DIR$/vendor/google.golang.org/genproto/googleapis/spanner/v1/type.pb.go" afterPath="$PROJECT_DIR$/vendor/google.golang.org/genproto/googleapis/spanner/v1/type.pb.go" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -49,8 +21,8 @@
       <file leaf-file-name="stream_handler.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/stream/stream_handler.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2123">
-              <caret line="157" column="22" lean-forward="true" selection-start-line="157" selection-start-column="22" selection-end-line="157" selection-end-column="22" />
+            <state relative-caret-position="300">
+              <caret line="20" column="31" lean-forward="true" selection-start-line="20" selection-start-column="31" selection-end-line="20" selection-end-column="31" />
               <folding>
                 <element signature="e#16#130#0" expanded="true" />
               </folding>
@@ -58,13 +30,81 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="stream_handler_test.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/stream/stream_handler_test.go">
+      <file leaf-file-name="mux.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/mux/mux.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
-              <caret line="213" column="16" lean-forward="false" selection-start-line="213" selection-start-column="16" selection-end-line="213" selection-end-column="16" />
+            <state relative-caret-position="150">
+              <caret line="10" column="19" lean-forward="true" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
               <folding>
-                <element signature="e#16#308#0" expanded="true" />
+                <element signature="e#13#70#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stream.pb.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pb/stream.pb.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="178">
+              <caret line="12" column="10" lean-forward="true" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
+              <folding>
+                <element signature="e#236#398#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="peer.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/peer/peer.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="390">
+              <caret line="26" column="0" lean-forward="true" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+              <folding>
+                <element signature="e#14#123#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="peer_store.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/peer/peer_store.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="15">
+              <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="host.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/host/host.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="22" column="5" lean-forward="true" selection-start-line="22" selection-start-column="5" selection-end-line="22" selection-end-column="5" />
+              <folding>
+                <element signature="e#14#102#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="host_test.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/host/host_test.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" column="13" lean-forward="true" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="message.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/msg/message.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="19" column="1" lean-forward="true" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+              <folding>
+                <element signature="e#13#66#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -73,9 +113,11 @@
       <file leaf-file-name="stream.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/stream/stream.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="267">
-              <caret line="32" column="19" lean-forward="true" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
-              <folding />
+            <state relative-caret-position="225">
+              <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
+              <folding>
+                <element signature="e#16#114#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -83,19 +125,11 @@
       <file leaf-file-name="conn.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/conn/conn.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="17" column="30" lean-forward="false" selection-start-line="17" selection-start-column="30" selection-end-line="17" selection-end-column="30" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="stream.pb.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pb/stream.pb.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
-              <caret line="170" column="0" lean-forward="false" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
-              <folding />
+            <state relative-caret-position="195">
+              <caret line="13" column="1" lean-forward="true" selection-start-line="13" selection-start-column="1" selection-end-line="13" selection-end-column="1" />
+              <folding>
+                <element signature="e#14#97#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -127,7 +161,6 @@
         <option value="$PROJECT_DIR$/test.go" />
         <option value="$PROJECT_DIR$/host_test.go" />
         <option value="$PROJECT_DIR$/pb/hello.proto" />
-        <option value="$PROJECT_DIR$/pb/stream.proto" />
         <option value="$PROJECT_DIR$/address.go" />
         <option value="$PROJECT_DIR$/glide.yaml" />
         <option value="$PROJECT_DIR$/vendor/github.com/it-chain/heimdall/rsa.go" />
@@ -139,13 +172,16 @@
         <option value="$PROJECT_DIR$/stream/streamHandler_test.go" />
         <option value="$PROJECT_DIR$/stream/streamHandler.go" />
         <option value="$PROJECT_DIR$/host.go" />
-        <option value="$PROJECT_DIR$/stream/stream_handler.go" />
         <option value="$PROJECT_DIR$/msg/message.go" />
         <option value="$PROJECT_DIR$/peer/peer.go" />
         <option value="$PROJECT_DIR$/peer/peer.go" />
         <option value="$PROJECT_DIR$/conn/conn.go" />
         <option value="$PROJECT_DIR$/stream/stream.go" />
         <option value="$PROJECT_DIR$/stream/stream_handler_test.go" />
+        <option value="$PROJECT_DIR$/host/host.go" />
+        <option value="$PROJECT_DIR$/pb/stream.proto" />
+        <option value="$PROJECT_DIR$/mux/mux.go" />
+        <option value="$PROJECT_DIR$/stream/stream_handler.go" />
       </list>
     </option>
   </component>
@@ -155,10 +191,10 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="y" value="24" />
-    <option name="width" value="1680" />
-    <option name="height" value="977" />
+    <option name="width" value="840" />
+    <option name="height" value="973" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -192,7 +228,27 @@
             <path>
               <item name="bifrost" type="b2602c69:ProjectViewProjectNode" />
               <item name="bifrost" type="462c0819:PsiDirectoryNode" />
+              <item name="host" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="bifrost" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bifrost" type="462c0819:PsiDirectoryNode" />
+              <item name="msg" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="bifrost" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bifrost" type="462c0819:PsiDirectoryNode" />
+              <item name="mux" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="bifrost" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bifrost" type="462c0819:PsiDirectoryNode" />
               <item name="pb" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="bifrost" type="b2602c69:ProjectViewProjectNode" />
+              <item name="bifrost" type="462c0819:PsiDirectoryNode" />
+              <item name="peer" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="bifrost" type="b2602c69:ProjectViewProjectNode" />
@@ -212,6 +268,11 @@
     <property name="DefaultGoTemplateProperty" value="Go File" />
     <property name="go.vendoring.notification.had.been.shown" value="true" />
     <property name="settings.editor.selected.configurable" value="watcher.settings" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/host" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -311,9 +372,6 @@
     <history-entry file="TestNewStreamHandler_in_stream_handler_test_go - 2018.03.27 at 17h 23m 27s.xml">
       <configuration name="TestNewStreamHandler in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestStreamHandler_Close_in_stream_handler_test_go - 2018.03.27 at 17h 06m 32s.xml">
-      <configuration name="TestStreamHandler_Close in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
-    </history-entry>
     <history-entry file="TestStreamHandler_Close_in_stream_handler_test_go - 2018.03.27 at 17h 06m 39s.xml">
       <configuration name="TestStreamHandler_Close in stream_handler_test.go" configurationId="GoTestRunConfiguration" />
     </history-entry>
@@ -338,9 +396,12 @@
     <history-entry file="go_test_github_com_it-chain_bifrost_stream - 2018.03.27 at 17h 24m 15s.xml">
       <configuration name="go test github.com/it-chain/bifrost/stream" configurationId="GoTestRunConfiguration" />
     </history-entry>
+    <history-entry file="go_test_github_com_it-chain_bifrost_stream - 2018.03.27 at 17h 24m 37s.xml">
+      <configuration name="go test github.com/it-chain/bifrost/stream" configurationId="GoTestRunConfiguration" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="24" width="1680" height="977" extended-state="0" />
+    <frame x="0" y="24" width="1680" height="973" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.20573871" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -348,7 +409,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32879817" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33029613" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32993197" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -375,30 +436,16 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/vendor/github.com/it-chain/heimdall/rsa.go" />
-    <entry file="file://$PROJECT_DIR$/host.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="25" column="23" lean-forward="false" selection-start-line="25" selection-start-column="23" selection-end-line="25" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conn.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="11" column="0" lean-forward="false" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/peer/peer_test.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="15" column="1" lean-forward="false" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/vendor/github.com/it-chain/heimdall/rsa.go" />
-    <entry file="file://$PROJECT_DIR$/host_test.go">
+    <entry file="file://$PROJECT_DIR$/host/host_test.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
           <caret line="25" column="1" lean-forward="false" selection-start-line="25" selection-start-column="1" selection-end-line="25" selection-end-column="1" />
@@ -409,6 +456,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="195">
           <caret line="16" column="1" lean-forward="true" selection-start-line="16" selection-start-column="1" selection-end-line="16" selection-end-column="1" />
+          <folding>
+            <element signature="e#14#123#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -493,63 +543,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/peer/peer_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="8" column="6" lean-forward="true" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/host_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="13" lean-forward="true" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/host.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/peer/peer_store.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/peer/peer.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="13" lean-forward="true" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/msg/message.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" column="1" lean-forward="true" selection-start-line="12" selection-start-column="1" selection-end-line="12" selection-end-column="1" />
-          <folding>
-            <element signature="e#13#66#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/vendor/google.golang.org/grpc/clientconn.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="69">
           <caret line="403" column="44" lean-forward="false" selection-start-line="403" selection-start-column="38" selection-end-line="403" selection-end-column="44" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pb/stream.proto">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="25" column="17" lean-forward="true" selection-start-line="25" selection-start-column="17" selection-end-line="25" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -602,46 +599,140 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/golang.org/x/net/context/context.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-388">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/golang.org/x/net/context/go19.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stream/stream_handler_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="265">
+          <caret line="203" column="38" lean-forward="true" selection-start-line="203" selection-start-column="38" selection-end-line="203" selection-end-column="38" />
+          <folding>
+            <element signature="e#16#308#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/peer/peer_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="8" column="6" lean-forward="true" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/peer/peer_store.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pb/stream.proto">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="26" column="0" lean-forward="true" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/pb/stream.pb.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="167">
-          <caret line="170" column="0" lean-forward="false" selection-start-line="170" selection-start-column="0" selection-end-line="170" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="178">
+          <caret line="12" column="10" lean-forward="true" selection-start-line="12" selection-start-column="10" selection-end-line="12" selection-end-column="10" />
+          <folding>
+            <element signature="e#236#398#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conn/conn.go">
+    <entry file="file://$PROJECT_DIR$/msg/message.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="17" column="30" lean-forward="false" selection-start-line="17" selection-start-column="30" selection-end-line="17" selection-end-column="30" />
-          <folding />
+        <state relative-caret-position="285">
+          <caret line="19" column="1" lean-forward="true" selection-start-line="19" selection-start-column="1" selection-end-line="19" selection-end-column="1" />
+          <folding>
+            <element signature="e#13#66#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/stream/stream.go">
+    <entry file="file://$PROJECT_DIR$/host/host_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="267">
-          <caret line="32" column="19" lean-forward="true" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
+        <state relative-caret-position="45">
+          <caret line="3" column="13" lean-forward="true" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/stream/stream_handler.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2123">
-          <caret line="157" column="22" lean-forward="true" selection-start-line="157" selection-start-column="22" selection-end-line="157" selection-end-column="22" />
+        <state relative-caret-position="300">
+          <caret line="20" column="31" lean-forward="true" selection-start-line="20" selection-start-column="31" selection-end-line="20" selection-end-column="31" />
           <folding>
             <element signature="e#16#130#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/stream/stream_handler_test.go">
+    <entry file="file://$PROJECT_DIR$/stream/stream.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="213" column="16" lean-forward="false" selection-start-line="213" selection-start-column="16" selection-end-line="213" selection-end-column="16" />
+        <state relative-caret-position="225">
+          <caret line="15" column="22" lean-forward="true" selection-start-line="15" selection-start-column="22" selection-end-line="15" selection-end-column="22" />
           <folding>
-            <element signature="e#16#308#0" expanded="true" />
+            <element signature="e#16#114#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conn/conn.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="1" lean-forward="true" selection-start-line="13" selection-start-column="1" selection-end-line="13" selection-end-column="1" />
+          <folding>
+            <element signature="e#14#97#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/host/host.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" column="5" lean-forward="true" selection-start-line="22" selection-start-column="5" selection-end-line="22" selection-end-column="5" />
+          <folding>
+            <element signature="e#14#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/peer/peer.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="26" column="0" lean-forward="true" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+          <folding>
+            <element signature="e#14#123#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mux/mux.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="19" lean-forward="true" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+          <folding>
+            <element signature="e#13#70#0" expanded="true" />
           </folding>
         </state>
       </provider>

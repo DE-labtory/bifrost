@@ -23,5 +23,7 @@ message Envelope {
     // sender's public key
     bytes pubkey = 3;
 
-    Type type =4;
+    Type type = 4;
+
+    string protocol = 5;
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/it-chain/bifrost/pb"
 )
 
-type ReceivedMessageHandle func(message msg.OutterMessage)
+type ReceivedMessageHandler func(message msg.OutterMessage)
 
 type StreamHandler interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
@@ -20,14 +20,14 @@ type StreamHandler interface {
 type StreamHandlerImpl struct {
 	streamWrapper StreamWrapper
 	stopFlag      int32
-	handle        ReceivedMessageHandle
+	handle        ReceivedMessageHandler
 	outChannl     chan *msg.InnerMessage
 	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
 	sync.RWMutex
 }
 
-func NewStreamHandler(streamWrapper StreamWrapper, handle ReceivedMessageHandle) (StreamHandler, error) {
+func NewStreamHandler(streamWrapper StreamWrapper, handle ReceivedMessageHandler) (StreamHandler, error) {
 
 	if streamWrapper == nil || handle == nil {
 		return nil, errors.New("fail to create streamHandler streamWrapper or handle is nil")
