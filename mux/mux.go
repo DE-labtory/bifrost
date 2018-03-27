@@ -1,9 +1,8 @@
 package mux
 
 import (
-	"sync"
-
 	"errors"
+	"sync"
 
 	"github.com/it-chain/bifrost/msg"
 )
