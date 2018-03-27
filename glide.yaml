@@ -5,3 +5,5 @@ import:
 - package: github.com/jbenet/go-base58
   version: 1.0.0
 - package: github.com/it-chain/heimdall
+- package: github.com/stretchr/testify
+  version: v1.2.1

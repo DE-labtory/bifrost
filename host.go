@@ -1,32 +1,33 @@
 package Bifrost
 
 import (
-	"google.golang.org/grpc"
-	"net"
 	"log"
+	"net"
+
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-type Host interface{
+type Host interface {
 	Register(*grpc.Server)
 }
 
-type Address struct{
+type Address struct {
 	Ip string
 }
 
-func NewAddress(ipAddress string) Address{
+func NewAddress(ipAddress string) Address {
 	// validate ip pattern
 	return Address{
-		Ip:ipAddress,
+		Ip: ipAddress,
 	}
 }
 
-type Bifrost struct{
+type Bifrost struct {
 	server *grpc.Server
 }
 
-func NewHost(address Address) Bifrost{
+func NewHost(address Address) Bifrost {
 	lis, err := net.Listen("tcp", address.Ip)
 
 	if err != nil {
@@ -38,6 +39,6 @@ func NewHost(address Address) Bifrost{
 	reflection.Register(s)
 
 	return Bifrost{
-		server:s,
+		server: s,
 	}
 }

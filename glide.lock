@@ -1,5 +1,5 @@
-hash: ad86eb65134de7e7958cc79b6b4d3c548a756476e2af3796b151a4b297ea767f
-updated: 2018-03-21T02:25:10.00787+09:00
+hash: 574b629cacbea1d884441261d62defc97d6dc986e439613e5d3e31e166e09288
+updated: 2018-03-27T16:43:51.306436+09:00
 imports:
 - name: github.com/golang/protobuf
   version: bbd03ef6da3a115852eaf24c8a1c46aeb39aa175
@@ -14,6 +14,8 @@ imports:
   version: 46632c9d039ca4f8b19fb4e768e711547c4f828b
 - name: github.com/jbenet/go-base58
   version: 6237cf65f3a6f7111cd8a42be3590df99a66bc7d
+- name: github.com/stretchr/testify
+  version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
 - name: golang.org/x/net
   version: 6078986fec03a1dcc236c34816c71b0e05018fda
   subpackages:
@@ -25,14 +27,14 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/text
-  version: 8c34f848e18c4bd34d02db7f19a0ed1a0a8f5852
+  version: ab48842968a66deafa354805a8b031924668e059
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: f8c8703595236ae70fdf8789ecb656ea0bcdcf46
+  version: ab0870e398d5dd054b868c0db1481ab029b9a9f2
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc

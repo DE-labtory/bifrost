@@ -2,19 +2,20 @@ package msg
 
 import (
 	"sync"
+
 	"github.com/it-chain/bifrost/pb"
 )
 
-type InnerMessage struct{
-	Envelope *pb.Envelope
-	OnErr    func(error)
+type InnerMessage struct {
+	Envelope  *pb.Envelope
+	OnErr     func(error)
 	OnSuccess func(interface{})
 }
 
 type OutterMessage struct {
-	Envelope     *pb.Envelope
-	Data         []byte
-	Stream       stream
+	Envelope *pb.Envelope
+	Data     []byte
+	Stream   stream
 	sync.Mutex
 }
 
