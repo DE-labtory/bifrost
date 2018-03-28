@@ -1,4 +1,4 @@
-package msg
+package stream
 
 import (
 	"sync"
@@ -15,12 +15,8 @@ type InnerMessage struct {
 type OutterMessage struct {
 	Envelope *pb.Envelope
 	Data     []byte
-	Stream   stream
+	Stream   StreamHandler
 	sync.Mutex
-}
-
-type stream interface {
-	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
 }
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/it-chain/bifrost/conn"
-	"github.com/it-chain/bifrost/msg"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/peer"
@@ -60,21 +59,13 @@ func (bih BifrostHost) ConnectToPeer(peer peer.Peer) error {
 	endPointAddress := conn.Address{IP: peer.Address.IP}
 	grpc_conn, err := conn.NewConnectionWithAddress(endPointAddress, false, nil)
 
-	if err != nil {
-		return err
-	}
-
-	streamWrapper, err := stream.NewClientStreamWrapper(grpc_conn)
+	_, err = stream.Connect(grpc_conn, bih.mux)
 
 	if err != nil {
 		return err
 	}
 
-	streamHandler, err := stream.NewStreamHandler(streamWrapper, bih.mux)
-
-	if err != nil {
-		return err
-	}
+	return nil
 }
 
 func (bih BifrostHost) createEnvelope(protocol string, data interface{}) (*pb.Envelope, error) {
@@ -103,12 +94,21 @@ func (bih BifrostHost) handleError(err error) {
 
 }
 
-func (bih BifrostHost) handleConnectionEstablish(message msg.OutterMessage) {
+func (bih BifrostHost) handleConnectionEstablish(message stream.OutterMessage) {
 	//peer추가
-	//
+	//todo verify 추가
+
+	connectedPeer := peer.Peer{}
+	err := json.Unmarshal(message.Data, &connectedPeer)
+
+	if err != nil {
+		return
+	}
+
+	streamHandler := message.Stream
 }
 
-func (bih BifrostHost) handleRequestIdentity(message msg.OutterMessage) {
+func (bih BifrostHost) handleRequestIdentity(message stream.OutterMessage) {
 
 	info := bih.identity.GetPublicInfo()
 

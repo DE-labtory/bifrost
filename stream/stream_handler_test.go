@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost/conn"
-	"github.com/it-chain/bifrost/msg"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -30,7 +29,11 @@ type MockServer struct {
 
 type Handler struct{}
 
-func (h Handler) ServeRequest(message msg.OutterMessage) {
+func (h Handler) ServeRequest(message OutterMessage) {
+
+}
+
+func (h Handler) ServeError(err error) {
 
 }
 
@@ -147,7 +150,7 @@ func TestStreamHandler_Send(t *testing.T) {
 		log.Fatal(err.Error())
 	}
 
-	streamHandler, err := NewStreamHandler(streamWrapper, Handler{})
+	streamHandler, err := SetStreamHandler(streamWrapper, Handler{})
 
 	if err != nil {
 		fmt.Errorf("error")
@@ -210,7 +213,7 @@ func TestStreamHandler_Close(t *testing.T) {
 	}
 
 	time.Sleep(1 * time.Second)
-	streamHandler, err := NewStreamHandler(streamWrapper, Handler{})
+	streamHandler, err := SetStreamHandler(streamWrapper, Handler{})
 
 	//then
 	streamHandler.Close()
