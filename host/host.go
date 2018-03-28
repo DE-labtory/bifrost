@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	CONNECTION_REQUEST  = "/connectionRequest"
-	CONNECTION_RESPONSE = "/connectionResponse"
+	REQUEST_IDENTITY     = "/requestIdentity"
+	CONNECTION_ESTABLISH = "/connectionEstablish"
 )
 
 type Host interface {
@@ -48,47 +48,33 @@ func NewHost(server *grpc.Server) *BifrostHost {
 	}
 
 	//set default handler
-	mux.Handle(CONNECTION_REQUEST, host.handleConnectionRequest)
+	mux.Handle(REQUEST_IDENTITY, host.handleRequestIdentity)
+	mux.Handle(CONNECTION_ESTABLISH, host.handleConnectionEstablish)
 	mux.HandleError(host.handleError)
 
 	return host
 }
 
-func (bih BifrostHost) ConnectToPeer(address Address) error {
+func (bih BifrostHost) ConnectToPeer(peer peer.Peer) error {
 
-	endPointAddress := conn.Address{IP: address.Ip}
+	endPointAddress := conn.Address{IP: peer.Address.IP}
 	grpc_conn, err := conn.NewConnectionWithAddress(endPointAddress, false, nil)
 
 	if err != nil {
-
+		return err
 	}
 
 	streamWrapper, err := stream.NewClientStreamWrapper(grpc_conn)
 
 	if err != nil {
-
+		return err
 	}
 
 	streamHandler, err := stream.NewStreamHandler(streamWrapper, bih.mux)
 
 	if err != nil {
-
+		return err
 	}
-
-	streamHandler.Send()
-}
-
-func (bih BifrostHost) handleConnectionRequest(message msg.OutterMessage) {
-
-	info := bih.identity.GetPublicInfo()
-
-	envelope, err := bih.createEnvelope(CONNECTION_RESPONSE, info)
-
-	if err != nil {
-		return
-	}
-
-	message.Respond(envelope, nil, nil)
 }
 
 func (bih BifrostHost) createEnvelope(protocol string, data interface{}) (*pb.Envelope, error) {
@@ -115,6 +101,24 @@ func (bih BifrostHost) createEnvelope(protocol string, data interface{}) (*pb.En
 
 func (bih BifrostHost) handleError(err error) {
 
+}
+
+func (bih BifrostHost) handleConnectionEstablish(message msg.OutterMessage) {
+	//peer추가
+	//
+}
+
+func (bih BifrostHost) handleRequestIdentity(message msg.OutterMessage) {
+
+	info := bih.identity.GetPublicInfo()
+
+	envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
+
+	if err != nil {
+		return
+	}
+
+	message.Respond(envelope, nil, nil)
 }
 
 //func NewHost(address Address) Host {
