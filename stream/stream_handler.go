@@ -12,6 +12,7 @@ import (
 
 type ReceivedMessageHandler interface {
 	ServeRequest(msg msg.OutterMessage)
+	ServeError(err error)
 }
 
 type StreamHandler interface {
@@ -159,6 +160,9 @@ func (sh *StreamHandlerImpl) listen() error {
 			sh.stopChannel <- stop
 			return nil
 		case err := <-errChan:
+			if sh.handle != nil {
+				sh.handle.ServeError(err)
+			}
 			return err
 		case message := <-sh.readChannel:
 			if sh.handle != nil {

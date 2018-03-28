@@ -59,10 +59,27 @@ type Peer struct {
 	PubKey  heimdall.RsaPublicKey
 }
 
-func NewPeer(Id ID, address Address, pubKey heimdall.RsaPublicKey) Peer {
-	return Peer{
-		Id:      Id,
+func NewPeer(id ID, address Address, pubKey heimdall.RsaPublicKey) *Peer {
+	return &Peer{
+		Id:      id,
 		Address: address,
 		PubKey:  pubKey,
 	}
+}
+
+type Identity struct {
+	*Peer
+	PriKey heimdall.RsaPrivateKey
+}
+
+func NewIdentity(id ID, address Address, pubKey heimdall.RsaPublicKey, priKey heimdall.RsaPrivateKey) *Identity {
+
+	return &Identity{
+		Peer:   NewPeer(id, address, pubKey),
+		PriKey: priKey,
+	}
+}
+
+func (identity Identity) GetPublicInfo() Peer {
+	return *identity.Peer
 }

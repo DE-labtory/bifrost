@@ -8,12 +8,6 @@ service StreamService{
 
 message Envelope {
 
-    enum Type {
-        Connection = 0;
-        DisConnection = 1;
-        DataTransfer = 2;
-    }
-
     // marshalled Message
     bytes payload = 1;
 
@@ -23,7 +17,5 @@ message Envelope {
     // sender's public key
     bytes pubkey = 3;
 
-    Type type = 4;
-
-    string protocol = 5;
+    string protocol = 4;
 }
