@@ -3,6 +3,8 @@ package stream
 import (
 	"testing"
 
+	"time"
+
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
@@ -41,5 +43,7 @@ func TestConnect(t *testing.T) {
 
 	}
 
-	assert.Equal(t, connectionFlag, true)
+	time.Sleep(1 * time.Second)
+
+	assert.Equal(t, true, connectionFlag)
 }

@@ -1,7 +1,10 @@
 package host
 
 import (
+	"context"
 	"encoding/json"
+
+	"time"
 
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
@@ -47,25 +50,11 @@ func NewHost(server *grpc.Server) *BifrostHost {
 	}
 
 	//set default handler
-	mux.Handle(REQUEST_IDENTITY, host.handleRequestIdentity)
-	mux.Handle(CONNECTION_ESTABLISH, host.handleConnectionEstablish)
+	//mux.Handle(REQUEST_IDENTITY, host.handleRequestIdentity)
+	//mux.Handle(CONNECTION_ESTABLISH, host.handleConnectionEstablish)
 	mux.HandleError(host.handleError)
 
 	return host
-}
-
-func (bih BifrostHost) ConnectToPeer(peer peer.Peer) error {
-
-	endPointAddress := conn.Address{IP: peer.Address.IP}
-	grpc_conn, err := conn.NewConnectionWithAddress(endPointAddress, false, nil)
-
-	_, err = stream.Connect(grpc_conn, bih.mux)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (bih BifrostHost) createEnvelope(protocol string, data interface{}) (*pb.Envelope, error) {
@@ -94,45 +83,130 @@ func (bih BifrostHost) handleError(err error) {
 
 }
 
-func (bih BifrostHost) handleConnectionEstablish(message stream.OutterMessage) {
-	//peer추가
-	//todo verify 추가
-
-	connectedPeer := peer.Peer{}
-	err := json.Unmarshal(message.Data, &connectedPeer)
-
-	if err != nil {
-		return
-	}
-
-	streamHandler := message.Stream
-}
-
-func (bih BifrostHost) handleRequestIdentity(message stream.OutterMessage) {
-
-	info := bih.identity.GetPublicInfo()
-
-	envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
-
-	if err != nil {
-		return
-	}
-
-	message.Respond(envelope, nil, nil)
-}
-
-//func NewHost(address Address) Host {
-//	lis, err := net.Listen("tcp", address.Ip)
+//func (bih BifrostHost) handleConnectionEstablish(message stream.OutterMessage) {
+//	//peer추가
+//	//todo verify 추가
+//
+//	connectedPeer := peer.Peer{}
+//	err := json.Unmarshal(message.Data, &connectedPeer)
 //
 //	if err != nil {
-//		log.Fatalf("failed to listen: %v", err)
+//		return
 //	}
 //
-//	s := grpc.NewServer()
-//	s.RegisterService(pb.StreamServiceServer{}, &BifrostHost)
-//	reflection.Register(s)
-//
-//	return Bifrost{
-//		server: s,
-//	}
+//	streamHandler := message.Stream
 //}
+//
+//func (bih BifrostHost) handleRequestIdentity(message stream.OutterMessage) {
+//
+//	info := bih.identity.GetPublicInfo()
+//
+//	envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
+//
+//	if err != nil {
+//		return
+//	}
+//
+//	message.Respond(envelope, nil, nil)
+//}
+
+func (bih BifrostHost) ConnectToPeer(peer peer.Peer) error {
+
+	endPointAddress := conn.Address{IP: peer.Address.IP}
+	grpc_conn, err := conn.NewConnectionWithAddress(endPointAddress, false, nil)
+
+	streamWrapper, err := stream.Connect(grpc_conn, bih.mux)
+
+	//handshake
+	// 1. wait identity request
+	// 2. send identity
+	// 3. connection Established
+
+	// 1.
+	envelope, err := recvWithTimeout(2, streamWrapper)
+
+	if err != nil {
+		streamWrapper.Close()
+		return err
+	}
+
+	// 2.
+	if IsRequestIdentityProtocol(envelope.GetProtocol()) {
+		info := bih.identity.GetPublicInfo()
+
+		envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
+
+		if err != nil {
+			return err
+		}
+
+		err = streamWrapper.Send(envelope)
+
+		if err != nil {
+			streamWrapper.Close()
+			return err
+		}
+
+		// 3.
+		envelope, err = recvWithTimeout(2, streamWrapper)
+
+		if err != nil {
+			streamWrapper.Close()
+			return err
+		}
+
+		if IsConnectionIstablishProtocol(envelope.GetProtocol()) {
+
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func recvWithTimeout(seconds int, wrapper stream.StreamWrapper) (*pb.Envelope, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
+	defer cancel()
+
+	c := make(chan *pb.Envelope, 1)
+	errch := make(chan error, 1)
+
+	go func() {
+		envelope, err := wrapper.Recv()
+		if err != nil {
+			errch <- err
+		}
+		c <- envelope
+	}()
+
+	select {
+	case <-ctx.Done():
+		//timeoutted body
+		return nil, ctx.Err()
+	case err := <-errch:
+		return nil, err
+	case ok := <-c:
+		//okay body
+		return ok, nil
+	}
+}
+
+func IsRequestIdentityProtocol(protocol string) bool {
+
+	if protocol == REQUEST_IDENTITY {
+		return true
+	}
+	return false
+}
+
+func IsConnectionIstablishProtocol(protocol string) bool {
+
+	if protocol == REQUEST_IDENTITY {
+		return true
+	}
+	return false
+}

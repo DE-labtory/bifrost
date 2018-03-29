@@ -54,16 +54,10 @@ func (sh *StreamHandlerImpl) writeStream() {
 
 	for !sh.toDie() {
 
-		stream := sh.streamWrapper.GetStream()
-
-		if stream == nil {
-			return
-		}
-
 		select {
 
 		case m := <-sh.outChannl:
-			err := stream.Send(m.Envelope)
+			err := sh.streamWrapper.Send(m.Envelope)
 			if err != nil {
 				if m.OnErr != nil {
 					go m.OnErr(err)
@@ -88,14 +82,7 @@ func (sh *StreamHandlerImpl) readStream(errChan chan error) {
 
 	for !sh.toDie() {
 
-		stream := sh.streamWrapper.GetStream()
-
-		if stream == nil {
-			errChan <- errors.New("Stream is nil")
-			return
-		}
-
-		envelope, err := stream.Recv()
+		envelope, err := sh.streamWrapper.Recv()
 
 		if sh.toDie() {
 			return

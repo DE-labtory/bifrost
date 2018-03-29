@@ -8,6 +8,7 @@ import (
 )
 
 type StreamWrapper interface {
+	Stream
 	Close()
 	GetStream() Stream
 }
@@ -42,6 +43,14 @@ func (csw *CStreamWrapper) GetStream() Stream {
 	return csw.clientStream
 }
 
+func (csw *CStreamWrapper) Send(envelope *pb.Envelope) error {
+	return csw.clientStream.Send(envelope)
+}
+
+func (csw *CStreamWrapper) Recv() (*pb.Envelope, error) {
+	return csw.clientStream.Recv()
+}
+
 func (csw *CStreamWrapper) Close() {
 	csw.conn.Close()
 	csw.clientStream.CloseSend()
@@ -67,4 +76,12 @@ func (ssw *SStreamWrapper) GetStream() Stream {
 
 func (ssw *SStreamWrapper) Close() {
 	ssw.cancel()
+}
+
+func (ssw *SStreamWrapper) Send(envelope *pb.Envelope) error {
+	return ssw.serverStream.Send(envelope)
+}
+
+func (ssw *SStreamWrapper) Recv() (*pb.Envelope, error) {
+	return ssw.serverStream.Recv()
 }
