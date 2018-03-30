@@ -19,6 +19,7 @@ type Connection interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
 	Close()
 	GetConnInfo() ConnenctionInfo
+	Start() error
 }
 
 type GrpcConnection struct {

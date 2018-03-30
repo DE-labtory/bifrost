@@ -27,7 +27,7 @@ type MockServer struct {
 func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 
 	envelope := &pb.Envelope{}
-	envelope.Protocol = REQUEST_IDENTITY
+	envelope.Protocol = REQUEST_CONNINFO
 	err := stream.Send(envelope)
 
 	if err != nil {
@@ -52,6 +52,14 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+
+	testEnvelope, err := stream.Recv()
+
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	log.Printf("Recevied Test envelop is [%s]", testEnvelope)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -107,9 +115,13 @@ func TestNew(t *testing.T) {
 	host := New(myconnectionInfo, connStore, mux, nil)
 
 	connection, err := host.ConnectToPeer(Address{Ip: "127.0.0.1:9999"})
+
+	log.Printf("Sending data...")
+	connection.Send(&pb.Envelope{Payload: []byte("test1")}, nil, nil)
 	//
 	//fmt.Print(err)
 	//fmt.Print(connection)
 	assert.Nil(t, err)
-	assert.Equal(t, connection.GetConnInfo().Id, conn.ID("123"))
+	assert.Equal(t, conn.ID("123"), connection.GetConnInfo().Id)
+	assert.Equal(t, host.connStore.GetConnection(conn.ID("123")).GetConnInfo().Id, conn.ID("123"))
 }

@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	REQUEST_IDENTITY     = "/requestIdentity"
+	REQUEST_CONNINFO     = "/requestConnInfo"
 	CONNECTION_ESTABLISH = "/connectionEstablish"
 )
 
@@ -50,11 +50,6 @@ func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux 
 		connStore:  connStore,
 	}
 
-	//set default handler
-	//mux.Handle(REQUEST_IDENTITY, host.handleRequestIdentity)
-	//mux.Handle(CONNECTION_ESTABLISH, host.handleConnectionEstablish)
-	//mux.HandleError(host.handleError)
-
 	return host
 }
 
@@ -84,33 +79,6 @@ func (bih BifrostHost) handleError(err error) {
 
 }
 
-//func (bih BifrostHost) handleConnectionEstablish(message stream.OutterMessage) {
-//	//peer추가
-//	//todo verify 추가
-//
-//	connectedPeer := peer.ConnenctionInfo{}
-//	err := json.Unmarshal(message.Data, &connectedPeer)
-//
-//	if err != nil {
-//		return
-//	}
-//
-//	streamHandler := message.Stream
-//}
-//
-//func (bih BifrostHost) handleRequestIdentity(message stream.OutterMessage) {
-//
-//	info := bih.identity.GetPublicInfo()
-//
-//	envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
-//
-//	if err != nil {
-//		return
-//	}
-//
-//	message.Respond(envelope, nil, nil)
-//}
-
 func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 	endPointAddress := stream.Address{IP: address.Ip}
@@ -136,10 +104,10 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 	}
 
 	// 2.
-	if IsRequestIdentityProtocol(envelope.GetProtocol()) {
+	if IsRequestConnInfoProtocol(envelope.GetProtocol()) {
 		info := bih.myConnInfo.GetPublicInfo()
 
-		envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
+		envelope, err := bih.createEnvelope(REQUEST_CONNINFO, info)
 
 		if err != nil {
 			return nil, err
@@ -169,6 +137,13 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 			}
 
 			conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
+
+			go func() {
+				if err != conn.Start() {
+					conn.Close()
+				}
+			}()
+
 			bih.connStore.AddConnection(conn)
 
 			return conn, nil
@@ -206,9 +181,9 @@ func recvWithTimeout(seconds int, wrapper stream.StreamWrapper) (*pb.Envelope, e
 	}
 }
 
-func IsRequestIdentityProtocol(protocol string) bool {
+func IsRequestConnInfoProtocol(protocol string) bool {
 
-	if protocol == REQUEST_IDENTITY {
+	if protocol == REQUEST_CONNINFO {
 		return true
 	}
 	return false
