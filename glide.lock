@@ -1,8 +1,8 @@
-hash: 574b629cacbea1d884441261d62defc97d6dc986e439613e5d3e31e166e09288
-updated: 2018-03-27T16:43:51.306436+09:00
+hash: 7be96a70aa991d8293305aeae3a67465b49726677642a1b539d260405723b78d
+updated: 2018-03-30T20:44:40.404076+09:00
 imports:
 - name: github.com/golang/protobuf
-  version: bbd03ef6da3a115852eaf24c8a1c46aeb39aa175
+  version: e09c5db296004fbe3f74490e84dcd62c3c5ddb1b
   subpackages:
   - proto
   - protoc-gen-go/descriptor
@@ -11,11 +11,15 @@ imports:
   - ptypes/duration
   - ptypes/timestamp
 - name: github.com/it-chain/heimdall
-  version: 46632c9d039ca4f8b19fb4e768e711547c4f828b
+  version: e4e1b03263ea99054cf3e6e13842e65740218fb9
+  subpackages:
+  - key
 - name: github.com/jbenet/go-base58
   version: 6237cf65f3a6f7111cd8a42be3590df99a66bc7d
 - name: github.com/stretchr/testify
   version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
+  subpackages:
+  - assert
 - name: golang.org/x/net
   version: 6078986fec03a1dcc236c34816c71b0e05018fda
   subpackages:
@@ -27,7 +31,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/text
-  version: ab48842968a66deafa354805a8b031924668e059
+  version: ece95c760240037f89ebcbdd7155ac8cb52e38fa
   subpackages:
   - secure/bidirule
   - transform
@@ -64,4 +68,12 @@ imports:
   - status
   - tap
   - transport
-testImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 8991bc29aa16c548c550c7ff78260e27b9ab7c73
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib

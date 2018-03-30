@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"errors"
+
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
@@ -39,7 +41,7 @@ type BifrostHost struct {
 	server     *grpc.Server
 }
 
-func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux *mux.Mux, server *grpc.Server) Host {
+func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux *mux.Mux, server *grpc.Server) *BifrostHost {
 
 	host := &BifrostHost{
 		mux:        mux,
@@ -109,12 +111,16 @@ func (bih BifrostHost) handleError(err error) {
 //	message.Respond(envelope, nil, nil)
 //}
 
-func (bih BifrostHost) ConnectToPeer(address Address) error {
+func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 	endPointAddress := stream.Address{IP: address.Ip}
 	grpc_conn, err := stream.NewClientConn(endPointAddress, false, nil)
 
 	streamWrapper, err := stream.Connect(grpc_conn)
+
+	if err != nil {
+		return nil, err
+	}
 
 	//handshake
 	// 1. wait identity request
@@ -126,7 +132,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) error {
 
 	if err != nil {
 		streamWrapper.Close()
-		return err
+		return nil, err
 	}
 
 	// 2.
@@ -136,14 +142,14 @@ func (bih BifrostHost) ConnectToPeer(address Address) error {
 		envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		err = streamWrapper.Send(envelope)
 
 		if err != nil {
 			streamWrapper.Close()
-			return err
+			return nil, err
 		}
 
 		// 3.
@@ -151,7 +157,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) error {
 
 		if err != nil {
 			streamWrapper.Close()
-			return err
+			return nil, err
 		}
 
 		if IsConnectionIstablishProtocol(envelope.GetProtocol()) {
@@ -159,19 +165,17 @@ func (bih BifrostHost) ConnectToPeer(address Address) error {
 			err := json.Unmarshal(envelope.Payload, connectedConnInfo)
 
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
 			bih.connStore.AddConnection(conn)
+
+			return conn, nil
 		}
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return nil, errors.New("Not a Request Identity Protocol")
 }
 
 func recvWithTimeout(seconds int, wrapper stream.StreamWrapper) (*pb.Envelope, error) {
@@ -212,7 +216,7 @@ func IsRequestIdentityProtocol(protocol string) bool {
 
 func IsConnectionIstablishProtocol(protocol string) bool {
 
-	if protocol == REQUEST_IDENTITY {
+	if protocol == CONNECTION_ESTABLISH {
 		return true
 	}
 	return false

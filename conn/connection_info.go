@@ -5,20 +5,21 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/it-chain/heimdall"
+	"github.com/it-chain/heimdall/key"
 	b58 "github.com/jbenet/go-base58"
 )
 
 type ID string
 
-func FromRsaPubKey(key heimdall.RsaPublicKey) ID {
+func FromRsaPubKey(key key.PubKey) ID {
 	encoded := b58.Encode(key.SKI())
 	return ID(encoded)
 }
 
-func FromRsaPriKey(key heimdall.RsaPrivateKey) ID {
+func FromRsaPriKey(key key.PriKey) ID {
 	pub, _ := key.PublicKey()
-	return FromRsaPubKey(*pub)
+
+	return FromRsaPubKey(pub)
 }
 
 func (id ID) String() string {
@@ -56,11 +57,11 @@ func ToAddress(ipv4 string) (Address, error) {
 type ConnenctionInfo struct {
 	Id      ID
 	Address Address
-	PubKey  heimdall.RsaPublicKey
+	PubKey  key.PubKey
 }
 
-func NewConnenctionInfo(id ID, address Address, pubKey heimdall.RsaPublicKey) *ConnenctionInfo {
-	return &ConnenctionInfo{
+func NewConnenctionInfo(id ID, address Address, pubKey key.PubKey) ConnenctionInfo {
+	return ConnenctionInfo{
 		Id:      id,
 		Address: address,
 		PubKey:  pubKey,
@@ -68,18 +69,18 @@ func NewConnenctionInfo(id ID, address Address, pubKey heimdall.RsaPublicKey) *C
 }
 
 type MyConnectionInfo struct {
-	*ConnenctionInfo
-	PriKey heimdall.RsaPrivateKey
+	ConnenctionInfo
+	PriKey key.PriKey
 }
 
-func NewMyConnectionInfo(id ID, address Address, pubKey heimdall.RsaPublicKey, priKey heimdall.RsaPrivateKey) *MyConnectionInfo {
+func NewMyConnectionInfo(id ID, address Address, pubKey key.PubKey, priKey key.PriKey) MyConnectionInfo {
 
-	return &MyConnectionInfo{
+	return MyConnectionInfo{
 		ConnenctionInfo: NewConnenctionInfo(id, address, pubKey),
 		PriKey:          priKey,
 	}
 }
 
 func (myConnectionInfo MyConnectionInfo) GetPublicInfo() ConnenctionInfo {
-	return *myConnectionInfo.ConnenctionInfo
+	return myConnectionInfo.ConnenctionInfo
 }
