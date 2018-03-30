@@ -9,7 +9,6 @@ import (
 
 	"time"
 
-	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -101,8 +100,8 @@ func TestNewStreamHandler(t *testing.T) {
 	mockServer := &MockServer{ch: connectionHandler}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	address := conn.Address{IP: serverIP}
-	grpc_conn, err := conn.NewConnectionWithAddress(address, false, nil)
+	address := Address{IP: serverIP}
+	grpc_conn, err := NewClientConn(address, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -137,8 +136,8 @@ func TestStreamHandler_Send(t *testing.T) {
 		listner1.Close()
 	}()
 
-	address := conn.Address{IP: serverIP}
-	grpc_conn, err := conn.NewConnectionWithAddress(address, false, nil)
+	address := Address{IP: serverIP}
+	grpc_conn, err := NewClientConn(address, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -192,8 +191,8 @@ func TestStreamHandler_Close(t *testing.T) {
 	mockServer := &MockServer{ch: connectionHandler, clh: closeHandler}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	address := conn.Address{IP: serverIP}
-	grpc_conn, err := conn.NewConnectionWithAddress(address, false, nil)
+	address := Address{IP: serverIP}
+	grpc_conn, err := NewClientConn(address, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())

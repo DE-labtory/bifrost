@@ -1,4 +1,4 @@
-package peer
+package conn
 
 import (
 	"errors"
@@ -53,33 +53,33 @@ func ToAddress(ipv4 string) (Address, error) {
 	}, nil
 }
 
-type Peer struct {
+type ConnenctionInfo struct {
 	Id      ID
 	Address Address
 	PubKey  heimdall.RsaPublicKey
 }
 
-func NewPeer(id ID, address Address, pubKey heimdall.RsaPublicKey) *Peer {
-	return &Peer{
+func NewConnenctionInfo(id ID, address Address, pubKey heimdall.RsaPublicKey) *ConnenctionInfo {
+	return &ConnenctionInfo{
 		Id:      id,
 		Address: address,
 		PubKey:  pubKey,
 	}
 }
 
-type Identity struct {
-	*Peer
+type MyConnectionInfo struct {
+	*ConnenctionInfo
 	PriKey heimdall.RsaPrivateKey
 }
 
-func NewIdentity(id ID, address Address, pubKey heimdall.RsaPublicKey, priKey heimdall.RsaPrivateKey) *Identity {
+func NewMyConnectionInfo(id ID, address Address, pubKey heimdall.RsaPublicKey, priKey heimdall.RsaPrivateKey) *MyConnectionInfo {
 
-	return &Identity{
-		Peer:   NewPeer(id, address, pubKey),
-		PriKey: priKey,
+	return &MyConnectionInfo{
+		ConnenctionInfo: NewConnenctionInfo(id, address, pubKey),
+		PriKey:          priKey,
 	}
 }
 
-func (identity Identity) GetPublicInfo() Peer {
-	return *identity.Peer
+func (myConnectionInfo MyConnectionInfo) GetPublicInfo() ConnenctionInfo {
+	return *myConnectionInfo.ConnenctionInfo
 }

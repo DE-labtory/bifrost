@@ -5,7 +5,6 @@ import (
 
 	"time"
 
-	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,8 +32,8 @@ func TestConnect(t *testing.T) {
 		listner1.Close()
 	}()
 
-	address := conn.Address{IP: serverIP}
-	grpc_conn, _ := conn.NewConnectionWithAddress(address, false, nil)
+	address := Address{IP: serverIP}
+	grpc_conn, _ := NewClientConn(address, false, nil)
 
 	//then
 	_, err := Connect(grpc_conn, Handler{})

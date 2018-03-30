@@ -1,4 +1,4 @@
-package conn
+package stream
 
 import (
 	"time"
@@ -13,7 +13,7 @@ type Address struct {
 	IP string
 }
 
-func NewConnectionWithAddress(address Address, tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error) {
+func NewClientConn(address Address, tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error) {
 
 	var opts []grpc.DialOption
 

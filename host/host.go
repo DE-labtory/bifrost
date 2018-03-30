@@ -6,7 +6,6 @@ import (
 
 	"time"
 
-	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/peer"
@@ -87,7 +86,7 @@ func (bih BifrostHost) handleError(err error) {
 //	//peer추가
 //	//todo verify 추가
 //
-//	connectedPeer := peer.Peer{}
+//	connectedPeer := peer.ConnenctionInfo{}
 //	err := json.Unmarshal(message.Data, &connectedPeer)
 //
 //	if err != nil {
@@ -110,10 +109,10 @@ func (bih BifrostHost) handleError(err error) {
 //	message.Respond(envelope, nil, nil)
 //}
 
-func (bih BifrostHost) ConnectToPeer(peer peer.Peer) error {
+func (bih BifrostHost) ConnectToPeer(peer peer.ConnenctionInfo) error {
 
-	endPointAddress := conn.Address{IP: peer.Address.IP}
-	grpc_conn, err := conn.NewConnectionWithAddress(endPointAddress, false, nil)
+	endPointAddress := stream.Address{IP: peer.Address.IP}
+	grpc_conn, err := stream.NewClientConn(endPointAddress, false, nil)
 
 	streamWrapper, err := stream.Connect(grpc_conn, bih.mux)
 
