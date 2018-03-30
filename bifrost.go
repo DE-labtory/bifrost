@@ -1,4 +1,4 @@
-package host
+package bifrost
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 
 	"time"
 
+	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/peer"
 	"github.com/it-chain/bifrost/stream"
 	"google.golang.org/grpc"
 )
@@ -33,19 +33,18 @@ func NewAddress(ipAddress string) Address {
 	}
 }
 
-type BifrostHost struct {
-	server   *grpc.Server
-	mux      *mux.Mux
-	identity peer.Identity
+type Bifrost struct {
+	mux        *mux.Mux
+	myConnInfo conn.MyConnectionInfo
+	connectionInfo
 }
 
-func NewHost(server *grpc.Server) *BifrostHost {
+func NewHost(server *grpc.Server) *Bifrost {
 
 	mux := mux.NewMux()
 
-	host := &BifrostHost{
-		server: server,
-		mux:    mux,
+	host := &Bifrost{
+		mux: mux,
 	}
 
 	//set default handler
@@ -114,7 +113,7 @@ func (bih BifrostHost) ConnectToPeer(peer peer.ConnenctionInfo) error {
 	endPointAddress := stream.Address{IP: peer.Address.IP}
 	grpc_conn, err := stream.NewClientConn(endPointAddress, false, nil)
 
-	streamWrapper, err := stream.Connect(grpc_conn, bih.mux)
+	streamWrapper, err := stream.Connect(grpc_conn)
 
 	//handshake
 	// 1. wait identity request

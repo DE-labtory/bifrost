@@ -4,12 +4,12 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/bifrost/msg"
+	"github.com/it-chain/bifrost/stream"
 )
 
 type Protocol string
 
-type HandlerFunc func(message msg.OutterMessage)
+type HandlerFunc func(message stream.OutterMessage)
 
 type ErrorFunc func(err error)
 
@@ -58,7 +58,7 @@ func (mux *Mux) match(protocol Protocol) HandlerFunc {
 	return nil
 }
 
-func (mux *Mux) ServeRequest(msg msg.OutterMessage) {
+func (mux *Mux) ServeRequest(msg stream.OutterMessage) {
 
 	mux.Lock()
 	defer mux.Unlock()

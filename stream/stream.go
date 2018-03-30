@@ -10,7 +10,7 @@ type Stream interface {
 	Recv() (*pb.Envelope, error)
 }
 
-func Connect(conn *grpc.ClientConn, handle ReceivedMessageHandler) (StreamWrapper, error) {
+func Connect(conn *grpc.ClientConn) (StreamWrapper, error) {
 
 	streamWrapper, err := NewClientStreamWrapper(conn)
 

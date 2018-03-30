@@ -19,6 +19,8 @@ type GrpcConnection struct {
 
 func NewConnection(connInfo ConnenctionInfo, streamHandler stream.StreamHandler) Connection {
 
+	streamHandler.Start()
+
 	return &GrpcConnection{
 		connInfo:      connInfo,
 		streamHandler: streamHandler,
@@ -26,9 +28,9 @@ func NewConnection(connInfo ConnenctionInfo, streamHandler stream.StreamHandler)
 }
 
 func (conn *GrpcConnection) Close() {
-
+	conn.streamHandler.Close()
 }
 
 func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
-
+	conn.streamHandler.Send(envelope, successCallBack, errCallBack)
 }
