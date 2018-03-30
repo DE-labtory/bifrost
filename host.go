@@ -3,7 +3,6 @@ package bifrost
 import (
 	"context"
 	"encoding/json"
-
 	"time"
 
 	"github.com/it-chain/bifrost/conn"
@@ -19,7 +18,7 @@ const (
 )
 
 type Host interface {
-	Register(*grpc.Server)
+	//Register(*grpc.Server)
 }
 
 type Address struct {
@@ -33,24 +32,26 @@ func NewAddress(ipAddress string) Address {
 	}
 }
 
-type Bifrost struct {
+type BifrostHost struct {
 	mux        *mux.Mux
 	myConnInfo conn.MyConnectionInfo
-	connectionInfo
+	connStore  *conn.ConnectionStore
+	server     *grpc.Server
 }
 
-func NewHost(server *grpc.Server) *Bifrost {
+func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux *mux.Mux, server *grpc.Server) Host {
 
-	mux := mux.NewMux()
-
-	host := &Bifrost{
-		mux: mux,
+	host := &BifrostHost{
+		mux:        mux,
+		myConnInfo: myConnInfo,
+		server:     server,
+		connStore:  connStore,
 	}
 
 	//set default handler
 	//mux.Handle(REQUEST_IDENTITY, host.handleRequestIdentity)
 	//mux.Handle(CONNECTION_ESTABLISH, host.handleConnectionEstablish)
-	mux.HandleError(host.handleError)
+	//mux.HandleError(host.handleError)
 
 	return host
 }
@@ -63,7 +64,7 @@ func (bih BifrostHost) createEnvelope(protocol string, data interface{}) (*pb.En
 		return nil, err
 	}
 
-	pub, err := bih.identity.PubKey.ToPEM()
+	pub, err := bih.myConnInfo.PubKey.ToPEM()
 
 	if err != nil {
 		return nil, err
@@ -108,9 +109,9 @@ func (bih BifrostHost) handleError(err error) {
 //	message.Respond(envelope, nil, nil)
 //}
 
-func (bih BifrostHost) ConnectToPeer(peer peer.ConnenctionInfo) error {
+func (bih BifrostHost) ConnectToPeer(address Address) error {
 
-	endPointAddress := stream.Address{IP: peer.Address.IP}
+	endPointAddress := stream.Address{IP: address.Ip}
 	grpc_conn, err := stream.NewClientConn(endPointAddress, false, nil)
 
 	streamWrapper, err := stream.Connect(grpc_conn)
@@ -130,7 +131,7 @@ func (bih BifrostHost) ConnectToPeer(peer peer.ConnenctionInfo) error {
 
 	// 2.
 	if IsRequestIdentityProtocol(envelope.GetProtocol()) {
-		info := bih.identity.GetPublicInfo()
+		info := bih.myConnInfo.GetPublicInfo()
 
 		envelope, err := bih.createEnvelope(REQUEST_IDENTITY, info)
 
@@ -154,7 +155,15 @@ func (bih BifrostHost) ConnectToPeer(peer peer.ConnenctionInfo) error {
 		}
 
 		if IsConnectionIstablishProtocol(envelope.GetProtocol()) {
+			connectedConnInfo := &conn.ConnenctionInfo{}
+			err := json.Unmarshal(envelope.Payload, connectedConnInfo)
 
+			if err != nil {
+				return err
+			}
+
+			conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
+			bih.connStore.AddConnection(conn)
 		}
 	}
 
