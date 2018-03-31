@@ -10,6 +10,8 @@ import (
 
 	"fmt"
 
+	"log"
+
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
@@ -42,18 +44,16 @@ type OnConnectionHandler func(conn.Connection)
 type BifrostHost struct {
 	mux                 *mux.Mux
 	myConnInfo          conn.MyConnectionInfo
-	connStore           *conn.ConnectionStore
 	server              *grpc.Server
 	onConnectionHandler OnConnectionHandler
 }
 
-func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
+func New(myConnInfo conn.MyConnectionInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
 
 	host := &BifrostHost{
 		mux:                 mux,
 		myConnInfo:          myConnInfo,
 		onConnectionHandler: onConnectionHandler,
-		connStore:           connStore,
 	}
 
 	return host
@@ -135,6 +135,9 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 		}
 
 		if IsConnectionIstablishProtocol(envelope.GetProtocol()) {
+
+			log.Printf("Received payload [%s]", envelope.Payload)
+
 			connectedConnInfo := &conn.ConnenctionInfo{}
 			err := json.Unmarshal(envelope.Payload, connectedConnInfo)
 
@@ -180,6 +183,8 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 		if !IsRequestConnInfoProtocol(m.GetProtocol()) {
 			return errors.New(fmt.Sprintf("Not a request connInfo protocol [%s]", m.GetProtocol()))
 		}
+
+		log.Printf("Received payload [%s]", envelope.Payload)
 
 		connectedConnInfo := &conn.ConnenctionInfo{}
 		err := json.Unmarshal(m.Payload, connectedConnInfo)
