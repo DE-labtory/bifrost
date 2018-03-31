@@ -3,8 +3,8 @@ package mux
 import (
 	"testing"
 
+	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/stream"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,29 +13,28 @@ func TestNewMux(t *testing.T) {
 	mux := NewMux()
 
 	//then
-	mux.Handle(Protocol("test1"), func(message stream.OutterMessage) {
+	mux.Handle(Protocol("test1"), func(message conn.OutterMessage) {
 
 	})
 
-	err := mux.Handle(Protocol("test1"), func(message stream.OutterMessage) {
+	err := mux.Handle(Protocol("test1"), func(message conn.OutterMessage) {
 
 	})
 
-	mux.Handle(Protocol("test3"), func(message stream.OutterMessage) {
+	mux.Handle(Protocol("test3"), func(message conn.OutterMessage) {
 
 	})
 
 	//result
 	assert.Error(t, err, "Asd")
 	assert.Equal(t, len(mux.registerHandled), 2)
-
 }
 
 func TestMux_Handle(t *testing.T) {
 	//when
 	mux := NewMux()
 
-	mux.Handle(Protocol("exist"), func(message stream.OutterMessage) {
+	mux.Handle(Protocol("exist"), func(message conn.OutterMessage) {
 
 	})
 
@@ -51,11 +50,11 @@ func TestMux_ServeRequest(t *testing.T) {
 	//when
 	mux := NewMux()
 
-	mux.Handle(Protocol("exist"), func(message stream.OutterMessage) {
+	mux.Handle(Protocol("exist"), func(message conn.OutterMessage) {
 		assert.Equal(t, message.Data, []byte("hello"))
 	})
 
-	message := stream.OutterMessage{}
+	message := conn.OutterMessage{}
 	message.Data = []byte("hello")
 	message.Envelope = &pb.Envelope{Protocol: "exist"}
 

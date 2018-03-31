@@ -60,9 +60,6 @@ func (mux *Mux) match(protocol Protocol) HandlerFunc {
 
 func (mux *Mux) ServeRequest(msg conn.OutterMessage) {
 
-	mux.Lock()
-	defer mux.Unlock()
-
 	protocol := msg.Envelope.Protocol
 
 	handleFunc := mux.match(Protocol(protocol))
