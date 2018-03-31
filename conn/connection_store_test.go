@@ -100,6 +100,7 @@ func TestConnectionStore_GetConnection(t *testing.T) {
 	if err != nil {
 
 	}
+
 	connStore.AddConnection(conn)
 
 	//when

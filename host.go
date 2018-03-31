@@ -3,9 +3,12 @@ package bifrost
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"time"
 
 	"errors"
+
+	"fmt"
 
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
@@ -34,20 +37,23 @@ func NewAddress(ipAddress string) Address {
 	}
 }
 
+type OnConnectionHandler func(conn.Connection)
+
 type BifrostHost struct {
-	mux        *mux.Mux
-	myConnInfo conn.MyConnectionInfo
-	connStore  *conn.ConnectionStore
-	server     *grpc.Server
+	mux                 *mux.Mux
+	myConnInfo          conn.MyConnectionInfo
+	connStore           *conn.ConnectionStore
+	server              *grpc.Server
+	onConnectionHandler OnConnectionHandler
 }
 
-func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux *mux.Mux, server *grpc.Server) *BifrostHost {
+func New(myConnInfo conn.MyConnectionInfo, connStore *conn.ConnectionStore, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
 
 	host := &BifrostHost{
-		mux:        mux,
-		myConnInfo: myConnInfo,
-		server:     server,
-		connStore:  connStore,
+		mux:                 mux,
+		myConnInfo:          myConnInfo,
+		onConnectionHandler: onConnectionHandler,
+		connStore:           connStore,
 	}
 
 	return host
@@ -144,8 +150,6 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 				}
 			}()
 
-			bih.connStore.AddConnection(conn)
-
 			return conn, nil
 		}
 	}
@@ -153,7 +157,58 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 	return nil, errors.New("Not a Request Identity Protocol")
 }
 
-func recvWithTimeout(seconds int, wrapper stream.StreamWrapper) (*pb.Envelope, error) {
+func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error {
+	//1. RquestPeer를 통해 나에게 Stream연결을 보낸 ConnInfo의정보를 확인
+	//2. ConnInfo의정보를정보를 기반으로 Connection을 생성
+	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
+
+	//todo siging
+	info := bih.myConnInfo.GetPublicInfo()
+	envelope, err := bih.createEnvelope(REQUEST_CONNINFO, info)
+
+	err = streamServer.Send(envelope)
+
+	if err != nil {
+		return err
+	}
+
+	if m, err := recvWithTimeout(2, streamServer); err == nil {
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		if !IsRequestConnInfoProtocol(m.GetProtocol()) {
+			return errors.New(fmt.Sprintf("Not a request connInfo protocol [%s]", m.GetProtocol()))
+		}
+
+		connectedConnInfo := &conn.ConnenctionInfo{}
+		err := json.Unmarshal(m.Payload, connectedConnInfo)
+
+		//validate connectedInfo
+		if err != nil {
+			return err
+		}
+
+		_, cf := context.WithCancel(context.Background())
+		streamWrapper := stream.NewServerStreamWrapper(streamServer, cf)
+
+		conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
+
+		go func() {
+			if err != conn.Start() {
+				conn.Close()
+			}
+		}()
+
+		bih.onConnectionHandler(conn)
+
+		wg.Wait()
+	}
+
+	return nil
+}
+
+func recvWithTimeout(seconds int, wrapper stream.Stream) (*pb.Envelope, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
 	defer cancel()

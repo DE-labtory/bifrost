@@ -1,16 +1,12 @@
 package bifrost
 
 import (
-	"log"
-	"testing"
-
-	"net"
-
 	"encoding/json"
-
-	"sync"
-
+	"log"
+	"net"
 	"os"
+	"sync"
+	"testing"
 
 	"github.com/it-chain/bifrost/conn"
 	mux2 "github.com/it-chain/bifrost/mux"
@@ -123,5 +119,4 @@ func TestNew(t *testing.T) {
 	//fmt.Print(connection)
 	assert.Nil(t, err)
 	assert.Equal(t, conn.ID("123"), connection.GetConnInfo().Id)
-	assert.Equal(t, host.connStore.GetConnection(conn.ID("123")).GetConnInfo().Id, conn.ID("123"))
 }
