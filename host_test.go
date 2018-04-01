@@ -1,16 +1,16 @@
 package bifrost
 
 import (
+	"encoding/json"
 	"log"
+	"net"
+	"os"
+	"sync"
 	"testing"
 
-	"net"
+	"fmt"
 
-	"encoding/json"
-
-	"sync"
-
-	"os"
+	"time"
 
 	"github.com/it-chain/bifrost/conn"
 	mux2 "github.com/it-chain/bifrost/mux"
@@ -91,7 +91,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	return s, lis
 }
 
-func TestNew(t *testing.T) {
+func TestBifrostHost_ConnectToPeer(t *testing.T) {
 
 	serverIP := "127.0.0.1:9999"
 	mockServer := &MockServer{}
@@ -109,10 +109,9 @@ func TestNew(t *testing.T) {
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
 	myconnectionInfo := conn.NewMyConnectionInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
-	connStore := conn.NewConnectionStore()
 	mux := mux2.NewMux()
 
-	host := New(myconnectionInfo, connStore, mux, nil)
+	host := New(myconnectionInfo, mux, nil)
 
 	connection, err := host.ConnectToPeer(Address{Ip: "127.0.0.1:9999"})
 
@@ -123,5 +122,44 @@ func TestNew(t *testing.T) {
 	//fmt.Print(connection)
 	assert.Nil(t, err)
 	assert.Equal(t, conn.ID("123"), connection.GetConnInfo().Id)
-	assert.Equal(t, host.connStore.GetConnection(conn.ID("123")).GetConnInfo().Id, conn.ID("123"))
+}
+
+func TestBifrostHost_Stream(t *testing.T) {
+
+	km, err := key.NewKeyManager("~/key")
+
+	defer os.RemoveAll("~/key")
+
+	priv, pub, err := km.GenerateKey(key.RSA4096)
+
+	myconnectionInfo := conn.NewMyConnectionInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	mux := mux2.NewMux()
+
+	var OnConnectionHandler = func(connection conn.Connection) {
+		log.Printf("New connections are connected [%s]", connection)
+		assert.Equal(t, connection.GetConnInfo().Address.IP, "127.0.0.1:8888")
+	}
+
+	serverHost := New(myconnectionInfo, mux, OnConnectionHandler)
+	serverIP := "127.0.0.1:8888"
+	server1, listner1 := ListenMockServer(serverHost, serverIP)
+
+	defer func() {
+		server1.Stop()
+		listner1.Close()
+	}()
+
+	clientHost := New(myconnectionInfo, mux, nil)
+
+	connection, err := clientHost.ConnectToPeer(Address{Ip: serverIP})
+
+	fmt.Println(connection)
+
+	if err != nil {
+		fmt.Printf("error is [%s]", err.Error())
+	}
+
+	fmt.Println(connection)
+
+	time.Sleep(2 * time.Second)
 }
