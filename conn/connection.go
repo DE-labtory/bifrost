@@ -3,7 +3,6 @@ package conn
 import (
 	"errors"
 	"sync"
-
 	"sync/atomic"
 
 	"github.com/it-chain/bifrost/pb"

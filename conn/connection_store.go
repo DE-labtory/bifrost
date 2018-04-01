@@ -46,8 +46,6 @@ func (connStore ConnectionStore) DeleteConnection(connID ID) {
 }
 
 func (connStore ConnectionStore) GetConnection(connID ID) Connection {
-	connStore.Lock()
-	defer connStore.Unlock()
 
 	conn, ok := connStore.connMap[connID]
 
