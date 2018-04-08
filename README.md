@@ -1,6 +1,6 @@
 # Bifrost
 
-![bifrost](/Users/jun/go/src/github.com/it-chain/bifrost/image/bifrost.jpeg)
+![bifrost](./image/bifrost.jpeg)
 
 
 
