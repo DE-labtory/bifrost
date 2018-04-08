@@ -1,5 +1,9 @@
 # Bifrost
 
+![bifrost](/Users/jun/go/src/github.com/it-chain/bifrost/image/bifrost.jpeg)
+
+
+
 Bifrost is a grpc-based P2P network library
 
 (In Norse mythology, Bifröst is a burning rainbow bridge that reaches between Midgard and Asgard, the realm of the gods.)
