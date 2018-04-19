@@ -43,12 +43,12 @@ type OnConnectionHandler func(conn.Connection)
 
 type BifrostHost struct {
 	mux                 *mux.Mux
-	myConnInfo          conn.MyConnectionInfo
+	myConnInfo          conn.MyConnInfo
 	server              *grpc.Server
 	onConnectionHandler OnConnectionHandler
 }
 
-func New(myConnInfo conn.MyConnectionInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
+func New(myConnInfo conn.MyConnInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
 
 	host := &BifrostHost{
 		mux:                 mux,
@@ -138,7 +138,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 			log.Printf("Received payload [%s]", envelope.Payload)
 
-			connectedConnInfo := &conn.ConnenctionInfo{}
+			connectedConnInfo := &conn.ConnInfo{}
 			err := json.Unmarshal(envelope.Payload, connectedConnInfo)
 
 			if err != nil {
@@ -186,7 +186,7 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 
 		log.Printf("Received payload [%s]", envelope.Payload)
 
-		connectedConnInfo := &conn.ConnenctionInfo{}
+		connectedConnInfo := &conn.ConnInfo{}
 		err := json.Unmarshal(m.Payload, connectedConnInfo)
 
 		//validate connectedInfo

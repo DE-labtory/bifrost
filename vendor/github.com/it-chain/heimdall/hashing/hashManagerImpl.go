@@ -1,14 +1,18 @@
+// This file implements hash manager for hashing process.
+
 package hashing
 
 import (
-	"hash"
-	"errors"
 	"crypto/sha1"
 	"crypto/sha512"
+	"errors"
+	"hash"
 )
 
-type hashManagerImpl struct {}
+// hashManagerImpl represents a instance of hashManager.
+type hashManagerImpl struct{}
 
+// NewHashManager initialize a hash manager.
 func NewHashManager() (HashManager, error) {
 
 	hm := &hashManagerImpl{}
@@ -17,6 +21,7 @@ func NewHashManager() (HashManager, error) {
 
 }
 
+// Hash hashes the input data.
 func (hm *hashManagerImpl) Hash(data []byte, tail []byte, opts HashOpts) ([]byte, error) {
 
 	if data == nil {

@@ -1,18 +1,22 @@
+// This file provides key storing process.
+
 package key
 
 import (
 	"encoding/hex"
-	"os"
-	"io/ioutil"
 	"errors"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 )
 
+// keyStorer contains key file path.
 type keyStorer struct {
 	path string
 }
 
-func (storer *keyStorer) Store(keys... Key) (err error) {
+// Store stores the input keys to file.
+func (storer *keyStorer) Store(keys ...Key) (err error) {
 
 	if len(keys) == 0 {
 		return errors.New("Input values should not be NIL")
@@ -21,7 +25,7 @@ func (storer *keyStorer) Store(keys... Key) (err error) {
 	for _, key := range keys {
 		err := storer.storeKey(key)
 
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
@@ -30,12 +34,13 @@ func (storer *keyStorer) Store(keys... Key) (err error) {
 
 }
 
-func (storer *keyStorer) storeKey(key Key) (error) {
+// storeKey changes the key format to PEM and make file name, then store into file.
+func (storer *keyStorer) storeKey(key Key) error {
 
 	var data []byte
 	var err error
 
-	if key == nil{
+	if key == nil {
 		return errors.New("No Key Errors")
 	}
 
@@ -45,7 +50,7 @@ func (storer *keyStorer) storeKey(key Key) (error) {
 		return err
 	}
 
-	path, err := storer.getFullPath(hex.EncodeToString(key.SKI()), key.Algorithm().String() + "_" + string(key.Type()))
+	path, err := storer.getFullPath(hex.EncodeToString(key.SKI()), key.Algorithm().String()+"_"+string(key.Type()))
 
 	if err != nil {
 		return err
@@ -62,6 +67,7 @@ func (storer *keyStorer) storeKey(key Key) (error) {
 
 }
 
+// getFullPath gets full (absolute) path of the key file.
 func (storer *keyStorer) getFullPath(alias, suffix string) (string, error) {
 
 	if _, err := os.Stat(storer.path); os.IsNotExist(err) {
@@ -71,6 +77,6 @@ func (storer *keyStorer) getFullPath(alias, suffix string) (string, error) {
 		}
 	}
 
-	return filepath.Join(storer.path, alias + "_" + suffix), nil
+	return filepath.Join(storer.path, alias+"_"+suffix), nil
 
 }

@@ -1,14 +1,19 @@
+// This file provides Sign and Verify functions for RSA.
+
 package auth
 
 import (
-	"crypto/rsa"
 	"crypto/rand"
+	"crypto/rsa"
 	"errors"
+
 	"github.com/it-chain/heimdall/key"
 )
 
+// RSASigner represents subject of RSA signing process.
 type RSASigner struct{}
 
+// Sign signs a digest(hash) using priKey(private key), and returns signature.
 func (s *RSASigner) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	if opts == nil {
@@ -19,8 +24,10 @@ func (s *RSASigner) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte
 
 }
 
+//RSAVerifier represents subject of RSA verifying process.
 type RSAVerifier struct{}
 
+// Verify verifies the signature using pubKey(public key) and digest of original message, then returns boolean value.
 func (v *RSAVerifier) Verify(pubKey key.Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if opts == nil {

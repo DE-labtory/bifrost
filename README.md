@@ -1,6 +1,6 @@
 # Bifrost
 
-<p align="center">![bifrost](./image/bifrost.jpeg)</p>
+<p align="center">![bifrost](image/bifrost.jpeg)</p>
 
 
 

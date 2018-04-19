@@ -1,10 +1,13 @@
+// This file provides RSA signing options.
+
 package auth
 
 import (
-	"crypto/rsa"
 	"crypto"
+	"crypto/rsa"
 )
 
+// RSASignerOpts represents RSA signing options as integer.
 type RSASignerOpts int
 
 const (
@@ -21,26 +24,27 @@ const (
 	UNKNOWN
 )
 
+// SignerOptsToPSSOptions parse the RSASignerOpts(RSA signer option) to PSS option.
 func (opts RSASignerOpts) SignerOptsToPSSOptions() *rsa.PSSOptions {
 
 	switch opts {
 	case AUTO_SHA224:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthAuto, Hash:crypto.SHA512_224}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthAuto, Hash: crypto.SHA512_224}
 	case AUTO_SHA256:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthAuto, Hash:crypto.SHA512_256}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthAuto, Hash: crypto.SHA512_256}
 	case AUTO_SHA384:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthAuto, Hash:crypto.SHA384}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthAuto, Hash: crypto.SHA384}
 	case AUTO_SHA512:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthAuto, Hash:crypto.SHA512}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthAuto, Hash: crypto.SHA512}
 
 	case EQUAL_SHA224:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthEqualsHash, Hash:crypto.SHA512_224}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: crypto.SHA512_224}
 	case EQUAL_SHA256:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthEqualsHash, Hash:crypto.SHA512_256}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: crypto.SHA512_256}
 	case EQUAL_SHA384:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthEqualsHash, Hash:crypto.SHA384}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: crypto.SHA384}
 	case EQUAL_SHA512:
-		return &rsa.PSSOptions{SaltLength:rsa.PSSSaltLengthEqualsHash, Hash:crypto.SHA512}
+		return &rsa.PSSOptions{SaltLength: rsa.PSSSaltLengthEqualsHash, Hash: crypto.SHA512}
 
 	default:
 		return nil

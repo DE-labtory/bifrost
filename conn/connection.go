@@ -17,12 +17,12 @@ type ReceivedMessageHandler interface {
 type Connection interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
 	Close()
-	GetConnInfo() ConnenctionInfo
+	GetConnInfo() ConnInfo
 	Start() error
 }
 
 type GrpcConnection struct {
-	connInfo      ConnenctionInfo
+	connInfo      ConnInfo
 	streamWrapper stream.StreamWrapper
 	stopFlag      int32
 	handle        ReceivedMessageHandler
@@ -32,7 +32,7 @@ type GrpcConnection struct {
 	sync.RWMutex
 }
 
-func NewConnection(connInfo ConnenctionInfo, streamWrapper stream.StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
+func NewConnection(connInfo ConnInfo, streamWrapper stream.StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
 
 	if streamWrapper == nil || handle == nil {
 		return nil, errors.New("fail to create connection streamWrapper or handle is nil")
@@ -48,7 +48,7 @@ func NewConnection(connInfo ConnenctionInfo, streamWrapper stream.StreamWrapper,
 	}, nil
 }
 
-func (conn *GrpcConnection) GetConnInfo() ConnenctionInfo {
+func (conn *GrpcConnection) GetConnInfo() ConnInfo {
 	return conn.connInfo
 }
 

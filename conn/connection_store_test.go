@@ -47,7 +47,7 @@ func TestConnectionStore_AddConnection(t *testing.T) {
 	msw := MockStreamWrapper{}
 	mrh := MockReceivedHandler{}
 
-	connInfo := ConnenctionInfo{}
+	connInfo := ConnInfo{}
 	connInfo.Id = ID("ASD")
 
 	conn, err := NewConnection(connInfo, msw, mrh)
@@ -69,7 +69,7 @@ func TestConnectionStore_DeleteConnection(t *testing.T) {
 	msw := MockStreamWrapper{}
 	mrh := MockReceivedHandler{}
 
-	connInfo := ConnenctionInfo{}
+	connInfo := ConnInfo{}
 	connInfo.Id = ID("ASD")
 
 	conn, err := NewConnection(connInfo, msw, mrh)
@@ -92,7 +92,7 @@ func TestConnectionStore_GetConnection(t *testing.T) {
 	msw := MockStreamWrapper{}
 	mrh := MockReceivedHandler{}
 
-	connInfo := ConnenctionInfo{}
+	connInfo := ConnInfo{}
 	connInfo.Id = ID("ASD")
 
 	conn, err := NewConnection(connInfo, msw, mrh)

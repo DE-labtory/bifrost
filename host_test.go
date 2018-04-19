@@ -44,7 +44,7 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 
 	envelope2 := &pb.Envelope{}
 	envelope2.Protocol = CONNECTION_ESTABLISH
-	payload, err := json.Marshal(conn.ConnenctionInfo{Id: "123"})
+	payload, err := json.Marshal(conn.ConnInfo{Id: "123"})
 	envelope2.Payload = payload
 
 	err = stream.Send(envelope2)
@@ -108,7 +108,7 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
-	myconnectionInfo := conn.NewMyConnectionInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := conn.NewMyConnInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	host := New(myconnectionInfo, mux, nil)
@@ -132,7 +132,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
-	myconnectionInfo := conn.NewMyConnectionInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := conn.NewMyConnInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	var OnConnectionHandler = func(connection conn.Connection) {

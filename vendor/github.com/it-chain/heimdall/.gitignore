@@ -23,4 +23,4 @@ Binaries for programs and plugins
 
 # key
 .keys
-.keyRepository/
+.heimdall/

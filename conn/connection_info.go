@@ -9,23 +9,28 @@ import (
 	b58 "github.com/jbenet/go-base58"
 )
 
+//Identitiy of Connection
 type ID string
 
-func FromRsaPubKey(key key.PubKey) ID {
+//Create ID from Public Key
+func FromPubKey(key key.PubKey) ID {
+
 	encoded := b58.Encode(key.SKI())
 	return ID(encoded)
 }
 
-func FromRsaPriKey(key key.PriKey) ID {
-	pub, _ := key.PublicKey()
+//Create ID from Pri Key
+func FromPriKey(key key.PriKey) ID {
 
-	return FromRsaPubKey(pub)
+	pub, _ := key.PublicKey()
+	return FromPubKey(pub)
 }
 
 func (id ID) String() string {
 	return string(id)
 }
 
+//Address to connect other peer
 type Address struct {
 	IP string
 }
@@ -37,6 +42,7 @@ func validIP4(ipAddress string) bool {
 	if re.MatchString(ipAddress) {
 		return true
 	}
+
 	return false
 }
 
@@ -54,33 +60,56 @@ func ToAddress(ipv4 string) (Address, error) {
 	}, nil
 }
 
-type ConnenctionInfo struct {
+type ConnInfo struct {
 	Id      ID
 	Address Address
 	PubKey  key.PubKey
 }
 
-func NewConnenctionInfo(id ID, address Address, pubKey key.PubKey) ConnenctionInfo {
-	return ConnenctionInfo{
+func NewConnInfo(id ID, address Address, pubKey key.PubKey) ConnInfo {
+	return ConnInfo{
 		Id:      id,
 		Address: address,
 		PubKey:  pubKey,
 	}
 }
 
-type MyConnectionInfo struct {
-	ConnenctionInfo
+type HostInfo struct {
+	ConnInfo
 	PriKey key.PriKey
 }
 
-func NewMyConnectionInfo(id ID, address Address, pubKey key.PubKey, priKey key.PriKey) MyConnectionInfo {
+func NewHostInfo(id ID, address Address, pubKey key.PubKey, priKey key.PriKey) HostInfo {
 
-	return MyConnectionInfo{
-		ConnenctionInfo: NewConnenctionInfo(id, address, pubKey),
-		PriKey:          priKey,
+	return HostInfo{
+		ConnInfo: NewConnInfo(id, address, pubKey),
+		PriKey:   priKey,
 	}
 }
 
-func (myConnectionInfo MyConnectionInfo) GetPublicInfo() ConnenctionInfo {
-	return myConnectionInfo.ConnenctionInfo
+type PublicConnInfo struct {
+	Id        ID
+	Address   Address
+	Pubkey    []byte
+	KeyType   key.KeyType
+	KeyGenOpt key.KeyGenOpts
+}
+
+func (hostInfo HostInfo) GetPublicInfo() *PublicConnInfo {
+
+	publicConnInfo := &PublicConnInfo{}
+	publicConnInfo.Id = hostInfo.Id
+	publicConnInfo.Address = hostInfo.Address
+
+	b, err := hostInfo.PubKey.ToPEM()
+
+	if err != nil {
+		return nil
+	}
+
+	publicConnInfo.Pubkey = b
+	publicConnInfo.KeyType = hostInfo.PubKey.Type()
+	publicConnInfo.KeyGenOpt = hostInfo.PubKey.Algorithm()
+
+	return publicConnInfo
 }

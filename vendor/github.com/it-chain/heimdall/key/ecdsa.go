@@ -1,20 +1,24 @@
+// This file implement ECDSA key and its generation.
+
 package key
 
 import (
-	"crypto/elliptic"
 	"crypto/ecdsa"
-	"fmt"
-	"errors"
+	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/pem"
-	"crypto/sha256"
+	"errors"
+	"fmt"
 )
 
+// An ECDSAKeyGenerator contains elliptic curve for ECDSA.
 type ECDSAKeyGenerator struct {
 	curve elliptic.Curve
 }
 
+// Generate returns private key and public key for ECDSA using key generation option.
 func (keygen *ECDSAKeyGenerator) Generate(opts KeyGenOpts) (pri PriKey, pub PubKey, err error) {
 
 	if keygen.curve == nil {
@@ -37,10 +41,12 @@ func (keygen *ECDSAKeyGenerator) Generate(opts KeyGenOpts) (pri PriKey, pub PubK
 
 }
 
+// ECDSAPrivateKey contains private key of ECDSA.
 type ECDSAPrivateKey struct {
 	PrivKey *ecdsa.PrivateKey
 }
 
+// SKI provides name of file that will be store a ECDSA private key.
 func (key *ECDSAPrivateKey) SKI() (ski []byte) {
 
 	if key.PrivKey == nil {
@@ -55,15 +61,18 @@ func (key *ECDSAPrivateKey) SKI() (ski []byte) {
 
 }
 
+// Algorithm returns key generation option of ECDSA.
 func (key *ECDSAPrivateKey) Algorithm() KeyGenOpts {
 	return ECDSACurveToKeyGenOpts(key.PrivKey.Curve)
 }
 
+// PublicKey returns ECDSA public key of key pair.
 func (key *ECDSAPrivateKey) PublicKey() (PubKey, error) {
 	return &ECDSAPublicKey{&key.PrivKey.PublicKey}, nil
 }
 
-func (key *ECDSAPrivateKey) ToPEM() ([]byte,error){
+// ToPEM makes a ECDSA private key to PEM format.
+func (key *ECDSAPrivateKey) ToPEM() ([]byte, error) {
 	keyData, err := x509.MarshalECPrivateKey(key.PrivKey)
 	if err != nil {
 		return nil, err
@@ -71,20 +80,23 @@ func (key *ECDSAPrivateKey) ToPEM() ([]byte,error){
 
 	return pem.EncodeToMemory(
 		&pem.Block{
-			Type: "ECDSA PRIVATE KEY",
+			Type:  "ECDSA PRIVATE KEY",
 			Bytes: keyData,
 		},
 	), nil
 }
 
-func (key *ECDSAPrivateKey) Type() (KeyType){
+// Type returns type of the ECDSA private key.
+func (key *ECDSAPrivateKey) Type() KeyType {
 	return PRIVATE_KEY
 }
 
+// ECDSAPublicKey contains components of a public key.
 type ECDSAPublicKey struct {
 	PubKey *ecdsa.PublicKey
 }
 
+// SKI provides name of file that will be store a ECDSA public key.
 func (key *ECDSAPublicKey) SKI() (ski []byte) {
 
 	if key.PubKey == nil {
@@ -99,11 +111,13 @@ func (key *ECDSAPublicKey) SKI() (ski []byte) {
 
 }
 
+// Algorithm returns ECDSA public key generation option.
 func (key *ECDSAPublicKey) Algorithm() KeyGenOpts {
 	return ECDSACurveToKeyGenOpts(key.PubKey.Curve)
 }
 
-func (key *ECDSAPublicKey) ToPEM() ([]byte,error){
+// ToPEM makes a ECDSA public key to PEM format.
+func (key *ECDSAPublicKey) ToPEM() ([]byte, error) {
 	keyData, err := x509.MarshalPKIXPublicKey(key.PubKey)
 	if err != nil {
 		return nil, err
@@ -111,12 +125,13 @@ func (key *ECDSAPublicKey) ToPEM() ([]byte,error){
 
 	return pem.EncodeToMemory(
 		&pem.Block{
-			Type: "ECDSA PUBLIC KEY",
+			Type:  "ECDSA PUBLIC KEY",
 			Bytes: keyData,
 		},
 	), nil
 }
 
-func (key *ECDSAPublicKey) Type() (KeyType){
+// Type returns type of the ECDSA public key.
+func (key *ECDSAPublicKey) Type() KeyType {
 	return PUBLIC_KEY
 }

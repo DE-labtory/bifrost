@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMarshalConnectionInfo(t *testing.T) {
+func TestMarshalConnInfo(t *testing.T) {
 
 	km, err := key.NewKeyManager("~/key")
 
@@ -18,7 +18,7 @@ func TestMarshalConnectionInfo(t *testing.T) {
 
 	_, pub, err := km.GenerateKey(key.RSA4096)
 
-	connInfo := NewConnenctionInfo(FromRsaPubKey(pub), Address{IP: "127.0.0.1:8888"}, pub)
+	connInfo := NewConnInfo(FromPubKey(pub), Address{IP: "127.0.0.1:8888"}, pub)
 
 	b, err := json.Marshal(connInfo)
 
@@ -28,7 +28,7 @@ func TestMarshalConnectionInfo(t *testing.T) {
 
 	}
 	//
-	connectedConnInfo := &ConnenctionInfo{}
+	connectedConnInfo := &ConnInfo{}
 	err = json.Unmarshal(b, connectedConnInfo)
 
 	assert.NoError(t, err)

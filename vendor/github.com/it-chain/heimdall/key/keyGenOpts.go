@@ -1,9 +1,12 @@
+// This file provides key generation options.
+
 package key
 
 import (
 	"crypto/elliptic"
 )
 
+// KeyGenOpts represents key generation options by integer number.
 type KeyGenOpts int
 
 const (
@@ -19,7 +22,7 @@ const (
 	UNKNOWN
 )
 
-var optsArr = [...]string {
+var optsArr = [...]string{
 	"rsa1024",
 	"rsa2048",
 	"rsa4096",
@@ -32,6 +35,7 @@ var optsArr = [...]string {
 	"unknown",
 }
 
+// ValidCheck checks the input key generation option is valid or not.
 func (opts KeyGenOpts) ValidCheck() bool {
 
 	if opts < 0 || opts >= KeyGenOpts(len(optsArr)) {
@@ -42,6 +46,7 @@ func (opts KeyGenOpts) ValidCheck() bool {
 
 }
 
+// String coverts format of key generation option from KeyGenOpts to string.
 func (opts KeyGenOpts) String() string {
 
 	if !opts.ValidCheck() {
@@ -52,6 +57,7 @@ func (opts KeyGenOpts) String() string {
 
 }
 
+// StringToKeyGenOpts converts format of key generation option from string to KeyGenOpts
 func StringToKeyGenOpts(rawOpts string) (KeyGenOpts, bool) {
 
 	for idx, opts := range optsArr {
@@ -64,7 +70,8 @@ func StringToKeyGenOpts(rawOpts string) (KeyGenOpts, bool) {
 
 }
 
-func ECDSACurveToKeyGenOpts(curve elliptic.Curve) (KeyGenOpts) {
+// ECDSACurveToKeyGenOpts converts format of ECDSA elliptic curve from elliptic.Curve to KeyGenOpts.
+func ECDSACurveToKeyGenOpts(curve elliptic.Curve) KeyGenOpts {
 
 	switch curve {
 	case elliptic.P224():
@@ -81,7 +88,8 @@ func ECDSACurveToKeyGenOpts(curve elliptic.Curve) (KeyGenOpts) {
 
 }
 
-func KeyGenOptsToECDSACurve(opts KeyGenOpts) (elliptic.Curve) {
+// KetGenOptsToECDSACurve converts format of ECDSA elliptic curve from KeyGenOpts to elliptic.Curve.
+func KeyGenOptsToECDSACurve(opts KeyGenOpts) elliptic.Curve {
 
 	switch opts {
 	case ECDSA224:
@@ -98,7 +106,8 @@ func KeyGenOptsToECDSACurve(opts KeyGenOpts) (elliptic.Curve) {
 
 }
 
-func RSABitsToKeyGenOpts(bits int) (KeyGenOpts) {
+// RSABitsToKeyGenOpts converts format of RSA bits from bit length to KeyGenOpts.
+func RSABitsToKeyGenOpts(bits int) KeyGenOpts {
 
 	switch bits {
 	case 1024:
@@ -113,7 +122,8 @@ func RSABitsToKeyGenOpts(bits int) (KeyGenOpts) {
 
 }
 
-func KeyGenOptsToRSABits(opts KeyGenOpts) (int) {
+// KeyGenOptsToRSABits converts format of RSA bits from KeyGenOpts to bit length.
+func KeyGenOptsToRSABits(opts KeyGenOpts) int {
 
 	switch opts {
 	case RSA1024:
