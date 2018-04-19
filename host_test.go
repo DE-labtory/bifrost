@@ -108,7 +108,7 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
-	myconnectionInfo := conn.NewMyConnInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := NewHostInfo(FromPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	host := New(myconnectionInfo, mux, nil)
@@ -121,7 +121,7 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 	//fmt.Print(err)
 	//fmt.Print(connection)
 	assert.Nil(t, err)
-	assert.Equal(t, conn.ID("123"), connection.GetConnInfo().Id)
+	assert.Equal(t, "123", connection.GetConnInfo().Id.ToString())
 }
 
 func TestBifrostHost_Stream(t *testing.T) {
@@ -132,7 +132,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
-	myconnectionInfo := conn.NewMyConnInfo(conn.FromRsaPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := NewHostInfo(FromPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	var OnConnectionHandler = func(connection conn.Connection) {
@@ -159,7 +159,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 		fmt.Printf("error is [%s]", err.Error())
 	}
 
-	fmt.Println(connection)
+	//fmt.Println(connection)
 
 	time.Sleep(2 * time.Second)
 }

@@ -35,7 +35,7 @@ type HostInfo struct {
 func NewHostInfo(id ID, address conn.Address, pubKey key.PubKey, priKey key.PriKey) HostInfo {
 
 	return HostInfo{
-		ConnInfo: conn.NewConnInfo(id, address, pubKey),
+		ConnInfo: conn.NewConnInfo(id.String(), address, pubKey),
 		PriKey:   priKey,
 	}
 }
@@ -43,7 +43,7 @@ func NewHostInfo(id ID, address conn.Address, pubKey key.PubKey, priKey key.PriK
 func (hostInfo HostInfo) GetPublicInfo() *conn.PublicConnInfo {
 
 	publicConnInfo := &conn.PublicConnInfo{}
-	publicConnInfo.Id = hostInfo.Id
+	publicConnInfo.Id = hostInfo.Id.ToString()
 	publicConnInfo.Address = hostInfo.Address
 
 	b, err := hostInfo.PubKey.ToPEM()

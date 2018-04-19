@@ -5,9 +5,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall/key"
 )
+
+type ID string
+
+func (id ID) ToString() string {
+	return string(id)
+}
 
 //Address to connect other peer
 type Address struct {
@@ -40,27 +45,54 @@ func ToAddress(ipv4 string) (Address, error) {
 }
 
 type ConnInfo struct {
-	Id      bifrost.ID
+	Id      ID
 	Address Address
 	PubKey  key.PubKey
 }
 
-func NewConnInfo(id bifrost.ID, address Address, pubKey key.PubKey) ConnInfo {
+func NewConnInfo(id string, address Address, pubKey key.PubKey) ConnInfo {
 	return ConnInfo{
-		Id:      id,
+		Id:      ID(id),
 		Address: address,
 		PubKey:  pubKey,
 	}
 }
 
 type PublicConnInfo struct {
-	Id        bifrost.ID
+	Id        string
 	Address   Address
 	Pubkey    []byte
 	KeyType   key.KeyType
 	KeyGenOpt key.KeyGenOpts
 }
 
-func FromPublicConnInfo(publicConnInfo PublicConnInfo) ConnInfo {
+func FromPublicConnInfo(publicConnInfo PublicConnInfo) (*ConnInfo, error) {
 
+	pubKey, err := ByteToPubKey(publicConnInfo.Pubkey, publicConnInfo.KeyGenOpt, publicConnInfo.KeyType)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &ConnInfo{
+		Id:      ID(publicConnInfo.Id),
+		Address: publicConnInfo.Address,
+		PubKey:  pubKey,
+	}, nil
+}
+
+func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType) (key.PubKey, error) {
+
+	k, err := key.PEMToPublicKey(byteKey)
+
+	if err != nil {
+		return nil, err
+	}
+
+	pub, err := key.MatchPublicKeyOpt(k, keyGenOpt)
+	if err != nil {
+		return nil, err
+	}
+
+	return pub, nil
 }
