@@ -5,30 +5,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/it-chain/bifrost"
 	"github.com/it-chain/heimdall/key"
-	b58 "github.com/jbenet/go-base58"
 )
-
-//Identitiy of Connection
-type ID string
-
-//Create ID from Public Key
-func FromPubKey(key key.PubKey) ID {
-
-	encoded := b58.Encode(key.SKI())
-	return ID(encoded)
-}
-
-//Create ID from Pri Key
-func FromPriKey(key key.PriKey) ID {
-
-	pub, _ := key.PublicKey()
-	return FromPubKey(pub)
-}
-
-func (id ID) String() string {
-	return string(id)
-}
 
 //Address to connect other peer
 type Address struct {
@@ -61,12 +40,12 @@ func ToAddress(ipv4 string) (Address, error) {
 }
 
 type ConnInfo struct {
-	Id      ID
+	Id      bifrost.ID
 	Address Address
 	PubKey  key.PubKey
 }
 
-func NewConnInfo(id ID, address Address, pubKey key.PubKey) ConnInfo {
+func NewConnInfo(id bifrost.ID, address Address, pubKey key.PubKey) ConnInfo {
 	return ConnInfo{
 		Id:      id,
 		Address: address,
@@ -74,42 +53,14 @@ func NewConnInfo(id ID, address Address, pubKey key.PubKey) ConnInfo {
 	}
 }
 
-type HostInfo struct {
-	ConnInfo
-	PriKey key.PriKey
-}
-
-func NewHostInfo(id ID, address Address, pubKey key.PubKey, priKey key.PriKey) HostInfo {
-
-	return HostInfo{
-		ConnInfo: NewConnInfo(id, address, pubKey),
-		PriKey:   priKey,
-	}
-}
-
 type PublicConnInfo struct {
-	Id        ID
+	Id        bifrost.ID
 	Address   Address
 	Pubkey    []byte
 	KeyType   key.KeyType
 	KeyGenOpt key.KeyGenOpts
 }
 
-func (hostInfo HostInfo) GetPublicInfo() *PublicConnInfo {
+func FromPublicConnInfo(publicConnInfo PublicConnInfo) ConnInfo {
 
-	publicConnInfo := &PublicConnInfo{}
-	publicConnInfo.Id = hostInfo.Id
-	publicConnInfo.Address = hostInfo.Address
-
-	b, err := hostInfo.PubKey.ToPEM()
-
-	if err != nil {
-		return nil
-	}
-
-	publicConnInfo.Pubkey = b
-	publicConnInfo.KeyType = hostInfo.PubKey.Type()
-	publicConnInfo.KeyGenOpt = hostInfo.PubKey.Algorithm()
-
-	return publicConnInfo
 }

@@ -43,16 +43,16 @@ type OnConnectionHandler func(conn.Connection)
 
 type BifrostHost struct {
 	mux                 *mux.Mux
-	myConnInfo          conn.MyConnInfo
+	info                HostInfo
 	server              *grpc.Server
 	onConnectionHandler OnConnectionHandler
 }
 
-func New(myConnInfo conn.MyConnInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
+func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
 
 	host := &BifrostHost{
 		mux:                 mux,
-		myConnInfo:          myConnInfo,
+		info:                myConnInfo,
 		onConnectionHandler: onConnectionHandler,
 	}
 
@@ -67,7 +67,7 @@ func (bih BifrostHost) createEnvelope(protocol string, data interface{}) (*pb.En
 		return nil, err
 	}
 
-	pub, err := bih.myConnInfo.PubKey.ToPEM()
+	pub, err := bih.info.PubKey.ToPEM()
 
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 	// 2.
 	if IsRequestConnInfoProtocol(envelope.GetProtocol()) {
-		info := bih.myConnInfo.GetPublicInfo()
+		info := bih.info.GetPublicInfo()
 
 		envelope, err := bih.createEnvelope(REQUEST_CONNINFO, info)
 
@@ -166,7 +166,7 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
 
 	//todo siging
-	info := bih.myConnInfo.GetPublicInfo()
+	info := bih.info.GetPublicInfo()
 	envelope, err := bih.createEnvelope(REQUEST_CONNINFO, info)
 
 	err = streamServer.Send(envelope)
