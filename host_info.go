@@ -32,7 +32,9 @@ type HostInfo struct {
 	PriKey key.PriKey
 }
 
-func NewHostInfo(id ID, address conn.Address, pubKey key.PubKey, priKey key.PriKey) HostInfo {
+func NewHostInfo(address conn.Address, pubKey key.PubKey, priKey key.PriKey) HostInfo {
+
+	id := FromPubKey(pubKey)
 
 	return HostInfo{
 		ConnInfo: conn.NewConnInfo(id.String(), address, pubKey),

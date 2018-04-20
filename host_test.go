@@ -26,9 +26,15 @@ type MockServer struct {
 
 func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 
+	km, err := key.NewKeyManager("~/key2")
+
+	defer os.RemoveAll("~/key2")
+
+	_, pub, err := km.GenerateKey(key.RSA4096)
+
 	envelope := &pb.Envelope{}
 	envelope.Protocol = REQUEST_CONNINFO
-	err := stream.Send(envelope)
+	err = stream.Send(envelope)
 
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -42,9 +48,18 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 		log.Fatalf(err.Error())
 	}
 
+	b, err := pub.ToPEM()
+
+	pci := conn.PublicConnInfo{}
+	pci.Id = "test1"
+	pci.Address = conn.Address{IP: "127.0.0.1"}
+	pci.Pubkey = b
+	pci.KeyGenOpt = pub.Algorithm()
+	pci.KeyType = pub.Type()
+
 	envelope2 := &pb.Envelope{}
 	envelope2.Protocol = CONNECTION_ESTABLISH
-	payload, err := json.Marshal(conn.ConnInfo{Id: "123"})
+	payload, err := json.Marshal(pci)
 	envelope2.Payload = payload
 
 	err = stream.Send(envelope2)
@@ -108,20 +123,19 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
-	myconnectionInfo := NewHostInfo(FromPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	host := New(myconnectionInfo, mux, nil)
 
 	connection, err := host.ConnectToPeer(Address{Ip: "127.0.0.1:9999"})
 
+	assert.Nil(t, err)
 	log.Printf("Sending data...")
 	connection.Send(&pb.Envelope{Payload: []byte("test1")}, nil, nil)
-	//
-	//fmt.Print(err)
-	//fmt.Print(connection)
+
 	assert.Nil(t, err)
-	assert.Equal(t, "123", connection.GetConnInfo().Id.ToString())
+	assert.Equal(t, "test1", connection.GetConnInfo().Id.ToString())
 }
 
 func TestBifrostHost_Stream(t *testing.T) {
@@ -132,7 +146,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 
 	priv, pub, err := km.GenerateKey(key.RSA4096)
 
-	myconnectionInfo := NewHostInfo(FromPubKey(pub), conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	var OnConnectionHandler = func(connection conn.Connection) {

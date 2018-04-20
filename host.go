@@ -63,43 +63,6 @@ func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHand
 	return host
 }
 
-func (bih BifrostHost) createSignedEnvelope(protocol string, data interface{}) (*pb.Envelope, error) {
-
-	payload, err := json.Marshal(data)
-
-	if err != nil {
-		return nil, err
-	}
-
-	pub, err := bih.info.PubKey.ToPEM()
-
-	if err != nil {
-		return nil, err
-	}
-
-	hash := sha512.New()
-	hash.Write(payload)
-	digest := hash.Sum(nil)
-
-	sig, err := bih.auth.Sign(bih.info.PriKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
-
-	if err != nil {
-		return nil, err
-	}
-
-	envelope := &pb.Envelope{}
-	envelope.Protocol = protocol
-	envelope.Payload = payload
-	envelope.Pubkey = pub
-	envelope.Signature = sig
-
-	return envelope, nil
-}
-
-func (bih BifrostHost) handleError(err error) {
-
-}
-
 func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 	endPointAddress := stream.Address{IP: address.Ip}
@@ -117,7 +80,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 	// 3. connection Established
 
 	// 1.
-	envelope, err := recvWithTimeout(2, streamWrapper)
+	envelope, err := recvWithTimeout(10, streamWrapper)
 
 	if err != nil {
 		streamWrapper.Close()
@@ -142,7 +105,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 		}
 
 		// 3.
-		envelope, err = recvWithTimeout(2, streamWrapper)
+		envelope, err = recvWithTimeout(3, streamWrapper)
 
 		if err != nil {
 			streamWrapper.Close()
@@ -179,8 +142,8 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 	//2. ConnInfo의정보를정보를 기반으로 Connection을 생성
 	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
 
-	info := bih.info.GetPublicInfo()
-	envelope, err := bih.createSignedEnvelope(REQUEST_CONNINFO, info)
+	var s struct{}
+	envelope, err := bih.createSignedEnvelope(REQUEST_CONNINFO, s)
 
 	err = streamServer.Send(envelope)
 
@@ -188,7 +151,7 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 		return err
 	}
 
-	if m, err := recvWithTimeout(2, streamServer); err == nil {
+	if m, err := recvWithTimeout(3, streamServer); err == nil {
 
 		wg := sync.WaitGroup{}
 		wg.Add(1)
@@ -198,6 +161,13 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 		}
 
 		log.Printf("Received payload [%s]", envelope.Payload)
+
+		info := bih.info.GetPublicInfo()
+		envelope, err := bih.createSignedEnvelope(CONNECTION_ESTABLISH, info)
+
+		if err = streamServer.Send(envelope); err != nil {
+			return err
+		}
 
 		connectedConnInfo, err := pubConnInfoToConnInfo(envelope.Payload)
 
@@ -210,7 +180,6 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 		streamWrapper := stream.NewServerStreamWrapper(streamServer, cf)
 
 		conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
-
 		defer conn.Close()
 
 		go func() {
@@ -287,4 +256,41 @@ func pubConnInfoToConnInfo(payload []byte) (*conn.ConnInfo, error) {
 	}
 
 	return connectedConnInfo, nil
+}
+
+func (bih BifrostHost) createSignedEnvelope(protocol string, data interface{}) (*pb.Envelope, error) {
+
+	payload, err := json.Marshal(data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	pub, err := bih.info.PubKey.ToPEM()
+
+	if err != nil {
+		return nil, err
+	}
+
+	hash := sha512.New()
+	hash.Write(payload)
+	digest := hash.Sum(nil)
+
+	sig, err := bih.auth.Sign(bih.info.PriKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+
+	if err != nil {
+		return nil, err
+	}
+
+	envelope := &pb.Envelope{}
+	envelope.Protocol = protocol
+	envelope.Payload = payload
+	envelope.Pubkey = pub
+	envelope.Signature = sig
+
+	return envelope, nil
+}
+
+func (bih BifrostHost) handleError(err error) {
+
 }
