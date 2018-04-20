@@ -2,14 +2,12 @@ package bifrost
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"os"
 	"sync"
 	"testing"
-
-	"fmt"
-
 	"time"
 
 	"github.com/it-chain/bifrost/conn"

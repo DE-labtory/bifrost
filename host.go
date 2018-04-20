@@ -125,7 +125,7 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 			conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
 
 			go func() {
-				if err != conn.Start() {
+				if err = conn.Start(); err != nil {
 					conn.Close()
 				}
 			}()
@@ -183,8 +183,9 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 		defer conn.Close()
 
 		go func() {
-			if err != conn.Start() {
+			if err = conn.Start(); err != nil {
 				conn.Close()
+				wg.Done()
 			}
 		}()
 

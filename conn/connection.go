@@ -11,7 +11,7 @@ import (
 
 type ReceivedMessageHandler interface {
 	ServeRequest(msg OutterMessage)
-	ServeError(err error)
+	ServeError(conn Connection, err error)
 }
 
 type Connection interface {
@@ -151,12 +151,12 @@ func (conn *GrpcConnection) Start() error {
 			return nil
 		case err := <-errChan:
 			if conn.handle != nil {
-				conn.handle.ServeError(err)
+				conn.handle.ServeError(conn, err)
 			}
 			return err
 		case message := <-conn.readChannel:
 			if conn.handle != nil {
-				conn.handle.ServeRequest(OutterMessage{Envelope: message, Conn: conn})
+				conn.handle.ServeRequest(OutterMessage{Envelope: message, Conn: conn, Data: message.Payload})
 			}
 		}
 	}
