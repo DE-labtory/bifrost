@@ -1,3 +1,5 @@
+// This file implements KeyManager.
+
 package key
 
 import (
@@ -7,23 +9,23 @@ import (
 	"strings"
 )
 
+// KeyManagerImpl contains private and public key pair, key file path, key generator, key loader and key storer.
 type keyManagerImpl struct {
+	priKey PriKey
+	pubKey PubKey
 
-	priKey 				PriKey
-	pubKey 				PubKey
+	path       string
+	generators map[KeyGenOpts]keyGenerator
 
-	path 				string
-	generators			map[KeyGenOpts]keyGenerator
-
-	loader				keyLoader
-	storer				keyStorer
-
+	loader keyLoader
+	storer keyStorer
 }
 
+// NewKeyManager makes a new key manager that contains key file path, key generator, key loader, key storer.
 func NewKeyManager(path string) (KeyManager, error) {
 
 	if len(path) == 0 {
-		path = "./.keyRepository"
+		path = "./.heimdall"
 	} else {
 		if !strings.HasPrefix(path, "./") {
 			path = "./" + path
@@ -57,15 +59,16 @@ func NewKeyManager(path string) (KeyManager, error) {
 	}
 
 	km := &keyManagerImpl{
-		path: path,
+		path:       path,
 		generators: keyGenerators,
-		loader: *loader,
-		storer: *storer,
+		loader:     *loader,
+		storer:     *storer,
 	}
 
 	return km, nil
 }
 
+// GenerateKey generates public and private key pair that matches the input key generation option.
 func (km *keyManagerImpl) GenerateKey(opts KeyGenOpts) (pri PriKey, pub PubKey, err error) {
 
 	err = km.RemoveKey()
@@ -97,6 +100,8 @@ func (km *keyManagerImpl) GenerateKey(opts KeyGenOpts) (pri PriKey, pub PubKey, 
 
 }
 
+// GetKey gets the key pair from keyManagerImpl struct.
+// if the keyManagerImpl doesn't have any key, then get keys from stored key files.
 func (km *keyManagerImpl) GetKey() (pri PriKey, pub PubKey, err error) {
 
 	if km.priKey == nil || km.pubKey == nil {
@@ -112,7 +117,8 @@ func (km *keyManagerImpl) GetKey() (pri PriKey, pub PubKey, err error) {
 
 }
 
-func (km *keyManagerImpl) RemoveKey() (error) {
+// RemoveKey removes key files.
+func (km *keyManagerImpl) RemoveKey() error {
 
 	err := os.RemoveAll(km.path)
 	if err != nil {
@@ -121,4 +127,45 @@ func (km *keyManagerImpl) RemoveKey() (error) {
 
 	return nil
 
+}
+
+// Reconstruct key from bytes.
+func (km *keyManagerImpl) ByteToKey(byteKey []byte, keyGenOpt KeyGenOpts, keyType KeyType) (err error) {
+
+	switch keyType {
+	case PRIVATE_KEY:
+		key, err := PEMToPrivateKey(byteKey)
+		if err != nil {
+			return err
+		}
+
+		pri, err := MatchPrivateKeyOpt(key, keyGenOpt)
+		if err != nil {
+			return err
+		}
+		km.priKey = pri
+
+	case PUBLIC_KEY:
+		key, err := PEMToPublicKey(byteKey)
+		if err != nil {
+			return err
+		}
+
+		pub, err := MatchPublicKeyOpt(key, keyGenOpt)
+		if err != nil {
+			return err
+		}
+		km.pubKey = pub
+
+	default:
+		return errors.New("failed to convert byte to key - not right keyType")
+	}
+
+	return nil
+
+}
+
+// GetPath returns path of key files
+func (km *keyManagerImpl) GetPath() string {
+	return km.path
 }

@@ -6,26 +6,15 @@ import (
 	"strings"
 
 	"github.com/it-chain/heimdall/key"
-	b58 "github.com/jbenet/go-base58"
 )
 
 type ID string
 
-func FromRsaPubKey(key key.PubKey) ID {
-	encoded := b58.Encode(key.SKI())
-	return ID(encoded)
-}
-
-func FromRsaPriKey(key key.PriKey) ID {
-	pub, _ := key.PublicKey()
-
-	return FromRsaPubKey(pub)
-}
-
-func (id ID) String() string {
+func (id ID) ToString() string {
 	return string(id)
 }
 
+//Address to connect other peer
 type Address struct {
 	IP string
 }
@@ -37,6 +26,7 @@ func validIP4(ipAddress string) bool {
 	if re.MatchString(ipAddress) {
 		return true
 	}
+
 	return false
 }
 
@@ -54,33 +44,55 @@ func ToAddress(ipv4 string) (Address, error) {
 	}, nil
 }
 
-type ConnenctionInfo struct {
+type ConnInfo struct {
 	Id      ID
 	Address Address
 	PubKey  key.PubKey
 }
 
-func NewConnenctionInfo(id ID, address Address, pubKey key.PubKey) ConnenctionInfo {
-	return ConnenctionInfo{
-		Id:      id,
+func NewConnInfo(id string, address Address, pubKey key.PubKey) ConnInfo {
+	return ConnInfo{
+		Id:      ID(id),
 		Address: address,
 		PubKey:  pubKey,
 	}
 }
 
-type MyConnectionInfo struct {
-	ConnenctionInfo
-	PriKey key.PriKey
+type PublicConnInfo struct {
+	Id        string
+	Address   Address
+	Pubkey    []byte
+	KeyType   key.KeyType
+	KeyGenOpt key.KeyGenOpts
 }
 
-func NewMyConnectionInfo(id ID, address Address, pubKey key.PubKey, priKey key.PriKey) MyConnectionInfo {
+func FromPublicConnInfo(publicConnInfo PublicConnInfo) (*ConnInfo, error) {
 
-	return MyConnectionInfo{
-		ConnenctionInfo: NewConnenctionInfo(id, address, pubKey),
-		PriKey:          priKey,
+	pubKey, err := ByteToPubKey(publicConnInfo.Pubkey, publicConnInfo.KeyGenOpt, publicConnInfo.KeyType)
+
+	if err != nil {
+		return nil, err
 	}
+
+	return &ConnInfo{
+		Id:      ID(publicConnInfo.Id),
+		Address: publicConnInfo.Address,
+		PubKey:  pubKey,
+	}, nil
 }
 
-func (myConnectionInfo MyConnectionInfo) GetPublicInfo() ConnenctionInfo {
-	return myConnectionInfo.ConnenctionInfo
+func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType) (key.PubKey, error) {
+
+	k, err := key.PEMToPublicKey(byteKey)
+
+	if err != nil {
+		return nil, err
+	}
+
+	pub, err := key.MatchPublicKeyOpt(k, keyGenOpt)
+	if err != nil {
+		return nil, err
+	}
+
+	return pub, nil
 }

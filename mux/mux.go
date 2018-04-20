@@ -11,7 +11,7 @@ type Protocol string
 
 type HandlerFunc func(message conn.OutterMessage)
 
-type ErrorFunc func(err error)
+type ErrorFunc func(conn conn.Connection, err error)
 
 type Mux struct {
 	sync.RWMutex
@@ -69,13 +69,13 @@ func (mux *Mux) ServeRequest(msg conn.OutterMessage) {
 	}
 }
 
-func (mux *Mux) ServeError(err error) {
+func (mux *Mux) ServeError(conn conn.Connection, err error) {
 
 	mux.Lock()
 	defer mux.Unlock()
 
 	if mux.errorFunc != nil {
-		mux.errorFunc(err)
+		mux.errorFunc(conn, err)
 	}
 }
 

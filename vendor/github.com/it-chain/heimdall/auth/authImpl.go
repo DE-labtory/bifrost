@@ -1,18 +1,21 @@
+// This file provides implementation of the authentication interface.
+
 package auth
 
 import (
-	"reflect"
-	"github.com/it-chain/heimdall/key"
 	"errors"
+	"reflect"
+
+	"github.com/it-chain/heimdall/key"
 )
 
+// authImpl contains signers and verifiers that is used for signing and verifying process.
 type authImpl struct {
-
-	signers		map[reflect.Type]signer
-	verifiers	map[reflect.Type]verifier
-
+	signers   map[reflect.Type]signer
+	verifiers map[reflect.Type]verifier
 }
 
+// NewAuth initialize the struct authImpl.
 func NewAuth() (Auth, error) {
 
 	signers := make(map[reflect.Type]signer)
@@ -24,14 +27,15 @@ func NewAuth() (Auth, error) {
 	verifiers[reflect.TypeOf(&key.ECDSAPublicKey{})] = &ECDSAVerifier{}
 
 	ai := &authImpl{
-		signers: 		signers,
-		verifiers: 		verifiers,
+		signers:   signers,
+		verifiers: verifiers,
 	}
 
 	return ai, nil
 
 }
 
+// Sign signs a digest(hash) using priKey(private key), and returns signature.
 func (ai *authImpl) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	var err error
@@ -58,6 +62,7 @@ func (ai *authImpl) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte
 
 }
 
+// Verify verifies the signature using pubKey(public key) and digest of original message, then returns boolean value.
 func (ai *authImpl) Verify(pubKey key.Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if pubKey == nil {
@@ -68,7 +73,7 @@ func (ai *authImpl) Verify(pubKey key.Key, signature, digest []byte, opts Signer
 		return false, errors.New("invalid signature")
 	}
 
-	if len(digest) == 0 {;
+	if len(digest) == 0 {
 		return false, errors.New("invalid digest")
 	}
 

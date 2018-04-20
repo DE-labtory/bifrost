@@ -1,24 +1,31 @@
+// This file provides certificate formatting and Sign and Verify functions for ECDSA.
+
 package auth
 
 import (
-	"math/big"
-	"encoding/asn1"
 	"crypto/ecdsa"
-	"errors"
 	"crypto/rand"
+	"encoding/asn1"
+	"errors"
+	"math/big"
+
 	"github.com/it-chain/heimdall/key"
 )
 
+// ecdsaSignature contains ECDSA signature components that are two integers, R and S.
 type ecdsaSignature struct {
 	R, S *big.Int
 }
 
-type ECDSASigner struct {}
+//ECDSASigner represents subject of ECDSA signing process.
+type ECDSASigner struct{}
 
+// marshalECDSASignature returns encoding format (ASN.1) of signature.
 func marshalECDSASignature(r, s *big.Int) ([]byte, error) {
 	return asn1.Marshal(ecdsaSignature{r, s})
 }
 
+// unmarshalECDSASignature parses the ASN.1 structure to ECDSA signature.
 func unmarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
 	ecdsaSig := new(ecdsaSignature)
 	_, err := asn1.Unmarshal(signature, ecdsaSig)
@@ -44,6 +51,7 @@ func unmarshalECDSASignature(signature []byte) (*big.Int, *big.Int, error) {
 
 }
 
+// Sign signs a digest(hash) using priKey(private key), and returns signature.
 func (signer *ECDSASigner) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	r, s, err := ecdsa.Sign(rand.Reader, priKey.(*key.ECDSAPrivateKey).PrivKey, digest)
@@ -60,8 +68,10 @@ func (signer *ECDSASigner) Sign(priKey key.Key, digest []byte, opts SignerOpts) 
 
 }
 
-type ECDSAVerifier struct {}
+//ECDSAVerifier represents subject of ECDSA verifying process.
+type ECDSAVerifier struct{}
 
+// Verify verifies the signature using pubKey(public key) and digest of original message, then returns boolean value.
 func (v *ECDSAVerifier) Verify(pubKey key.Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	r, s, err := unmarshalECDSASignature(signature)

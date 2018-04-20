@@ -1,5 +1,8 @@
+// This file provides hash options.
+
 package hashing
 
+// HashOpts represents hash options with integer.
 type HashOpts int
 
 const (

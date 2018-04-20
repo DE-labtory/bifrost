@@ -150,7 +150,7 @@ func TestStreamHandler_Send(t *testing.T) {
 		log.Fatal(err.Error())
 	}
 
-	conn, err := NewConnection(ConnenctionInfo{}, streamWrapper, Handler{})
+	conn, err := NewConnection(ConnInfo{}, streamWrapper, Handler{})
 
 	if err != nil {
 		fmt.Errorf("error")
@@ -213,7 +213,7 @@ func TestStreamHandler_Close(t *testing.T) {
 	}
 
 	time.Sleep(1 * time.Second)
-	conn, err := NewConnection(ConnenctionInfo{}, streamWrapper, Handler{})
+	conn, err := NewConnection(ConnInfo{}, streamWrapper, Handler{})
 
 	//then
 	conn.Close()

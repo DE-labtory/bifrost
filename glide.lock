@@ -1,5 +1,5 @@
 hash: 7be96a70aa991d8293305aeae3a67465b49726677642a1b539d260405723b78d
-updated: 2018-03-30T20:44:40.404076+09:00
+updated: 2018-04-18T17:41:56.185285+09:00
 imports:
 - name: github.com/golang/protobuf
   version: e09c5db296004fbe3f74490e84dcd62c3c5ddb1b
@@ -11,7 +11,7 @@ imports:
   - ptypes/duration
   - ptypes/timestamp
 - name: github.com/it-chain/heimdall
-  version: e4e1b03263ea99054cf3e6e13842e65740218fb9
+  version: 855be675269dd68a16cb4fa0729f322b64f9ec09
   subpackages:
   - key
 - name: github.com/jbenet/go-base58
@@ -21,9 +21,10 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 6078986fec03a1dcc236c34816c71b0e05018fda
+  version: d41e8174641f662c5a2d1c7a5f9e828788eb8706
   subpackages:
   - context
+  - http/httpguts
   - http2
   - http2/hpack
   - idna
@@ -31,14 +32,14 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/text
-  version: ece95c760240037f89ebcbdd7155ac8cb52e38fa
+  version: 7922cc490dd5a7dbaa7fd5d6196b49db59ac042f
   subpackages:
   - secure/bidirule
   - transform
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: ab0870e398d5dd054b868c0db1481ab029b9a9f2
+  version: 7fd901a49ba6a7f87732eb344f6e3c5b19d1b200
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc

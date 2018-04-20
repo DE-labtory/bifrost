@@ -1,25 +1,28 @@
+// This file provides components that is needed for loading key process.
+
 package key
 
 import (
-	"os"
-	"io/ioutil"
-	"strings"
-	"crypto/rsa"
-	"crypto/ecdsa"
 	"errors"
+	"io/ioutil"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
+// keyLoader contains path as a string.
 type keyLoader struct {
 	path string
 }
 
+// keyInfos contains key related information such as id, key generation option and key type.
 type keyInfos struct {
-	id			string
-	keyGenOpts	KeyGenOpts
-	keyType		KeyType
+	id         string
+	keyGenOpts KeyGenOpts
+	keyType    KeyType
 }
 
+// Load loads private key and public key from stored file.
 func (loader *keyLoader) Load() (pri PriKey, pub PubKey, err error) {
 
 	if _, err := os.Stat(loader.path); os.IsNotExist(err) {
@@ -39,33 +42,25 @@ func (loader *keyLoader) Load() (pri PriKey, pub PubKey, err error) {
 		if ok {
 			switch keyInfos.keyType {
 			case PRIVATE_KEY:
-				key, err := loader.loadKey(keyInfos.id, keyInfos.keyType)
+				key, err := loader.loadKey(keyInfos.id, keyInfos.keyGenOpts, keyInfos.keyType)
 				if err != nil {
 					return nil, nil, err
 				}
 
-				switch key.(type) {
-				case *rsa.PrivateKey:
-					pri = &RSAPrivateKey{PrivKey: key.(*rsa.PrivateKey), bits: KeyGenOptsToRSABits(keyInfos.keyGenOpts)}
-				case *ecdsa.PrivateKey:
-					pri = &ECDSAPrivateKey{PrivKey: key.(*ecdsa.PrivateKey)}
-				default:
-					return nil, nil, errors.New("Failed to load Key")
+				pri, err = MatchPrivateKeyOpt(key, keyInfos.keyGenOpts)
+				if err != nil {
+					return nil, nil, err
 				}
 
 			case PUBLIC_KEY:
-				key, err := loader.loadKey(keyInfos.id, keyInfos.keyType)
+				key, err := loader.loadKey(keyInfos.id, keyInfos.keyGenOpts, keyInfos.keyType)
 				if err != nil {
 					return nil, nil, err
 				}
 
-				switch key.(type) {
-				case *rsa.PublicKey:
-					pub = &RSAPublicKey{PubKey: key.(*rsa.PublicKey), bits: KeyGenOptsToRSABits(keyInfos.keyGenOpts)}
-				case *ecdsa.PublicKey:
-					pub = &ECDSAPublicKey{key.(*ecdsa.PublicKey)}
-				default:
-					return nil, nil, errors.New("Failed to load Key")
+				pub, err = MatchPublicKeyOpt(key, keyInfos.keyGenOpts)
+				if err != nil {
+					return nil, nil, err
 				}
 			}
 		}
@@ -79,13 +74,14 @@ func (loader *keyLoader) Load() (pri PriKey, pub PubKey, err error) {
 
 }
 
-func (loader *keyLoader) loadKey(alias string, keyType KeyType) (key interface{}, err error) {
+// loadKey reads key from file and changes the format from PEM to key.
+func (loader *keyLoader) loadKey(alias string, keyGenOpt KeyGenOpts, keyType KeyType) (key interface{}, err error) {
 
 	if len(alias) == 0 {
 		return nil, errors.New("Input value should not be blank")
 	}
 
-	path, err := loader.getFullPath(alias, string(keyType))
+	path, err := loader.getFullPath(alias, keyGenOpt.String(), string(keyType))
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +106,7 @@ func (loader *keyLoader) loadKey(alias string, keyType KeyType) (key interface{}
 
 }
 
+// getKeyInfos gets key information that are id, key generation option and key type.
 func (loader *keyLoader) getKeyInfos(name string) (*keyInfos, bool) {
 
 	datas := strings.Split(name, "_")
@@ -129,16 +126,17 @@ func (loader *keyLoader) getKeyInfos(name string) (*keyInfos, bool) {
 	}
 
 	infos := &keyInfos{
-		id:datas[0],
-		keyGenOpts:keyGenOpts,
-		keyType:keyType,
+		id:         datas[0],
+		keyGenOpts: keyGenOpts,
+		keyType:    keyType,
 	}
 
 	return infos, true
 
 }
 
-func (loader *keyLoader) getFullPath(alias, suffix string) (string, error) {
+// getFullPath gets full (absolute) path of a key file.
+func (loader *keyLoader) getFullPath(alias, keyGenOpt string, suffix string) (string, error) {
 	if _, err := os.Stat(loader.path); os.IsNotExist(err) {
 		err = os.MkdirAll(loader.path, 0755)
 		if err != nil {
@@ -146,5 +144,5 @@ func (loader *keyLoader) getFullPath(alias, suffix string) (string, error) {
 		}
 	}
 
-	return filepath.Join(loader.path, alias + "_" + suffix), nil
+	return filepath.Join(loader.path, alias+"_"+keyGenOpt+"_"+suffix), nil
 }
