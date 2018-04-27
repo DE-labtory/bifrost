@@ -56,7 +56,7 @@ func TestFromPublicConnInfo(t *testing.T) {
 
 	//then
 	assert.NoError(t, err)
-	assert.Equal(t, pub, connInfo.PubKey)
+	assert.Equal(t, pub, connInfo.PeerKey)
 	assert.Equal(t, pci.Id, string(connInfo.Id))
 	assert.Equal(t, pci.Address, connInfo.Address)
 }

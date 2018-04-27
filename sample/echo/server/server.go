@@ -99,6 +99,5 @@ func main() {
 		log.Fatal(err)
 	}
 	//time.Sleep(time.Hour)
-
 	bifrost.Listen(host)
 }

@@ -47,14 +47,14 @@ func ToAddress(ipv4 string) (Address, error) {
 type ConnInfo struct {
 	Id      ID
 	Address Address
-	PubKey  key.PubKey
+	PeerKey key.PubKey
 }
 
 func NewConnInfo(id string, address Address, pubKey key.PubKey) ConnInfo {
 	return ConnInfo{
 		Id:      ID(id),
 		Address: address,
-		PubKey:  pubKey,
+		PeerKey: pubKey,
 	}
 }
 
@@ -77,7 +77,7 @@ func FromPublicConnInfo(publicConnInfo PublicConnInfo) (*ConnInfo, error) {
 	return &ConnInfo{
 		Id:      ID(publicConnInfo.Id),
 		Address: publicConnInfo.Address,
-		PubKey:  pubKey,
+		PeerKey: pubKey,
 	}, nil
 }
 

@@ -82,7 +82,6 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 }
 
 func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grpc.Server, net.Listener) {
-
 	lis, err := net.Listen("tcp", ipAddress)
 
 	if err != nil {
