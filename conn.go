@@ -1,4 +1,4 @@
-package conn
+package bifrost
 
 import (
 	"errors"
@@ -6,8 +6,26 @@ import (
 	"sync/atomic"
 
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/stream"
 )
+
+type InnerMessage struct {
+	Envelope  *pb.Envelope
+	OnErr     func(error)
+	OnSuccess func(interface{})
+}
+
+type OutterMessage struct {
+	Envelope *pb.Envelope
+	Data     []byte
+	Conn     Connection
+	sync.Mutex
+}
+
+// Respond sends a msg to the source that sent the ReceivedMessageImpl
+func (m *OutterMessage) Respond(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
+
+	m.Conn.Send(envelope, successCallBack, errCallBack)
+}
 
 type ReceivedMessageHandler interface {
 	ServeRequest(msg OutterMessage)
@@ -23,7 +41,7 @@ type Connection interface {
 
 type GrpcConnection struct {
 	connInfo      ConnInfo
-	streamWrapper stream.StreamWrapper
+	streamWrapper StreamWrapper
 	stopFlag      int32
 	handle        ReceivedMessageHandler
 	outChannl     chan *InnerMessage
@@ -32,7 +50,7 @@ type GrpcConnection struct {
 	sync.RWMutex
 }
 
-func NewConnection(connInfo ConnInfo, streamWrapper stream.StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
+func NewConnection(connInfo ConnInfo, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
 
 	if streamWrapper == nil || handle == nil {
 		return nil, errors.New("fail to create connection streamWrapper or handle is nil")

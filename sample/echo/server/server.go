@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/gops/agent"
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/conn"
+	"github.com/it-chain/bifrost/grpc"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/auth"

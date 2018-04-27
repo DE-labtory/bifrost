@@ -1,4 +1,4 @@
-package conn
+package bifrost
 
 import (
 	"fmt"
@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/stream"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -101,8 +100,7 @@ func TestNewStreamHandler(t *testing.T) {
 	mockServer := &MockServer{ch: connectionHandler}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	address := stream.Address{IP: serverIP}
-	grpc_conn, err := stream.NewClientConn(address, false, nil)
+	grpc_conn, err := NewClientConn(serverIP, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -137,14 +135,13 @@ func TestStreamHandler_Send(t *testing.T) {
 		listner1.Close()
 	}()
 
-	address := stream.Address{IP: serverIP}
-	grpc_conn, err := stream.NewClientConn(address, false, nil)
+	grpc_conn, err := NewClientConn(serverIP, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	streamWrapper, err := stream.NewClientStreamWrapper(grpc_conn)
+	streamWrapper, err := NewClientStreamWrapper(grpc_conn)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -192,8 +189,8 @@ func TestStreamHandler_Close(t *testing.T) {
 	mockServer := &MockServer{ch: connectionHandler, clh: closeHandler}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	address := stream.Address{IP: serverIP}
-	grpc_conn, err := stream.NewClientConn(address, false, nil)
+	//address := Address{Ip: serverIP}
+	grpc_conn, err := NewClientConn(serverIP, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -206,7 +203,7 @@ func TestStreamHandler_Close(t *testing.T) {
 
 	//need to wait to connect
 	time.Sleep(1 * time.Second)
-	streamWrapper, err := stream.NewClientStreamWrapper(grpc_conn)
+	streamWrapper, err := NewClientStreamWrapper(grpc_conn)
 
 	if err != nil {
 		log.Fatal(err.Error())

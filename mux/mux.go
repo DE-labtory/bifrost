@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/bifrost/conn"
+	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
 )
 
 type Protocol string

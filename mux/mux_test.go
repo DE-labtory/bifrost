@@ -3,7 +3,7 @@ package mux
 import (
 	"testing"
 
-	"github.com/it-chain/bifrost/conn"
+	"github.com/it-chain/bifrost/grpc"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 )
