@@ -4,14 +4,14 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
+	"github.com/it-chain/bifrost"
 )
 
 type Protocol string
 
-type HandlerFunc func(message conn.OutterMessage)
+type HandlerFunc func(message bifrost.Message)
 
-type ErrorFunc func(conn conn.Connection, err error)
+type ErrorFunc func(conn bifrost.Connection, err error)
 
 type Mux struct {
 	sync.RWMutex
@@ -58,7 +58,7 @@ func (mux *Mux) match(protocol Protocol) HandlerFunc {
 	return nil
 }
 
-func (mux *Mux) ServeRequest(msg conn.OutterMessage) {
+func (mux *Mux) ServeRequest(msg bifrost.Message) {
 
 	protocol := msg.Envelope.Protocol
 
@@ -69,7 +69,7 @@ func (mux *Mux) ServeRequest(msg conn.OutterMessage) {
 	}
 }
 
-func (mux *Mux) ServeError(conn conn.Connection, err error) {
+func (mux *Mux) ServeError(conn bifrost.Connection, err error) {
 
 	mux.Lock()
 	defer mux.Unlock()

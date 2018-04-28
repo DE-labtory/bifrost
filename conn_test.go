@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"testing"
-
 	"time"
 
 	"github.com/it-chain/bifrost/pb"
@@ -28,7 +27,7 @@ type MockServer struct {
 
 type Handler struct{}
 
-func (h Handler) ServeRequest(message OutterMessage) {
+func (h Handler) ServeRequest(message Message) {
 
 }
 

@@ -6,72 +6,100 @@ import (
 	"sync/atomic"
 
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/heimdall/key"
 )
 
-type InnerMessage struct {
+type ConnID = string
+
+type innerMessage struct {
 	Envelope  *pb.Envelope
 	OnErr     func(error)
 	OnSuccess func(interface{})
 }
 
-type OutterMessage struct {
+type Message struct {
 	Envelope *pb.Envelope
 	Data     []byte
 	Conn     Connection
-	sync.Mutex
 }
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl
-func (m *OutterMessage) Respond(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
+func (m *Message) Respond(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
 
 	m.Conn.Send(envelope, successCallBack, errCallBack)
 }
 
 type ReceivedMessageHandler interface {
-	ServeRequest(msg OutterMessage)
+	ServeRequest(msg Message)
 	ServeError(conn Connection, err error)
 }
 
 type Connection interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
 	Close()
-	GetConnInfo() ConnInfo
+	GetAddress() Address
+	GetPeerKey() key.PubKey
+	GetID() ConnID
 	Start() error
 }
 
 type GrpcConnection struct {
-	connInfo      ConnInfo
+	ID            ConnID
+	peerKey       key.PubKey
+	address       Address
 	streamWrapper StreamWrapper
 	stopFlag      int32
 	handle        ReceivedMessageHandler
-	outChannl     chan *InnerMessage
+	outChannl     chan *innerMessage
 	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
 	sync.RWMutex
 }
 
-func NewConnection(connInfo ConnInfo, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
+func NewConnection(address Address, pubkey key.PubKey, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
 
-	if streamWrapper == nil || handle == nil {
+	if streamWrapper == nil || handle == nil || pubkey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or handle is nil")
 	}
 
 	return &GrpcConnection{
-		connInfo:      connInfo,
+		ID:            FromPubKey(pubkey),
+		peerKey:       pubkey,
+		address:       address,
 		streamWrapper: streamWrapper,
 		handle:        handle,
-		outChannl:     make(chan *InnerMessage, 200),
+		outChannl:     make(chan *innerMessage, 200),
 		readChannel:   make(chan *pb.Envelope, 200),
 		stopChannel:   make(chan struct{}, 1),
 	}, nil
 }
 
-func (conn *GrpcConnection) GetConnInfo() ConnInfo {
-	return conn.connInfo
+func (conn *GrpcConnection) GetAddress() Address {
+	return conn.address
+}
+func (conn *GrpcConnection) GetPeerKey() key.PubKey {
+	return conn.peerKey
+}
+func (conn *GrpcConnection) GetID() ConnID {
+	return conn.ID
 }
 
 func (conn *GrpcConnection) toDie() bool {
 	return atomic.LoadInt32(&(conn.stopFlag)) == int32(1)
+}
+
+func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
+
+	conn.Lock()
+	defer conn.Unlock()
+
+	m := &innerMessage{
+		Envelope:  envelope,
+		OnErr:     errCallBack,
+		OnSuccess: successCallBack,
+	}
+
+	conn.outChannl <- m
 }
 
 func (conn *GrpcConnection) writeStream() {
@@ -121,20 +149,6 @@ func (conn *GrpcConnection) readStream(errChan chan error) {
 	}
 }
 
-func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
-
-	conn.Lock()
-	defer conn.Unlock()
-
-	m := &InnerMessage{
-		Envelope:  envelope,
-		OnErr:     errCallBack,
-		OnSuccess: successCallBack,
-	}
-
-	conn.outChannl <- m
-}
-
 func (conn *GrpcConnection) Close() {
 
 	if conn.toDie() {
@@ -174,10 +188,29 @@ func (conn *GrpcConnection) Start() error {
 			return err
 		case message := <-conn.readChannel:
 			if conn.handle != nil {
-				conn.handle.ServeRequest(OutterMessage{Envelope: message, Conn: conn, Data: message.Payload})
+				m := Message{Envelope: message, Conn: conn, Data: message.Payload}
+				conn.handle.ServeRequest(m)
 			}
 		}
 	}
 
 	return nil
 }
+
+//
+//func NewConnInfo(id string, address Address, pubKey key.PubKey) ConnInfo {
+//	return ConnInfo{
+//		Id:      id,
+//		Address: address,
+//		PeerKey: pubKey,
+//	}
+//}
+
+//
+//type PublicConnInfo struct {
+//	Id        string
+//	Address   Address
+//	Pubkey    []byte
+//	KeyType   key.KeyType
+//	KeyGenOpt key.KeyGenOpts
+//}
