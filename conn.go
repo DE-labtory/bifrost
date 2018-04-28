@@ -9,6 +9,8 @@ import (
 
 	"fmt"
 
+	"bytes"
+
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/auth"
 	"github.com/it-chain/heimdall/key"
@@ -116,6 +118,7 @@ func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(int
 	conn.outChannl <- m
 }
 
+//todo signer opts from config
 func sign(envelope *pb.Envelope, priKey key.PriKey) (*pb.Envelope, error) {
 
 	hash := sha512.New()
@@ -131,6 +134,28 @@ func sign(envelope *pb.Envelope, priKey key.PriKey) (*pb.Envelope, error) {
 	envelope.Signature = sig
 
 	return envelope, nil
+}
+
+//todo signer opts from config
+func verify(envelope *pb.Envelope, pubkey key.PubKey) bool {
+
+	b, _ := pubkey.ToPEM()
+
+	if !bytes.Equal(envelope.Pubkey, b) {
+		return false
+	}
+
+	hash := sha512.New()
+	hash.Write(envelope.Payload)
+	digest := hash.Sum(nil)
+
+	flag, err := auth.Verify(pubkey, envelope.Signature, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+
+	if err != nil {
+		return false
+	}
+
+	return flag
 }
 
 func (conn *GrpcConnection) writeStream() {
@@ -218,9 +243,13 @@ func (conn *GrpcConnection) Start() error {
 			}
 			return err
 		case message := <-conn.readChannel:
-			if conn.handle != nil {
-				m := Message{Envelope: message, Conn: conn, Data: message.Payload}
-				conn.handle.ServeRequest(m)
+			if verify(message, conn.peerKey) {
+				if conn.handle != nil {
+					m := Message{Envelope: message, Conn: conn, Data: message.Payload}
+					conn.handle.ServeRequest(m)
+				}
+			} else {
+				//
 			}
 		}
 	}
