@@ -5,7 +5,12 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"crypto/sha512"
+
+	"fmt"
+
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/heimdall/auth"
 	"github.com/it-chain/heimdall/key"
 )
 
@@ -45,6 +50,7 @@ type Connection interface {
 
 type GrpcConnection struct {
 	ID            ConnID
+	key           key.PriKey
 	peerKey       key.PubKey
 	address       Address
 	streamWrapper StreamWrapper
@@ -56,15 +62,16 @@ type GrpcConnection struct {
 	sync.RWMutex
 }
 
-func NewConnection(address Address, pubkey key.PubKey, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
+func NewConnection(address Address, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
 
-	if streamWrapper == nil || handle == nil || pubkey == nil {
+	if streamWrapper == nil || handle == nil || peerKey == nil || priKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or handle is nil")
 	}
 
 	return &GrpcConnection{
-		ID:            FromPubKey(pubkey),
-		peerKey:       pubkey,
+		ID:            FromPubKey(peerKey),
+		key:           priKey,
+		peerKey:       peerKey,
 		address:       address,
 		streamWrapper: streamWrapper,
 		handle:        handle,
@@ -93,13 +100,37 @@ func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(int
 	conn.Lock()
 	defer conn.Unlock()
 
+	signedEnvelope, err := sign(envelope, conn.key)
+
+	if err != nil {
+		go errCallBack(errors.New(fmt.Sprintf("fail to sign envelope [%s]", err.Error())))
+		return
+	}
+
 	m := &innerMessage{
-		Envelope:  envelope,
+		Envelope:  signedEnvelope,
 		OnErr:     errCallBack,
 		OnSuccess: successCallBack,
 	}
 
 	conn.outChannl <- m
+}
+
+func sign(envelope *pb.Envelope, priKey key.PriKey) (*pb.Envelope, error) {
+
+	hash := sha512.New()
+	hash.Write(envelope.Payload)
+	digest := hash.Sum(nil)
+
+	sig, err := auth.Sign(priKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+
+	if err != nil {
+		return nil, err
+	}
+
+	envelope.Signature = sig
+
+	return envelope, nil
 }
 
 func (conn *GrpcConnection) writeStream() {
