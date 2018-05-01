@@ -1,15 +1,12 @@
 package bifrost
 
 import (
+	"bytes"
+	"crypto/sha512"
 	"errors"
+	"fmt"
 	"sync"
 	"sync/atomic"
-
-	"crypto/sha512"
-
-	"fmt"
-
-	"bytes"
 
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/auth"
