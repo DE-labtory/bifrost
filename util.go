@@ -20,16 +20,11 @@ func FromPriKey(key key.PriKey) string {
 
 func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType) (key.PubKey, error) {
 
-	k, err := key.PEMToPublicKey(byteKey)
+	pubKey, err := key.PEMToPublicKey(byteKey, keyGenOpt)
 
 	if err != nil {
 		return nil, err
 	}
 
-	pub, err := key.MatchPublicKeyOpt(k, keyGenOpt)
-	if err != nil {
-		return nil, err
-	}
-
-	return pub, nil
+	return pubKey, nil
 }
