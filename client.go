@@ -9,10 +9,6 @@ import (
 
 const defaultTimeout = time.Second * 3
 
-//type Address struct {
-//	IP string
-//}
-
 func NewClientConn(ip string, tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error) {
 
 	var opts []grpc.DialOption

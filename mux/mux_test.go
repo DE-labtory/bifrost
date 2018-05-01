@@ -5,7 +5,6 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +21,7 @@ func TestNewMux(t *testing.T) {
 
 	})
 
-	mux.Handle(Protocol("test3"), func(message conn.OutterMessage) {
+	mux.Handle(Protocol("test3"), func(message bifrost.Message) {
 
 	})
 
