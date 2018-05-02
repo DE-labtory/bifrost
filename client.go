@@ -3,32 +3,58 @@ package bifrost
 import (
 	"time"
 
+	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
 const defaultTimeout = time.Second * 3
 
-func NewClientConn(ip string, tslEnabled bool, creds credentials.TransportCredentials) (*grpc.ClientConn, error) {
+type Client struct {
+}
+
+type GrpcOpts struct {
+	ip         string
+	tslEnabled bool
+	creds      credentials.TransportCredentials
+}
+
+type KeyOpts struct {
+	priKey key.PriKey
+	pubKey key.PubKey
+}
+
+func Dial(grpcOpts GrpcOpts, key KeyOpts) (*grpc.ClientConn, error) {
 
 	var opts []grpc.DialOption
 
-	if tslEnabled {
-		opts = append(opts, grpc.WithTransportCredentials(creds))
+	if grpcOpts.tslEnabled {
+		opts = append(opts, grpc.WithTransportCredentials(grpcOpts.creds))
 	} else {
 		opts = append(opts, grpc.WithInsecure())
 	}
 
 	opts = append(opts, grpc.WithTimeout(defaultTimeout))
-	conn, err := grpc.Dial(ip, opts...)
+	gconn, err := grpc.Dial(grpcOpts.ip, opts...)
+
 	if err != nil {
 		return nil, err
 	}
 
+	connect(gconn)
+
+	streamWrapper, err := NewClientStreamWrapper(gconn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	conn := NewConnection()
+
 	return conn, err
 }
 
-func Connect(conn *grpc.ClientConn) (StreamWrapper, error) {
+func connect(conn *grpc.ClientConn) (StreamWrapper, error) {
 
 	streamWrapper, err := NewClientStreamWrapper(conn)
 

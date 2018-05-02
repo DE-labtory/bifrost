@@ -1,6 +1,10 @@
 package bifrost
 
 import (
+	"context"
+	"time"
+
+	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
 	b58 "github.com/jbenet/go-base58"
 )
@@ -27,4 +31,32 @@ func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType)
 	}
 
 	return pubKey, nil
+}
+
+func recvWithTimeout(seconds int, stream Stream) (*pb.Envelope, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
+	defer cancel()
+
+	c := make(chan *pb.Envelope, 1)
+	errch := make(chan error, 1)
+
+	go func() {
+		envelope, err := stream.Recv()
+		if err != nil {
+			errch <- err
+		}
+		c <- envelope
+	}()
+
+	select {
+	case <-ctx.Done():
+		//timeoutted body
+		return nil, ctx.Err()
+	case err := <-errch:
+		return nil, err
+	case ok := <-c:
+		//okay body
+		return ok, nil
+	}
 }
