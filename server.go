@@ -10,17 +10,20 @@ import (
 	"sync"
 
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/heimdall/key"
 	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-func Stream(streamServer pb.StreamService_StreamServer) error {
+type BifrostStreamServer struct {
+}
+
+func (s BifrostStreamServer) BifrostStream(streamServer pb.StreamService_BifrostStreamServer) error {
 	//1. RquestPeer를 통해 나에게 Stream연결을 보낸 ConnInfo의정보를 확인
 	//2. ConnInfo의정보를정보를 기반으로 Connection을 생성
 	//3. 생성완료후 OnConnectionHandler를 통해 처리한다.
 
-	var s struct{}
 	envelope, err := bih.createSignedEnvelope(REQUEST_CONNINFO, s)
 
 	err = streamServer.Send(envelope)
@@ -75,24 +78,42 @@ func Stream(streamServer pb.StreamService_StreamServer) error {
 	return nil
 }
 
-func Listen(ip string) {
+type onConnectionHandler func(connection Connection)
+type onErrorHandler func(err error)
 
-	lis, err := net.Listen("tcp", host.info.Address.IP)
+type Server struct {
+	priKey key.PriKey
+	pubKey key.PubKey
+}
+
+func (s Server) OnConnection() {
+
+}
+
+func (s Server) OnError() {
+
+}
+
+func (s Server) Listen(ip string) {
+
+	lis, err := net.Listen("tcp", ip)
+
+	defer lis.Close()
 
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	s := grpc.NewServer()
-	pb.RegisterStreamServiceServer(s, host)
-	reflection.Register(s)
+	g := grpc.NewServer()
 
-	log.Println("Listen... on: [%s]", host.info.Address.IP)
-	func() {
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-			s.Stop()
-			lis.Close()
-		}
-	}()
+	defer g.Stop()
+	pb.RegisterStreamServiceServer(g, BifrostStreamServer{})
+	reflection.Register(g)
+
+	log.Println("Listen... on: [%s]", ip)
+	if err := g.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+		g.Stop()
+		lis.Close()
+	}
 }
