@@ -32,7 +32,7 @@ func GetKeyOpts(path string) KeyOpts {
 
 func TestServer_Listen(t *testing.T) {
 
-	path := "~/key"
+	path := "./key"
 
 	keyOpt := GetKeyOpts(path)
 
