@@ -7,6 +7,8 @@ import (
 
 	"os"
 
+	"time"
+
 	"github.com/it-chain/heimdall/key"
 )
 
@@ -40,8 +42,9 @@ func TestServer_Listen(t *testing.T) {
 
 	s := NewServer(keyOpt)
 
-	s.Listen("127.0.0.1:7777")
+	go s.Listen("127.0.0.1:7777")
 
+	time.Sleep(3 * time.Second)
 }
 
 //
