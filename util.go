@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"encoding/json"
+
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
 	b58 "github.com/jbenet/go-base58"
@@ -59,4 +61,31 @@ func recvWithTimeout(seconds int, stream Stream) (*pb.Envelope, error) {
 		//okay body
 		return ok, nil
 	}
+}
+
+type KeyOpts struct {
+	priKey key.PriKey
+	pubKey key.PubKey
+}
+
+func buildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
+	b, _ := pubKey.ToPEM()
+
+	pi := &PeerInfo{
+		ip:        ip,
+		Pubkey:    b,
+		KeyType:   pubKey.Type(),
+		KeyGenOpt: pubKey.Algorithm(),
+	}
+
+	payload, err := json.Marshal(pi)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Envelope{
+		Payload: payload,
+		Type:    pb.Envelope_REQUEST_PEERINFO,
+	}, nil
 }

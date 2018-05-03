@@ -21,7 +21,7 @@ type StreamWrapper interface {
 type CStreamWrapper struct {
 	conn         *grpc.ClientConn
 	client       pb.StreamServiceClient
-	clientStream pb.StreamService_StreamClient
+	clientStream pb.StreamService_BifrostStreamClient
 	cancel       context.CancelFunc
 }
 
@@ -30,7 +30,7 @@ func NewClientStreamWrapper(conn *grpc.ClientConn) (StreamWrapper, error) {
 
 	ctx, cf := context.WithCancel(context.Background())
 	streamServiceClient := pb.NewStreamServiceClient(conn)
-	clientStream, err := streamServiceClient.Stream(ctx)
+	clientStream, err := streamServiceClient.BifrostStream(ctx)
 
 	if err != nil {
 		return nil, err
@@ -64,11 +64,11 @@ func (csw *CStreamWrapper) Close() {
 
 //server stream wrapper
 type SStreamWrapper struct {
-	serverStream pb.StreamService_StreamServer
+	serverStream pb.StreamService_BifrostStreamServer
 	cancel       context.CancelFunc
 }
 
-func NewServerStreamWrapper(serverStream pb.StreamService_StreamServer, cancel context.CancelFunc) StreamWrapper {
+func NewServerStreamWrapper(serverStream pb.StreamService_BifrostStreamServer, cancel context.CancelFunc) StreamWrapper {
 	return &SStreamWrapper{
 		cancel:       cancel,
 		serverStream: serverStream,

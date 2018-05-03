@@ -41,7 +41,7 @@ type ReceivedMessageHandler interface {
 type Connection interface {
 	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
 	Close()
-	GetAddress() Address
+	GetIP() string
 	GetPeerKey() key.PubKey
 	GetID() ConnID
 	Start() error
@@ -51,7 +51,7 @@ type GrpcConnection struct {
 	ID            ConnID
 	key           key.PriKey
 	peerKey       key.PubKey
-	address       Address
+	ip            string
 	streamWrapper StreamWrapper
 	stopFlag      int32
 	handle        ReceivedMessageHandler
@@ -61,7 +61,7 @@ type GrpcConnection struct {
 	sync.RWMutex
 }
 
-func NewConnection(address Address, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
+func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
 
 	if streamWrapper == nil || handle == nil || peerKey == nil || priKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or handle is nil")
@@ -71,7 +71,7 @@ func NewConnection(address Address, priKey key.PriKey, peerKey key.PubKey, strea
 		ID:            FromPubKey(peerKey),
 		key:           priKey,
 		peerKey:       peerKey,
-		address:       address,
+		ip:            ip,
 		streamWrapper: streamWrapper,
 		handle:        handle,
 		outChannl:     make(chan *innerMessage, 200),
@@ -80,8 +80,8 @@ func NewConnection(address Address, priKey key.PriKey, peerKey key.PubKey, strea
 	}, nil
 }
 
-func (conn *GrpcConnection) GetAddress() Address {
-	return conn.address
+func (conn *GrpcConnection) GetIP() string {
+	return conn.ip
 }
 func (conn *GrpcConnection) GetPeerKey() key.PubKey {
 	return conn.peerKey

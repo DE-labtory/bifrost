@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type MockConnectionHandler func(stream pb.StreamService_StreamServer)
+type MockConnectionHandler func(stream pb.StreamService_BifrostStreamServer)
 type MockRecvHandler func(envelope *pb.Envelope)
 type MockCloseHandler func()
 
@@ -34,7 +34,7 @@ func (h Handler) ServeError(conn Connection, err error) {
 
 }
 
-func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
+func (ms MockServer) BifrostStream(stream pb.StreamService_BifrostStreamServer) error {
 
 	if ms.ch != nil {
 		ms.ch(stream)
@@ -89,7 +89,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 
 func TestNewStreamHandler(t *testing.T) {
 
-	var connectionHandler = func(stream pb.StreamService_StreamServer) {
+	var connectionHandler = func(stream pb.StreamService_BifrostStreamServer) {
 		//result
 		fmt.Print("connected")
 	}
@@ -98,7 +98,11 @@ func TestNewStreamHandler(t *testing.T) {
 	mockServer := &MockServer{ch: connectionHandler}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	grpc_conn, err := NewClientConn(serverIP, false, nil)
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+
+	opts = append(opts, grpc.WithTimeout(3*time.Second))
+	grpc_conn, err := grpc.Dial(serverIP, opts...)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -106,7 +110,7 @@ func TestNewStreamHandler(t *testing.T) {
 
 	ctx, _ := context.WithCancel(context.Background())
 	streamServiceClient := pb.NewStreamServiceClient(grpc_conn)
-	_, err = streamServiceClient.Stream(ctx)
+	_, err = streamServiceClient.BifrostStream(ctx)
 
 	defer func() {
 		server1.Stop()

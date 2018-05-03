@@ -1,5 +1,49 @@
 package bifrost
 
+import (
+	"testing"
+
+	"log"
+
+	"os"
+
+	"github.com/it-chain/heimdall/key"
+)
+
+func GetKeyOpts(path string) KeyOpts {
+
+	km, err := key.NewKeyManager(path)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	pri, pub, err := km.GenerateKey(key.RSA4096)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return KeyOpts{
+		pubKey: pub,
+		priKey: pri,
+	}
+}
+
+func TestServer_Listen(t *testing.T) {
+
+	path := "~/key"
+
+	keyOpt := GetKeyOpts(path)
+
+	defer os.RemoveAll(path)
+
+	s := NewServer(keyOpt)
+
+	s.Listen("127.0.0.1:7777")
+
+}
+
 //
 //import (
 //	"encoding/json"
