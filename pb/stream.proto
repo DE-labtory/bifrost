@@ -3,7 +3,7 @@ syntax = "proto3";
 package pb;
 
 service StreamService{
-    rpc Stream (stream Envelope) returns (stream Envelope) {}
+    rpc BifrostStream (stream Envelope) returns (stream Envelope) {}
 }
 
 message Envelope {
