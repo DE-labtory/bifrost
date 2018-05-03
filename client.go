@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"context"
 	"github.com/it-chain/bifrost/mux"
+	"github.com/it-chain/bifrost/pb"
 )
 
 // defaultDialTimeout
@@ -31,6 +32,7 @@ func NewClient(serverIp string, clientKey key.PriKey, mux mux.Mux) *Client {
 	return &Client{
 		ServerIp:  serverIp,
 		clientKey: clientKey,
+		// todo Mux는 conn 생성할때 넣어줄건데 지금 받는게 맞을까 ? __? -> client 생성할때 받아놓는거도 나쁘지않는듯
 		mux: mux,
 	}
 }
@@ -42,7 +44,7 @@ type GrpcOpts struct {
 }
 
 // 서버와 연결 요청. 실패시 err. handshake 과정을 거침.
-func (c Client) ConnectToServer(grpcOpts GrpcOpts) error {
+func (c *Client) ConnectToServer(grpcOpts GrpcOpts) error {
 
 	var opts []grpc.DialOption
 
@@ -65,8 +67,27 @@ func (c Client) ConnectToServer(grpcOpts GrpcOpts) error {
 		return err
 	}
 
-	
+
+	err = handShake(streamWrapper)
+
 	return err
+}
+
+// todo client 의 connection 확인하고 message send
+func (c *Client) SendMessage (envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) error {
+	panic("implement 해주세용")
+}
+
+
+
+func handShake(streamWrapper StreamWrapper) error {
+	env, err := recvWithTimeout(10, streamWrapper)
+	if err != nil {
+		streamWrapper.Close()
+		return err
+	}
+	//todo handshake 만들어야함
+	panic("implement 해주세용")
 }
 
 func connect(conn *grpc.ClientConn) (StreamWrapper, error) {
