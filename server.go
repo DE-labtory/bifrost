@@ -6,17 +6,17 @@ import (
 	"fmt"
 	"log"
 	"net"
-
 	"sync"
 
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type BifrostStreamServer struct {
+	OnConnectionHandler OnConnectionHandler
+	OnErrorHandler      OnErrorHandler
 }
 
 func (s BifrostStreamServer) BifrostStream(streamServer pb.StreamService_BifrostStreamServer) error {
@@ -60,17 +60,17 @@ func (s BifrostStreamServer) BifrostStream(streamServer pb.StreamService_Bifrost
 		_, cf := context.WithCancel(context.Background())
 		streamWrapper := stream.NewServerStreamWrapper(streamServer, cf)
 
-		conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
-		defer conn.Close()
-
-		go func() {
-			if err = conn.Start(); err != nil {
-				conn.Close()
-				wg.Done()
-			}
-		}()
-
-		bih.onConnectionHandler(conn)
+		//conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
+		//defer conn.Close()
+		//
+		//go func() {
+		//	if err = conn.Start(); err != nil {
+		//		conn.Close()
+		//		wg.Done()
+		//	}
+		//}()
+		//
+		//bih.onConnectionHandler(conn)
 
 		wg.Wait()
 	}
@@ -78,20 +78,33 @@ func (s BifrostStreamServer) BifrostStream(streamServer pb.StreamService_Bifrost
 	return nil
 }
 
-type onConnectionHandler func(connection Connection)
-type onErrorHandler func(err error)
+type OnConnectionHandler func(connection Connection)
+type OnErrorHandler func(err error)
 
 type Server struct {
-	priKey key.PriKey
-	pubKey key.PubKey
+	priKey              key.PriKey
+	pubKey              key.PubKey
+	onConnectionHandler OnConnectionHandler
+	onnErrorHandler     OnErrorHandler
+	bifrostStreamServer *BifrostStreamServer
 }
 
-func (s Server) OnConnection() {
+func (s Server) OnConnection(handler OnConnectionHandler) {
 
+	if handler == nil {
+		return
+	}
+
+	s.onConnectionHandler = handler
 }
 
-func (s Server) OnError() {
+func (s Server) OnError(handler OnErrorHandler) {
 
+	if handler == nil {
+		return
+	}
+
+	s.onnErrorHandler = handler
 }
 
 func (s Server) Listen(ip string) {
@@ -107,7 +120,7 @@ func (s Server) Listen(ip string) {
 	g := grpc.NewServer()
 
 	defer g.Stop()
-	pb.RegisterStreamServiceServer(g, BifrostStreamServer{})
+	pb.RegisterStreamServiceServer(g, s.bifrostStreamServer)
 	reflection.Register(g)
 
 	log.Println("Listen... on: [%s]", ip)
