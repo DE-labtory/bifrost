@@ -213,19 +213,25 @@ func dial(serverIP string) (*grpc.ClientConn, error) {
 	return grpc_conn, nil
 }
 
+type SendCallBack func(envelope *pb.Envelope)
+type CloseCallBack func()
+
 type MockStreamWrapper struct {
+	sendCallBack  SendCallBack
+	closeCallBack CloseCallBack
 }
 
-func (MockStreamWrapper) Send(*pb.Envelope) error {
-	panic("implement me")
+func (msw MockStreamWrapper) Send(envelope *pb.Envelope) error {
+	msw.sendCallBack(envelope)
+	return nil
 }
 
 func (MockStreamWrapper) Recv() (*pb.Envelope, error) {
 	panic("implement me")
 }
 
-func (MockStreamWrapper) Close() {
-	panic("implement me")
+func (msw MockStreamWrapper) Close() {
+	msw.closeCallBack()
 }
 
 func (MockStreamWrapper) GetStream() Stream {

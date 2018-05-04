@@ -8,6 +8,8 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"log"
+
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/auth"
 	"github.com/it-chain/heimdall/key"
@@ -127,11 +129,24 @@ func build(protocol string, payload []byte, priKey key.PriKey) (*pb.Envelope, er
 		return nil, err
 	}
 
+	pubKey, err := priKey.PublicKey()
+
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := pubKey.ToPEM()
+
+	if err != nil {
+		return nil, err
+	}
+
 	envelope := &pb.Envelope{}
 	envelope.Signature = sig
 	envelope.Payload = payload
 	envelope.Type = pb.Envelope_NORMAL
 	envelope.Protocol = protocol
+	envelope.Pubkey = b
 
 	return envelope, nil
 }
@@ -142,6 +157,7 @@ func verify(envelope *pb.Envelope, pubkey key.PubKey) bool {
 	b, _ := pubkey.ToPEM()
 
 	if !bytes.Equal(envelope.Pubkey, b) {
+		log.Printf("Pubkey is different")
 		return false
 	}
 
@@ -152,6 +168,7 @@ func verify(envelope *pb.Envelope, pubkey key.PubKey) bool {
 	flag, err := auth.Verify(pubkey, envelope.Signature, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
 
 	if err != nil {
+		log.Printf(err.Error())
 		return false
 	}
 

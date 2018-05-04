@@ -49,140 +49,81 @@ func TestNewStreamHandler(t *testing.T) {
 
 func TestGrpcConnection_Send(t *testing.T) {
 
+	//given
 	path := "./key"
 	keyOpts := getKeyOpts(path)
 	defer os.RemoveAll(path)
 
-	grpc_conn, err := dial(serverIP)
+	mockStreamWrapper := MockStreamWrapper{}
+	mockStreamWrapper.sendCallBack = func(envelope *pb.Envelope) {
+
+		//then
+		assert.Equal(t, envelope.Protocol, "test1")
+		assert.Equal(t, envelope.Payload, []byte("jun"))
+		assert.True(t, verify(envelope, keyOpts.pubKey))
+	}
+
+	conn, err := NewConnection("127.0.0.1", keyOpts.priKey, keyOpts.pubKey, mockStreamWrapper)
+
 	assert.NoError(t, err)
 
-	streamWrapper, err := NewClientStreamWrapper(grpc_conn)
+	go func() {
+		if err := conn.Start(); err != nil {
+			conn.Close()
+		}
+	}()
 
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	conn, err := NewConnection(serverIP, streamWrapper)
-
-	if err != nil {
-		fmt.Errorf("error")
-	}
-
-	var success = func(interface{}) {
-		fmt.Printf("success")
-	}
-
-	var fail = func(err error) {
-		t.Fail()
-	}
-
-	envelope := &pb.Envelope{}
-	envelope.Payload = []byte("hello")
-
-	//then
-	conn.Send(envelope, success, fail)
-
-	time.Sleep(2 * time.Second)
+	//when
+	conn.Send([]byte("jun"), "test1", nil, nil)
 }
 
-//
-//func TestStreamHandler_Send(t *testing.T) {
-//
-//	//when
-//	var recvHandler = func(envelope *pb.Envelope) {
-//		//result
-//		assert.Equal(t, envelope.Payload, []byte("hello"))
-//	}
-//
-//	serverIP := "127.0.0.1:9999"
-//	mockServer := &MockServer{rh: recvHandler}
-//	server1, listner1 := ListenMockServer(mockServer, serverIP)
-//
-//	defer func() {
-//		server1.Stop()
-//		listner1.Close()
-//	}()
-//
-//	grpc_conn, err := NewClientConn(serverIP, false, nil)
-//
-//	if err != nil {
-//		log.Fatal(err.Error())
-//	}
-//
-//	streamWrapper, err := NewClientStreamWrapper(grpc_conn)
-//
-//	if err != nil {
-//		log.Fatal(err.Error())
-//	}
-//
-//	conn, err := NewConnection(ConnInfo{}, streamWrapper, Handler{})
-//
-//	if err != nil {
-//		fmt.Errorf("error")
-//	}
-//
-//	var success = func(interface{}) {
-//		fmt.Printf("success")
-//	}
-//
-//	var fail = func(err error) {
-//		t.Fail()
-//	}
-//
-//	envelope := &pb.Envelope{}
-//	envelope.Payload = []byte("hello")
-//
-//	//then
-//	conn.Send(envelope, success, fail)
-//
-//	time.Sleep(2 * time.Second)
-//}
-//
-//func TestStreamHandler_Close(t *testing.T) {
-//
-//	//when
-//	closed := false
-//
-//	var closeHandler = func() {
-//		//should be closed
-//		closed = true
-//	}
-//
-//	var connectionHandler = func(stream pb.StreamService_StreamServer) {
-//		//result
-//		fmt.Print("connected")
-//	}
-//
-//	serverIP := "127.0.0.1:9999"
-//	mockServer := &MockServer{ch: connectionHandler, clh: closeHandler}
-//	server1, listner1 := ListenMockServer(mockServer, serverIP)
-//
-//	//address := Address{Ip: serverIP}
-//	grpc_conn, err := NewClientConn(serverIP, false, nil)
-//
-//	if err != nil {
-//		log.Fatal(err.Error())
-//	}
-//
-//	defer func() {
-//		server1.Stop()
-//		listner1.Close()
-//	}()
-//
-//	//need to wait to connect
-//	time.Sleep(1 * time.Second)
-//	streamWrapper, err := NewClientStreamWrapper(grpc_conn)
-//
-//	if err != nil {
-//		log.Fatal(err.Error())
-//	}
-//
-//	time.Sleep(1 * time.Second)
-//	conn, err := NewConnection(ConnInfo{}, streamWrapper, Handler{})
-//
-//	//then
-//	conn.Close()
-//	//result
-//	time.Sleep(3 * time.Second)
-//	assert.Equal(t, closed, true)
-//}
+func TestGrpcConnection_GetPeerKey(t *testing.T) {
+
+	//given
+	path := "./key"
+	keyOpts := getKeyOpts(path)
+	defer os.RemoveAll(path)
+
+	mockStreamWrapper := MockStreamWrapper{}
+
+	conn, err := NewConnection("127.0.0.1", keyOpts.priKey, keyOpts.pubKey, mockStreamWrapper)
+
+	assert.NoError(t, err)
+
+	go func() {
+		if err := conn.Start(); err != nil {
+			conn.Close()
+		}
+	}()
+
+	//when
+	k := conn.GetPeerKey()
+
+	//then
+	assert.Equal(t, k, keyOpts.pubKey)
+}
+
+func TestGrpcConnection_Close(t *testing.T) {
+
+	//given
+	path := "./key"
+	keyOpts := getKeyOpts(path)
+	defer os.RemoveAll(path)
+
+	mockStreamWrapper := MockStreamWrapper{}
+	mockStreamWrapper.closeCallBack = func() {
+		assert.True(t, true)
+	}
+
+	conn, err := NewConnection("127.0.0.1", keyOpts.priKey, keyOpts.pubKey, mockStreamWrapper)
+
+	assert.NoError(t, err)
+
+	go func() {
+		if err := conn.Start(); err != nil {
+			assert.NotNil(t, err)
+		}
+	}()
+
+	conn.Close()
+}
