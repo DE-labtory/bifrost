@@ -2,9 +2,8 @@ package bifrost
 
 import (
 	"context"
-	"time"
-
 	"encoding/json"
+	"time"
 
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
@@ -85,6 +84,6 @@ func buildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
 
 	return &pb.Envelope{
 		Payload: payload,
-		Type:    pb.Envelope_REQUEST_PEERINFO,
+		Type:    pb.Envelope_RESPONSE_PEERINFO,
 	}, nil
 }

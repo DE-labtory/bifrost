@@ -28,9 +28,9 @@ type Message struct {
 }
 
 // Respond sends a msg to the source that sent the ReceivedMessageImpl
-func (m *Message) Respond(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
+func (m *Message) Respond(data []byte, protocol string, successCallBack func(interface{}), errCallBack func(error)) {
 
-	m.Conn.Send(envelope, successCallBack, errCallBack)
+	m.Conn.Send(data, protocol, successCallBack, errCallBack)
 }
 
 type ReceivedMessageHandler interface {
@@ -39,7 +39,7 @@ type ReceivedMessageHandler interface {
 }
 
 type Connection interface {
-	Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error))
+	Send(data []byte, protocol string, successCallBack func(interface{}), errCallBack func(error))
 	Close()
 	GetIP() string
 	GetPeerKey() key.PubKey
@@ -93,12 +93,12 @@ func (conn *GrpcConnection) toDie() bool {
 	return atomic.LoadInt32(&(conn.stopFlag)) == int32(1)
 }
 
-func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(interface{}), errCallBack func(error)) {
+func (conn *GrpcConnection) Send(payload []byte, protocol string, successCallBack func(interface{}), errCallBack func(error)) {
 
 	conn.Lock()
 	defer conn.Unlock()
 
-	signedEnvelope, err := sign(envelope, conn.key)
+	signedEnvelope, err := build(protocol, payload, conn.key)
 
 	if err != nil {
 		go errCallBack(errors.New(fmt.Sprintf("fail to sign envelope [%s]", err.Error())))
@@ -115,10 +115,10 @@ func (conn *GrpcConnection) Send(envelope *pb.Envelope, successCallBack func(int
 }
 
 //todo signer opts from config
-func sign(envelope *pb.Envelope, priKey key.PriKey) (*pb.Envelope, error) {
+func build(protocol string, payload []byte, priKey key.PriKey) (*pb.Envelope, error) {
 
 	hash := sha512.New()
-	hash.Write(envelope.Payload)
+	hash.Write(payload)
 	digest := hash.Sum(nil)
 
 	sig, err := auth.Sign(priKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
@@ -127,7 +127,11 @@ func sign(envelope *pb.Envelope, priKey key.PriKey) (*pb.Envelope, error) {
 		return nil, err
 	}
 
+	envelope := &pb.Envelope{}
 	envelope.Signature = sig
+	envelope.Payload = payload
+	envelope.Type = pb.Envelope_NORMAL
+	envelope.Protocol = protocol
 
 	return envelope, nil
 }
