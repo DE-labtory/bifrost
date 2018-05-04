@@ -10,9 +10,8 @@ import "github.com/it-chain/heimdall/key"
 //
 //
 type PeerInfo struct {
-	ip        string
+	Ip        string
 	Pubkey    []byte
-	KeyType   key.KeyType
 	KeyGenOpt key.KeyGenOpts
 }
 

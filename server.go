@@ -37,7 +37,7 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 
 	if m, err := recvWithTimeout(3, streamServer); err == nil {
 
-		valid, peerInfo := validateRequestPeerInfo(m)
+		valid, ip, peerKey := validateRequestPeerInfo(m)
 
 		if !valid {
 			return errors.New("fail to validate request peer info")
@@ -56,33 +56,39 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 		_, cf := context.WithCancel(context.Background())
 		streamWrapper := NewServerStreamWrapper(streamServer, cf)
 
-		pubKey, err := ByteToPubKey(peerInfo.Pubkey, peerInfo.KeyGenOpt, peerInfo.KeyType)
-
-		conn, err := NewConnection(peerInfo.ip, s.priKey, pubKey, streamWrapper, nil)
+		conn, err := NewConnection(ip, s.priKey, peerKey, streamWrapper, nil)
 		s.onConnectionHandler(conn)
 	}
 
 	return nil
 }
 
-func validateRequestPeerInfo(envelope *pb.Envelope) (bool, *PeerInfo) {
+func validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
 
 	if envelope.GetType() != pb.Envelope_REQUEST_PEERINFO {
 		log.Printf("Invaild message type")
-		return false, nil
+		return false, "", nil
 	}
 
 	log.Printf("Received payload [%s]", envelope.Payload)
 
-	var peerInfo *PeerInfo
+	peerInfo := &PeerInfo{}
 
 	err := json.Unmarshal(envelope.Payload, peerInfo)
 
 	if err != nil {
-		return false, nil
+		log.Printf("fail to unmarshal message [%s]", err.Error())
+		return false, "", nil
 	}
 
-	return true, peerInfo
+	pubKey, err := ByteToPubKey(peerInfo.Pubkey, peerInfo.KeyGenOpt)
+
+	if err != nil {
+		log.Printf("Invaild Pubkey [%s]", err.Error())
+		return false, "", nil
+	}
+
+	return true, peerInfo.Ip, pubKey
 }
 
 type OnConnectionHandler func(connection Connection)
@@ -95,7 +101,7 @@ func NewServer(key KeyOpts) *Server {
 	}
 }
 
-func (s Server) OnConnection(handler OnConnectionHandler) {
+func (s *Server) OnConnection(handler OnConnectionHandler) {
 
 	if handler == nil {
 		return
@@ -104,7 +110,7 @@ func (s Server) OnConnection(handler OnConnectionHandler) {
 	s.onConnectionHandler = handler
 }
 
-func (s Server) OnError(handler OnErrorHandler) {
+func (s *Server) OnError(handler OnErrorHandler) {
 
 	if handler == nil {
 		return

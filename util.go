@@ -24,7 +24,7 @@ func FromPriKey(key key.PriKey) string {
 	return FromPubKey(pub)
 }
 
-func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType) (key.PubKey, error) {
+func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts) (key.PubKey, error) {
 
 	pubKey, err := key.PEMToPublicKey(byteKey, keyGenOpt)
 
@@ -72,9 +72,8 @@ func buildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
 	b, _ := pubKey.ToPEM()
 
 	pi := &PeerInfo{
-		ip:        ip,
+		Ip:        ip,
 		Pubkey:    b,
-		KeyType:   pubKey.Type(),
 		KeyGenOpt: pubKey.Algorithm(),
 	}
 
