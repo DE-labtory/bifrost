@@ -256,21 +256,3 @@ func (conn *GrpcConnection) Start() error {
 
 	return nil
 }
-
-//
-//func NewConnInfo(id string, address Address, pubKey key.PubKey) ConnInfo {
-//	return ConnInfo{
-//		Id:      id,
-//		Address: address,
-//		PeerKey: pubKey,
-//	}
-//}
-
-//
-//type PublicConnInfo struct {
-//	Id        string
-//	Address   Address
-//	Pubkey    []byte
-//	KeyType   key.KeyType
-//	KeyGenOpt key.KeyGenOpts
-//}

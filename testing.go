@@ -4,10 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"log"
 
+	"net"
+
+	"time"
+
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/heimdall/key"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/reflection"
 )
 
 type StreamServer struct {
@@ -85,5 +94,140 @@ func (StreamServer) SendMsg(m interface{}) error {
 }
 
 func (StreamServer) RecvMsg(m interface{}) error {
+	panic("implement me")
+}
+
+type MockConnectionHandler func(stream pb.StreamService_BifrostStreamServer)
+type MockRecvHandler func(envelope *pb.Envelope)
+type MockCloseHandler func()
+
+type MockServer struct {
+	rh  MockRecvHandler
+	ch  MockConnectionHandler
+	clh MockCloseHandler
+}
+
+type Handler struct{}
+
+func (h Handler) ServeRequest(message Message) {
+
+}
+
+func (h Handler) ServeError(conn Connection, err error) {
+
+}
+
+func (ms MockServer) BifrostStream(stream pb.StreamService_BifrostStreamServer) error {
+
+	if ms.ch != nil {
+		ms.ch(stream)
+	}
+
+	for {
+		envelope, err := stream.Recv()
+
+		//fmt.Printf(err.Error())
+
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			if ms.clh != nil {
+				ms.clh()
+			}
+			return err
+		}
+
+		if ms.rh != nil {
+			ms.rh(envelope)
+		}
+	}
+}
+
+func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grpc.Server, net.Listener) {
+
+	lis, err := net.Listen("tcp", ipAddress)
+
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterStreamServiceServer(s, mockServer)
+	reflection.Register(s)
+
+	fmt.Printf("listen..")
+
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+			s.Stop()
+			lis.Close()
+		}
+	}()
+
+	return s, lis
+}
+
+func getKeyOpts(path string) KeyOpts {
+
+	km, err := key.NewKeyManager(path)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	pri, pub, err := km.GenerateKey(key.RSA4096)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	return KeyOpts{
+		pubKey: pub,
+		priKey: pri,
+	}
+}
+
+func getServer(path string) *Server {
+
+	keyOpt := getKeyOpts(path)
+
+	s := NewServer(keyOpt)
+
+	return s
+}
+
+func dial(serverIP string) (*grpc.ClientConn, error) {
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithInsecure())
+
+	opts = append(opts, grpc.WithTimeout(3*time.Second))
+	grpc_conn, err := grpc.Dial(serverIP, opts...)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return grpc_conn, nil
+}
+
+type MockStreamWrapper struct {
+}
+
+func (MockStreamWrapper) Send(*pb.Envelope) error {
+	panic("implement me")
+}
+
+func (MockStreamWrapper) Recv() (*pb.Envelope, error) {
+	panic("implement me")
+}
+
+func (MockStreamWrapper) Close() {
+	panic("implement me")
+}
+
+func (MockStreamWrapper) GetStream() Stream {
 	panic("implement me")
 }

@@ -2,90 +2,17 @@ package bifrost
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"net"
 	"testing"
 	"time"
 
+	"os"
+
 	"github.com/it-chain/bifrost/pb"
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
-
-type MockConnectionHandler func(stream pb.StreamService_BifrostStreamServer)
-type MockRecvHandler func(envelope *pb.Envelope)
-type MockCloseHandler func()
-
-type MockServer struct {
-	rh  MockRecvHandler
-	ch  MockConnectionHandler
-	clh MockCloseHandler
-}
-
-type Handler struct{}
-
-func (h Handler) ServeRequest(message Message) {
-
-}
-
-func (h Handler) ServeError(conn Connection, err error) {
-
-}
-
-func (ms MockServer) BifrostStream(stream pb.StreamService_BifrostStreamServer) error {
-
-	if ms.ch != nil {
-		ms.ch(stream)
-	}
-
-	for {
-		envelope, err := stream.Recv()
-
-		//fmt.Printf(err.Error())
-
-		if err == io.EOF {
-			return nil
-		}
-
-		if err != nil {
-			if ms.clh != nil {
-				ms.clh()
-			}
-			return err
-		}
-
-		if ms.rh != nil {
-			ms.rh(envelope)
-		}
-	}
-}
-
-func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grpc.Server, net.Listener) {
-
-	lis, err := net.Listen("tcp", ipAddress)
-
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	s := grpc.NewServer()
-	pb.RegisterStreamServiceServer(s, mockServer)
-	reflection.Register(s)
-
-	fmt.Printf("listen..")
-
-	go func() {
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
-			s.Stop()
-			lis.Close()
-		}
-	}()
-
-	return s, lis
-}
 
 func TestNewStreamHandler(t *testing.T) {
 
@@ -118,6 +45,44 @@ func TestNewStreamHandler(t *testing.T) {
 	}()
 
 	time.Sleep(3 * time.Second)
+}
+
+func TestGrpcConnection_Send(t *testing.T) {
+
+	path := "./key"
+	keyOpts := getKeyOpts(path)
+	defer os.RemoveAll(path)
+
+	grpc_conn, err := dial(serverIP)
+	assert.NoError(t, err)
+
+	streamWrapper, err := NewClientStreamWrapper(grpc_conn)
+
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	conn, err := NewConnection(serverIP, streamWrapper)
+
+	if err != nil {
+		fmt.Errorf("error")
+	}
+
+	var success = func(interface{}) {
+		fmt.Printf("success")
+	}
+
+	var fail = func(err error) {
+		t.Fail()
+	}
+
+	envelope := &pb.Envelope{}
+	envelope.Payload = []byte("hello")
+
+	//then
+	conn.Send(envelope, success, fail)
+
+	time.Sleep(2 * time.Second)
 }
 
 //
