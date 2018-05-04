@@ -6,8 +6,6 @@ import (
 	"log"
 	"net"
 
-	"sync"
-
 	"encoding/json"
 
 	"github.com/it-chain/bifrost/pb"
@@ -39,9 +37,6 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 
 	if m, err := recvWithTimeout(3, streamServer); err == nil {
 
-		wg := sync.WaitGroup{}
-		wg.Add(1)
-
 		valid, peerInfo := validateRequestPeerInfo(m)
 
 		if !valid {
@@ -63,21 +58,8 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 
 		pubKey, err := ByteToPubKey(peerInfo.Pubkey, peerInfo.KeyGenOpt, peerInfo.KeyType)
 
-		//todo mux를 외부에서 세팅후에 넣어주는 부분 추가 해야함ㅎ
 		conn, err := NewConnection(peerInfo.ip, s.priKey, pubKey, streamWrapper, nil)
-
-		defer conn.Close()
-
-		go func() {
-			if err = conn.Start(); err != nil {
-				conn.Close()
-				wg.Done()
-			}
-		}()
-
 		s.onConnectionHandler(conn)
-
-		wg.Wait()
 	}
 
 	return nil
