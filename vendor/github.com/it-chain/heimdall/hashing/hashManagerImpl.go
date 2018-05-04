@@ -9,20 +9,8 @@ import (
 	"hash"
 )
 
-// hashManagerImpl represents a instance of hashManager.
-type hashManagerImpl struct{}
-
-// NewHashManager initialize a hash manager.
-func NewHashManager() (HashManager, error) {
-
-	hm := &hashManagerImpl{}
-
-	return hm, nil
-
-}
-
 // Hash hashes the input data.
-func (hm *hashManagerImpl) Hash(data []byte, tail []byte, opts HashOpts) ([]byte, error) {
+func Hash(data []byte, tail []byte, opts HashOpts) ([]byte, error) {
 
 	if data == nil {
 		return nil, errors.New("Data should not be NIL")

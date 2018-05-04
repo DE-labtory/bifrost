@@ -10,33 +10,23 @@ import (
 )
 
 // authImpl contains signers and verifiers that is used for signing and verifying process.
-type authImpl struct {
-	signers   map[reflect.Type]signer
-	verifiers map[reflect.Type]verifier
-}
+var signers map[reflect.Type]signer
+var verifiers map[reflect.Type]verifier
 
-// NewAuth initialize the struct authImpl.
-func NewAuth() (Auth, error) {
+//initialize signer and verifiers
+func init() {
 
-	signers := make(map[reflect.Type]signer)
+	signers = make(map[reflect.Type]signer)
 	signers[reflect.TypeOf(&key.RSAPrivateKey{})] = &RSASigner{}
 	signers[reflect.TypeOf(&key.ECDSAPrivateKey{})] = &ECDSASigner{}
 
-	verifiers := make(map[reflect.Type]verifier)
+	verifiers = make(map[reflect.Type]verifier)
 	verifiers[reflect.TypeOf(&key.RSAPublicKey{})] = &RSAVerifier{}
 	verifiers[reflect.TypeOf(&key.ECDSAPublicKey{})] = &ECDSAVerifier{}
-
-	ai := &authImpl{
-		signers:   signers,
-		verifiers: verifiers,
-	}
-
-	return ai, nil
-
 }
 
 // Sign signs a digest(hash) using priKey(private key), and returns signature.
-func (ai *authImpl) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte, error) {
+func Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte, error) {
 
 	var err error
 
@@ -48,7 +38,7 @@ func (ai *authImpl) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte
 		return nil, errors.New("Private key is not exist.")
 	}
 
-	signer, found := ai.signers[reflect.TypeOf(priKey)]
+	signer, found := signers[reflect.TypeOf(priKey)]
 	if !found {
 		return nil, errors.New("unsupported key type.")
 	}
@@ -63,7 +53,7 @@ func (ai *authImpl) Sign(priKey key.Key, digest []byte, opts SignerOpts) ([]byte
 }
 
 // Verify verifies the signature using pubKey(public key) and digest of original message, then returns boolean value.
-func (ai *authImpl) Verify(pubKey key.Key, signature, digest []byte, opts SignerOpts) (bool, error) {
+func Verify(pubKey key.Key, signature, digest []byte, opts SignerOpts) (bool, error) {
 
 	if pubKey == nil {
 		return false, errors.New("invalid key")
@@ -77,7 +67,7 @@ func (ai *authImpl) Verify(pubKey key.Key, signature, digest []byte, opts Signer
 		return false, errors.New("invalid digest")
 	}
 
-	verifier, found := ai.verifiers[reflect.TypeOf(pubKey)]
+	verifier, found := verifiers[reflect.TypeOf(pubKey)]
 	if !found {
 		return false, errors.New("unsupported key type")
 	}

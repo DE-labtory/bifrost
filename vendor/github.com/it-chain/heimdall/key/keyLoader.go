@@ -38,32 +38,32 @@ func (loader *keyLoader) Load() (pri PriKey, pub PubKey, err error) {
 	for _, file := range files {
 
 		keyInfos, ok := loader.getKeyInfos(file.Name())
-
-		if ok {
-			switch keyInfos.keyType {
-			case PRIVATE_KEY:
-				key, err := loader.loadKey(keyInfos.id, keyInfos.keyGenOpts, keyInfos.keyType)
-				if err != nil {
-					return nil, nil, err
-				}
-
-				pri, err = MatchPrivateKeyOpt(key, keyInfos.keyGenOpts)
-				if err != nil {
-					return nil, nil, err
-				}
-
-			case PUBLIC_KEY:
-				key, err := loader.loadKey(keyInfos.id, keyInfos.keyGenOpts, keyInfos.keyType)
-				if err != nil {
-					return nil, nil, err
-				}
-
-				pub, err = MatchPublicKeyOpt(key, keyInfos.keyGenOpts)
-				if err != nil {
-					return nil, nil, err
-				}
-			}
+		if !ok {
+			return nil, nil, errors.New("Failed to get key informations")
 		}
+
+		keyByte, err := loader.loadKeyBytes(keyInfos.id, keyInfos.keyGenOpts, keyInfos.keyType)
+		if err != nil {
+			return nil, nil, errors.New("Failed to get key bytes by loading key file")
+		}
+
+		switch keyInfos.keyType {
+		case PRIVATE_KEY:
+			pri, err = PEMToPrivateKey(keyByte, keyInfos.keyGenOpts)
+			if err != nil {
+				return nil, nil, err
+			}
+
+		case PUBLIC_KEY:
+			pub, err = PEMToPublicKey(keyByte, keyInfos.keyGenOpts)
+			if err != nil {
+				return nil, nil, err
+			}
+
+		default:
+			return nil, nil, errors.New("Wrog key type entered")
+		}
+
 	}
 
 	if pri == nil || pub == nil {
@@ -74,9 +74,8 @@ func (loader *keyLoader) Load() (pri PriKey, pub PubKey, err error) {
 
 }
 
-// loadKey reads key from file and changes the format from PEM to key.
-func (loader *keyLoader) loadKey(alias string, keyGenOpt KeyGenOpts, keyType KeyType) (key interface{}, err error) {
-
+// loadKeyBytes reads key bytes from file.
+func (loader *keyLoader) loadKeyBytes(alias string, keyGenOpt KeyGenOpts, keyType KeyType) (keyByte []byte, err error) {
 	if len(alias) == 0 {
 		return nil, errors.New("Input value should not be blank")
 	}
@@ -86,24 +85,12 @@ func (loader *keyLoader) loadKey(alias string, keyGenOpt KeyGenOpts, keyType Key
 		return nil, err
 	}
 
-	data, err := ioutil.ReadFile(path)
+	keyByte, err = ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	switch keyType {
-	case PRIVATE_KEY:
-		key, err = PEMToPrivateKey(data)
-	case PUBLIC_KEY:
-		key, err = PEMToPublicKey(data)
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return key, nil
-
+	return keyByte, nil
 }
 
 // getKeyInfos gets key information that are id, key generation option and key type.

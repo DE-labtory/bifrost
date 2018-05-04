@@ -18,7 +18,7 @@ func TestPEMToPrivateKey(t *testing.T) {
 
 	priPEM, _ := pri.ToPEM()
 
-	testPri, err := PEMToPrivateKey(priPEM)
+	testPri, err := PEMToPrivateKey(priPEM, keyGenOption)
 	assert.NotNil(t, testPri)
 	assert.NoError(t, err)
 
@@ -33,7 +33,7 @@ func TestPEMToPublicKey(t *testing.T) {
 
 	pubPEM, _ := pub.ToPEM()
 
-	testPub, err := PEMToPublicKey(pubPEM)
+	testPub, err := PEMToPublicKey(pubPEM, keyGenOption)
 	assert.NotNil(t, testPub)
 	assert.NoError(t, err)
 
@@ -80,7 +80,9 @@ func TestMatchPrivateKeyOpt(t *testing.T) {
 
 	priPEM, _ := pri.ToPEM()
 
-	testPri, _ := PEMToPrivateKey(priPEM)
+	block, _ := pem.Decode(priPEM)
+
+	testPri, _ := DERToPrivateKey(block.Bytes)
 
 	myPri, err := MatchPrivateKeyOpt(testPri, keyGenOption)
 	assert.NoError(t, err)
@@ -97,7 +99,9 @@ func TestMatchPublicKeyOpt(t *testing.T) {
 
 	pubPEM, _ := pub.ToPEM()
 
-	testPub, _ := PEMToPublicKey(pubPEM)
+	block, _ := pem.Decode(pubPEM)
+
+	testPub, _ := DERToPublicKey(block.Bytes)
 
 	myPub, err := MatchPublicKeyOpt(testPub, keyGenOption)
 	assert.NoError(t, err)

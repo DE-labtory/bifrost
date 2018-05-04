@@ -14,9 +14,6 @@ type KeyManager interface {
 	// RemoveKey removes key files.
 	RemoveKey() error
 
-	// Reconstruct key from bytes.
-	ByteToKey(byteKey []byte, keyGenOpt KeyGenOpts, keyType KeyType) (err error)
-
 	// GetPath returns path of key files
 	GetPath() string
 }

@@ -3,7 +3,7 @@ syntax = "proto3";
 package pb;
 
 service StreamService{
-    rpc Stream (stream Envelope) returns (stream Envelope) {}
+    rpc BifrostStream (stream Envelope) returns (stream Envelope) {}
 }
 
 message Envelope {
@@ -17,5 +17,14 @@ message Envelope {
     // sender's public key
     bytes pubkey = 3;
 
+    // message protocol
     string protocol = 4;
+
+    Type type = 5;
+
+    enum Type {
+        REQUEST_PEERINFO = 0;
+        RESPONSE_PEERINFO = 2;
+        NORMAL = 3;
+    }
 }

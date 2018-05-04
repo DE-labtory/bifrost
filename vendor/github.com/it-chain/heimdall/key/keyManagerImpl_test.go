@@ -52,23 +52,6 @@ func TestKeyManagerImpl_RemoveKey(t *testing.T) {
 	defer os.RemoveAll("./.testKeys")
 }
 
-func TestKeyManagerImpl_ByteToKey(t *testing.T) {
-	var keyGenOption = KeyGenOpts(RSA2048)
-
-	testKeyManager, _ := NewKeyManager("./.testKeys")
-	pri, pub, _ := testKeyManager.GenerateKey(keyGenOption)
-
-	priPEM, _ := pri.ToPEM()
-	pubPEM, _ := pub.ToPEM()
-
-	err := testKeyManager.ByteToKey(priPEM, keyGenOption, pri.Type())
-	assert.NoError(t, err)
-	err = testKeyManager.ByteToKey(pubPEM, keyGenOption, pub.Type())
-	assert.NoError(t, err)
-
-	defer os.RemoveAll("./.testKeys")
-}
-
 func TestKeyManagerImpl_GetPath(t *testing.T) {
 	testKeyManager, _ := NewKeyManager("./.testKeys")
 	originPath := "./.testKeys/.keys"

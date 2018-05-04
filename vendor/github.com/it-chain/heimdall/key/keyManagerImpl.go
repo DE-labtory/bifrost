@@ -9,11 +9,8 @@ import (
 	"strings"
 )
 
-// KeyManagerImpl contains private and public key pair, key file path, key generator, key loader and key storer.
+// KeyManagerImpl contains key file path, key generator, key loader and key storer.
 type keyManagerImpl struct {
-	priKey PriKey
-	pubKey PubKey
-
 	path       string
 	generators map[KeyGenOpts]keyGenerator
 
@@ -68,7 +65,7 @@ func NewKeyManager(path string) (KeyManager, error) {
 	return km, nil
 }
 
-// GenerateKey generates public and private key pair that matches the input key generation option.
+// GenerateKey generates(returns and stores as file) public and private key pair that matches the input key generation option.
 func (km *keyManagerImpl) GenerateKey(opts KeyGenOpts) (pri PriKey, pub PubKey, err error) {
 
 	err = km.RemoveKey()
@@ -95,8 +92,7 @@ func (km *keyManagerImpl) GenerateKey(opts KeyGenOpts) (pri PriKey, pub PubKey, 
 		return nil, nil, errors.New("Failed to store a Key")
 	}
 
-	km.priKey, km.pubKey = pri, pub
-	return km.priKey, km.pubKey, nil
+	return pri, pub, nil
 
 }
 
@@ -104,16 +100,12 @@ func (km *keyManagerImpl) GenerateKey(opts KeyGenOpts) (pri PriKey, pub PubKey, 
 // if the keyManagerImpl doesn't have any key, then get keys from stored key files.
 func (km *keyManagerImpl) GetKey() (pri PriKey, pub PubKey, err error) {
 
-	if km.priKey == nil || km.pubKey == nil {
-		pri, pub, err := km.loader.Load()
-		if err != nil {
-			return nil, nil, err
-		}
-
-		km.priKey, km.pubKey = pri, pub
+	pri, pub, err = km.loader.Load()
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return km.priKey, km.pubKey, nil
+	return pri, pub, nil
 
 }
 
@@ -123,42 +115,6 @@ func (km *keyManagerImpl) RemoveKey() error {
 	err := os.RemoveAll(km.path)
 	if err != nil {
 		return err
-	}
-
-	return nil
-
-}
-
-// Reconstruct key from bytes.
-func (km *keyManagerImpl) ByteToKey(byteKey []byte, keyGenOpt KeyGenOpts, keyType KeyType) (err error) {
-
-	switch keyType {
-	case PRIVATE_KEY:
-		key, err := PEMToPrivateKey(byteKey)
-		if err != nil {
-			return err
-		}
-
-		pri, err := MatchPrivateKeyOpt(key, keyGenOpt)
-		if err != nil {
-			return err
-		}
-		km.priKey = pri
-
-	case PUBLIC_KEY:
-		key, err := PEMToPublicKey(byteKey)
-		if err != nil {
-			return err
-		}
-
-		pub, err := MatchPublicKeyOpt(key, keyGenOpt)
-		if err != nil {
-			return err
-		}
-		km.pubKey = pub
-
-	default:
-		return errors.New("failed to convert byte to key - not right keyType")
 	}
 
 	return nil

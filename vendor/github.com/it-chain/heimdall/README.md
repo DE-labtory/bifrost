@@ -37,18 +37,14 @@ priv, pub, err = keyManager.GetKey()
 
 sampleData = []byte("This is the data will be transmitted.")
 
-hashManager, err := hashing.NewHashManager()
-
 // Convert raw data to hashed data by using SHA512 function
-digest, err := hashManager.Hash(sampleData, nil, hashing.SHA512)
-
-authManager, err := auth.NewAuth()
+digest, err := hashing.Hash(sampleData, nil, hashing.SHA512)
 
 // The option will be used in signing process of RSA-PSS algorithm for making EM(Encoded Message)
 signerOpts := auth.EQUAL_SHA256.SignerOptsToPSSOptions()
 
-// AuthManager make hashed-data(digest) to signature with the generated private key
-signature, err := authManager.Sign(priv, digest, signerOpts)
+// Auth make hashed-data(digest) to signature with the generated private key
+signature, err := auth.Sign(priv, digest, signerOpts)
 
 /* --------- After data transmitted --------- */
 // Reconstruct public key from byte(PEM) formatted public key and store the key into keyManager
@@ -58,8 +54,8 @@ err := keyManager.ByteToKey(byteFormatPubKey, key.RSA4096, key.PUBLIC_KEY)
 // Get the reconstructed public key
 _, pub, err := keyManager.GetKey()
 
-// AuthManager verify that received data has any forgery during transmitting process
-ok, err := authManager.Verify(pub, signature, digest, signerOpts)
+// Auth verify that received data has any forgery during transmitting process
+ok, err := auth.Verify(pub, signature, digest, signerOpts)
 
 fmt.println(ok) // true
 ```
