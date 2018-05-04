@@ -12,35 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func getKeyOpts(path string) KeyOpts {
-
-	km, err := key.NewKeyManager(path)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err := km.GenerateKey(key.RSA4096)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return KeyOpts{
-		pubKey: pub,
-		priKey: pri,
-	}
-}
-
-func getServer(path string) *Server {
-
-	keyOpt := getKeyOpts(path)
-
-	s := NewServer(keyOpt)
-
-	return s
-}
-
 func TestServer_OnConnection(t *testing.T) {
 
 	//given
