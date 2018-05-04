@@ -61,9 +61,9 @@ type GrpcConnection struct {
 	sync.RWMutex
 }
 
-func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper, handle ReceivedMessageHandler) (Connection, error) {
+func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper) (Connection, error) {
 
-	if streamWrapper == nil || handle == nil || peerKey == nil || priKey == nil {
+	if streamWrapper == nil || peerKey == nil || priKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or handle is nil")
 	}
 
@@ -73,7 +73,6 @@ func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapp
 		peerKey:       peerKey,
 		ip:            ip,
 		streamWrapper: streamWrapper,
-		handle:        handle,
 		outChannl:     make(chan *innerMessage, 200),
 		readChannel:   make(chan *pb.Envelope, 200),
 		stopChannel:   make(chan struct{}, 1),

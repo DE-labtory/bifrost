@@ -37,7 +37,7 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 
 	if m, err := recvWithTimeout(3, streamServer); err == nil {
 
-		valid, ip, peerKey := validateRequestPeerInfo(m)
+		valid, ip, peerKey := ValidateRequestPeerInfo(m)
 
 		if !valid {
 			return errors.New("fail to validate request peer info")
@@ -56,14 +56,21 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 		_, cf := context.WithCancel(context.Background())
 		streamWrapper := NewServerStreamWrapper(streamServer, cf)
 
-		conn, err := NewConnection(ip, s.priKey, peerKey, streamWrapper, nil)
-		s.onConnectionHandler(conn)
+		conn, err := NewConnection(ip, s.priKey, peerKey, streamWrapper)
+
+		if err != nil {
+			return err
+		}
+
+		if s.onConnectionHandler != nil {
+			s.onConnectionHandler(conn)
+		}
 	}
 
 	return nil
 }
 
-func validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
+func ValidateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
 
 	if envelope.GetType() != pb.Envelope_REQUEST_PEERINFO {
 		log.Printf("Invaild message type")
