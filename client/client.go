@@ -7,7 +7,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"context"
-	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost"
 	"errors"
@@ -27,7 +26,6 @@ type ClientOpts struct {
 	ip     string
 	priKey key.PriKey
 	pubKey key.PubKey
-	mux    *mux.DefaultMux
 }
 
 // Server 와 연결시 사용되는 grpc option.
@@ -71,8 +69,6 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 	if err != nil {
 		return nil, err
 	}
-
-	conn.Handle(clientOpts.mux)
 
 	return conn, nil
 }
