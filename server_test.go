@@ -82,7 +82,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	envelope.Payload = payload
 
 	//when
-	flag, ip, peerKey := ValidateRequestPeerInfo(envelope)
+	flag, ip, peerKey := validateRequestPeerInfo(envelope)
 
 	//then
 	assert.True(t, flag)
@@ -106,7 +106,7 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 	envelope.Payload = payload
 
 	//when
-	flag, _, _ := ValidateRequestPeerInfo(envelope)
+	flag, _, _ := validateRequestPeerInfo(envelope)
 
 	//then
 	assert.False(t, flag)

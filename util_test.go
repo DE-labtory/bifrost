@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,4 +28,24 @@ func TestByteToPubKey(t *testing.T) {
 	//then
 	assert.NoError(t, err)
 	assert.Equal(t, pubK, pub)
+}
+
+func TestBuildResponsePeerInfo(t *testing.T) {
+
+	//given
+	km, err := key.NewKeyManager("~/key")
+	ip := "127.0.0.1"
+	assert.NoError(t, err)
+	defer os.RemoveAll("~/key")
+
+	_, pub, err := km.GenerateKey(key.RSA4096)
+	assert.NoError(t, err)
+
+	//when
+	envelope, err := buildResponsePeerInfo(ip, pub)
+	assert.NoError(t, err)
+
+	//then
+	assert.NoError(t, err)
+	assert.Equal(t, envelope.Type, pb.Envelope_RESPONSE_PEERINFO)
 }

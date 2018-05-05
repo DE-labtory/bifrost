@@ -67,7 +67,7 @@ type KeyOpts struct {
 	pubKey key.PubKey
 }
 
-func buildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
+func buildResponsePeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
 	b, _ := pubKey.ToPEM()
 
 	pi := &PeerInfo{
