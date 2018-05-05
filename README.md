@@ -1,6 +1,6 @@
 # Bifrost
 
-<p align="center">![bifrost](image/bifrost.jpeg)</p>
+<p align="center"><img src="./image/bifrost.jpeg" width="171px" height="171px"></p>
 
 
 
@@ -23,5 +23,5 @@ go get -u github.com/it-chain/bifrost
 
 ## Lincese
 
-Heimdall source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
+Bifrost source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the [LICENSE](LICENSE) file.
 

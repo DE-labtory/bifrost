@@ -12,6 +12,7 @@ import (
 	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"time"
 )
 
 type Server struct {
@@ -35,15 +36,15 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 		return err
 	}
 
-	if m, err := recvWithTimeout(3, streamServer); err == nil {
+	if m, err := RecvWithTimeout(3*time.Second, streamServer); err == nil {
 
 		valid, ip, peerKey := validateRequestPeerInfo(m)
 
 		if !valid {
 			return errors.New("fail to validate request peer info")
 		}
-
-		envelope, err := buildResponsePeerInfo(s.ip, s.pubKey)
+    
+		envelope, err := BuildRequestPeerInfo(s.ip, s.pubKey)
 
 		if err != nil {
 			return errors.New("fail to build info")
@@ -72,7 +73,7 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 
 func validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
 
-	if envelope.GetType() != pb.Envelope_REQUEST_PEERINFO {
+	if envelope.GetType() != pb.Envelope_RESPONSE_PEERINFO {
 		log.Printf("Invaild message type")
 		return false, "", nil
 	}

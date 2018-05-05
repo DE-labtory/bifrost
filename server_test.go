@@ -78,7 +78,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	payload, _ := json.Marshal(peerInfo)
 
 	envelope := &pb.Envelope{}
-	envelope.Type = pb.Envelope_REQUEST_PEERINFO
+	envelope.Type = pb.Envelope_RESPONSE_PEERINFO
 	envelope.Payload = payload
 
 	//when
@@ -102,7 +102,7 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 	payload, _ := json.Marshal(peerInfo)
 
 	envelope := &pb.Envelope{}
-	envelope.Type = pb.Envelope_REQUEST_PEERINFO
+	envelope.Type = pb.Envelope_RESPONSE_PEERINFO
 	envelope.Payload = payload
 
 	//when
