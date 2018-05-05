@@ -67,11 +67,10 @@ type KeyOpts struct {
 	PubKey key.PubKey
 }
 
-func BuildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
+func BuildResponsePeerInfo(pubKey key.PubKey) (*pb.Envelope, error) {
 	b, _ := pubKey.ToPEM()
 
 	pi := &PeerInfo{
-		Ip:        ip,
 		Pubkey:    b,
 		KeyGenOpt: pubKey.Algorithm(),
 	}

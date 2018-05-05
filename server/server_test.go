@@ -1,4 +1,4 @@
-package bifrost
+package server
 
 import (
 	"encoding/json"
@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
 	"github.com/stretchr/testify/assert"
@@ -18,12 +19,12 @@ func TestServer_OnConnection(t *testing.T) {
 	path := "./key"
 	defer os.RemoveAll(path)
 
-	s := getServer(path)
+	s := GetServer(path)
 
 	assert.Nil(t, s.onConnectionHandler)
 
 	//when
-	s.OnConnection(func(conn Connection) {
+	s.OnConnection(func(conn bifrost.Connection) {
 		log.Printf("asd")
 	})
 
@@ -37,7 +38,7 @@ func TestServer_OnError(t *testing.T) {
 	path := "./key"
 	defer os.RemoveAll(path)
 
-	s := getServer(path)
+	s := GetServer(path)
 
 	assert.Nil(t, s.onErrorHandler)
 
@@ -69,7 +70,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 
 	b, _ := pub.ToPEM()
 
-	peerInfo := &PeerInfo{
+	peerInfo := &bifrost.PeerInfo{
 		Ip:        "127.0.0.1",
 		Pubkey:    b,
 		KeyGenOpt: pub.Algorithm(),
@@ -82,7 +83,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	envelope.Payload = payload
 
 	//when
-	flag, ip, peerKey := validateRequestPeerInfo(envelope)
+	flag, ip, peerKey := ValidateResponsePeerInfo(envelope)
 
 	//then
 	assert.True(t, flag)
@@ -93,7 +94,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 
 	//given
-	peerInfo := &PeerInfo{
+	peerInfo := &bifrost.PeerInfo{
 		Ip:        "127.0.0.1",
 		Pubkey:    []byte("123"),
 		KeyGenOpt: key.RSA2048,
@@ -118,7 +119,7 @@ func TestServer_BifrostStream(t *testing.T) {
 	path2 := "./key2"
 
 	km, err := key.NewKeyManager(path)
-	s := getServer(path2)
+	s := GetServer(path2)
 
 	defer os.RemoveAll(path)
 	defer os.RemoveAll(path2)
@@ -131,7 +132,7 @@ func TestServer_BifrostStream(t *testing.T) {
 
 	b, _ := pub.ToPEM()
 
-	peerInfo := &PeerInfo{
+	peerInfo := &bifrost.PeerInfo{
 		Ip:        "127.0.0.1",
 		Pubkey:    b,
 		KeyGenOpt: pub.Algorithm(),
@@ -150,7 +151,7 @@ func TestServer_Listen(t *testing.T) {
 
 	defer os.RemoveAll(path)
 
-	s := getServer(path)
+	s := GetServer(path)
 
 	go s.Listen("127.0.0.1:7777")
 
