@@ -43,7 +43,7 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 			return errors.New("fail to validate request peer info")
 		}
 
-		envelope, err := buildRequestPeerInfo(s.ip, s.pubKey)
+		envelope, err := BuildRequestPeerInfo(s.ip, s.pubKey)
 
 		if err != nil {
 			return errors.New("fail to build info")
