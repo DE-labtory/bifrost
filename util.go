@@ -63,8 +63,8 @@ func recvWithTimeout(seconds int, stream Stream) (*pb.Envelope, error) {
 }
 
 type KeyOpts struct {
-	priKey key.PriKey
-	pubKey key.PubKey
+	PriKey key.PriKey
+	PubKey key.PubKey
 }
 
 func buildResponsePeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {

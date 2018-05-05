@@ -185,8 +185,8 @@ func getKeyOpts(path string) KeyOpts {
 	}
 
 	return KeyOpts{
-		pubKey: pub,
-		priKey: pri,
+		PubKey: pub,
+		PriKey: pri,
 	}
 }
 

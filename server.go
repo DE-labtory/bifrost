@@ -116,8 +116,8 @@ type OnErrorHandler func(err error)
 
 func NewServer(key KeyOpts) *Server {
 	return &Server{
-		priKey: key.priKey,
-		pubKey: key.pubKey,
+		priKey: key.PriKey,
+		pubKey: key.PubKey,
 	}
 }
 
