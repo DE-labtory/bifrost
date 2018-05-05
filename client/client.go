@@ -11,6 +11,7 @@ import (
 	"github.com/it-chain/bifrost"
 	"errors"
 	"encoding/json"
+	"log"
 )
 
 // handshake 과정에서 올바르지 않은 메세지 타입이 올 경우 발생하는 에러
@@ -23,15 +24,15 @@ const (
 
 // Server 와 연결시 사용되는 Client option
 type ClientOpts struct {
-	ip     string
-	priKey key.PriKey
-	pubKey key.PubKey
+	Ip     string
+	PriKey key.PriKey
+	PubKey key.PubKey
 }
 
 // Server 와 연결시 사용되는 grpc option.
 type GrpcOpts struct {
-	tlsEnabled bool
-	creds      credentials.TransportCredentials
+	TlsEnabled bool
+	Creds      credentials.TransportCredentials
 }
 
 // 서버와 연결 요청. 실패시 err. handshake 과정을 거침.
@@ -39,8 +40,8 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 
 	var opts []grpc.DialOption
 
-	if grpcOpts.tlsEnabled {
-		opts = append(opts, grpc.WithTransportCredentials(grpcOpts.creds))
+	if grpcOpts.TlsEnabled {
+		opts = append(opts, grpc.WithTransportCredentials(grpcOpts.Creds))
 	} else {
 		opts = append(opts, grpc.WithInsecure())
 	}
@@ -64,7 +65,7 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 		return nil, err
 	}
 
-	conn, err := bifrost.NewConnection(serverIp, clientOpts.priKey, serverPubKey, streamWrapper)
+	conn, err := bifrost.NewConnection(serverIp, clientOpts.PriKey, serverPubKey, streamWrapper)
 
 	if err != nil {
 		return nil, err
@@ -77,6 +78,7 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) (key.PubKey, error) {
 	err := handShakeWaitServer(streamWrapper)
 	if err != nil {
+		log.Printf("handshake success")
 		streamWrapper.Close()
 		return nil, err
 	}
@@ -92,8 +94,9 @@ func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) (key.
 		streamWrapper.Close()
 		return nil, err
 	}
+	log.Printf("handshake success")
 
-	return serverPubKey, nil
+	return *serverPubKey, nil
 
 }
 
@@ -112,7 +115,7 @@ func handShakeWaitServer(streamWrapper bifrost.StreamWrapper) error {
 
 // handShake 두번째 과정 함수. client 의 peer info 메세지를 server 에게 전달한다.
 func handShakeSendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) error {
-	env, err := bifrost.BuildRequestPeerInfo(clientOpts.ip, clientOpts.pubKey)
+	env, err := bifrost.BuildRequestPeerInfo(clientOpts.Ip, clientOpts.PubKey)
 
 	if err != nil {
 		return err
