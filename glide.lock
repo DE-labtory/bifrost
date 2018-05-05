@@ -1,5 +1,5 @@
-hash: 928f4c1540efc02f6b23129b999f60787e603399582e888a61ad404cfa61b35e
-updated: 2018-05-01T20:59:44.466441+09:00
+hash: 974c78a22ae4050420c78500bc88c326b316b6832d0989ecc5ccaf5ec0c82b28
+updated: 2018-05-04T14:52:07.029141+09:00
 imports:
 - name: github.com/golang/protobuf
   version: b4deda0973fb4c70b50d226b1af49f3da59f5265
@@ -22,7 +22,7 @@ imports:
   subpackages:
   - assert
 - name: golang.org/x/net
-  version: 5f9ae10d9af5b1c89ae6904293b14b064d4ada23
+  version: 640f4622ab692b87c2f3a94265e6f579fe38263d
   subpackages:
   - context
   - http/httpguts

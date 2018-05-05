@@ -2,6 +2,7 @@ package bifrost
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/it-chain/bifrost/pb"
@@ -22,7 +23,7 @@ func FromPriKey(key key.PriKey) string {
 	return FromPubKey(pub)
 }
 
-func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType) (key.PubKey, error) {
+func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts) (key.PubKey, error) {
 
 	pubKey, err := key.PEMToPublicKey(byteKey, keyGenOpt)
 
@@ -59,4 +60,30 @@ func recvWithTimeout(seconds int, stream Stream) (*pb.Envelope, error) {
 		//okay body
 		return ok, nil
 	}
+}
+
+type KeyOpts struct {
+	priKey key.PriKey
+	pubKey key.PubKey
+}
+
+func buildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
+	b, _ := pubKey.ToPEM()
+
+	pi := &PeerInfo{
+		Ip:        ip,
+		Pubkey:    b,
+		KeyGenOpt: pubKey.Algorithm(),
+	}
+
+	payload, err := json.Marshal(pi)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Envelope{
+		Payload: payload,
+		Type:    pb.Envelope_RESPONSE_PEERINFO,
+	}, nil
 }

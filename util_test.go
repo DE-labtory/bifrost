@@ -19,12 +19,10 @@ func TestByteToPubKey(t *testing.T) {
 
 	b, err := pub.ToPEM()
 	assert.NoError(t, err)
-
 	keyGenOpt := pub.Algorithm()
-	keyType := pub.Type()
 
 	//when
-	pubK, err := ByteToPubKey(b, keyGenOpt, keyType)
+	pubK, err := ByteToPubKey(b, keyGenOpt)
 
 	//then
 	assert.NoError(t, err)
