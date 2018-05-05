@@ -27,7 +27,7 @@ type ClientOpts struct {
 	ip     string
 	priKey key.PriKey
 	pubKey key.PubKey
-	mux    mux.Mux
+	mux    mux.DefaultMux
 }
 
 // Server 와 연결시 사용되는 grpc option.
@@ -37,7 +37,7 @@ type GrpcOpts struct {
 }
 
 // 서버와 연결 요청. 실패시 err. handshake 과정을 거침.
-func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Connection, error) {
+func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, mux *mux.DefaultMux) (bifrost.Connection, error) {
 
 	var opts []grpc.DialOption
 
@@ -71,6 +71,8 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 	if err != nil {
 		return nil, err
 	}
+	
+	conn.Handle(mux)
 
 	return conn, nil
 }
