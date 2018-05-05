@@ -20,7 +20,7 @@ package main
 //	"github.com/it-chain/it-chain-Engine/legacy/network/comm/conn"
 //)
 //
-//func CreateHost(ip string, mux *mux.Mux, pub key.PubKey, pri key.PriKey) *bifrost.BifrostHost {
+//func CreateHost(ip string, mux *mux.DefaultMux, pub key.PubKey, pri key.PriKey) *bifrost.BifrostHost {
 //
 //	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: ip}, pub, pri)
 //

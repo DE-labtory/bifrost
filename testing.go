@@ -33,7 +33,7 @@ func NewMockStreamServer(peerInfo PeerInfo) *StreamServer {
 	}
 }
 
-func (s StreamServer) Send(envelope *pb.Envelope) error {
+func (s *StreamServer) Send(envelope *pb.Envelope) error {
 	log.Print("Mock send func called")
 
 	s.countSend = s.countSend + 1
@@ -46,7 +46,7 @@ func (s StreamServer) Send(envelope *pb.Envelope) error {
 	}
 
 	if s.countSend == 2 {
-		bool, _, _ := ValidateRequestPeerInfo(envelope)
+		bool, _, _ := validateResponsePeerInfo(envelope)
 
 		if bool {
 			return nil
@@ -57,7 +57,7 @@ func (s StreamServer) Send(envelope *pb.Envelope) error {
 	return nil
 }
 
-func (s StreamServer) Recv() (*pb.Envelope, error) {
+func (s *StreamServer) Recv() (*pb.Envelope, error) {
 
 	s.countRecv = s.countRecv + 1
 
@@ -107,13 +107,13 @@ type MockServer struct {
 	clh MockCloseHandler
 }
 
-type Handler struct{}
+type MockHandler struct{}
 
-func (h Handler) ServeRequest(message Message) {
+func (h MockHandler) ServeRequest(message Message) {
 
 }
 
-func (h Handler) ServeError(conn Connection, err error) {
+func (h MockHandler) ServeError(conn Connection, err error) {
 
 }
 
@@ -185,8 +185,8 @@ func getKeyOpts(path string) KeyOpts {
 	}
 
 	return KeyOpts{
-		pubKey: pub,
-		priKey: pri,
+		PubKey: pub,
+		PriKey: pri,
 	}
 }
 

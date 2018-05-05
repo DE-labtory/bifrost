@@ -43,14 +43,14 @@ package bifrost
 //type OnConnectionHandler func(conn.Connection)
 //
 //type BifrostHost struct {
-//	mux                 *mux.Mux
+//	mux                 *mux.DefaultMux
 //	info                HostInfo
 //	server              *grpc.Server
 //	onConnectionHandler OnConnectionHandler
 //	auth                auth.Auth
 //}
 //
-//func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
+//func New(myConnInfo HostInfo, mux *mux.DefaultMux, onConnectionHandler OnConnectionHandler) *BifrostHost {
 //
 //	auth, _ := auth.NewAuth()
 //

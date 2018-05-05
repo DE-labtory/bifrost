@@ -13,7 +13,7 @@ type HandlerFunc func(message bifrost.Message)
 
 type ErrorFunc func(conn bifrost.Connection, err error)
 
-type Mux struct {
+type DefaultMux struct {
 	sync.RWMutex
 	registerHandled map[Protocol]*Handle
 	errorFunc       ErrorFunc
@@ -23,13 +23,13 @@ type Handle struct {
 	handlerFunc HandlerFunc
 }
 
-func NewMux() *Mux {
-	return &Mux{
+func New() *DefaultMux {
+	return &DefaultMux{
 		registerHandled: make(map[Protocol]*Handle),
 	}
 }
 
-func (mux *Mux) Handle(protocol Protocol, handler HandlerFunc) error {
+func (mux *DefaultMux) Handle(protocol Protocol, handler HandlerFunc) error {
 
 	mux.Lock()
 	defer mux.Unlock()
@@ -44,7 +44,7 @@ func (mux *Mux) Handle(protocol Protocol, handler HandlerFunc) error {
 	return nil
 }
 
-func (mux *Mux) match(protocol Protocol) HandlerFunc {
+func (mux *DefaultMux) match(protocol Protocol) HandlerFunc {
 
 	mux.Lock()
 	defer mux.Unlock()
@@ -58,7 +58,7 @@ func (mux *Mux) match(protocol Protocol) HandlerFunc {
 	return nil
 }
 
-func (mux *Mux) ServeRequest(msg bifrost.Message) {
+func (mux *DefaultMux) ServeRequest(msg bifrost.Message) {
 
 	protocol := msg.Envelope.Protocol
 
@@ -69,7 +69,7 @@ func (mux *Mux) ServeRequest(msg bifrost.Message) {
 	}
 }
 
-func (mux *Mux) ServeError(conn bifrost.Connection, err error) {
+func (mux *DefaultMux) ServeError(conn bifrost.Connection, err error) {
 
 	mux.Lock()
 	defer mux.Unlock()
@@ -79,7 +79,7 @@ func (mux *Mux) ServeError(conn bifrost.Connection, err error) {
 	}
 }
 
-func (mux *Mux) HandleError(errorfunc ErrorFunc) {
+func (mux *DefaultMux) HandleError(errorfunc ErrorFunc) {
 
 	mux.Lock()
 	defer mux.Unlock()
