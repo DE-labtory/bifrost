@@ -35,7 +35,7 @@ func (m *Message) Respond(data []byte, protocol string, successCallBack func(int
 	m.Conn.Send(data, protocol, successCallBack, errCallBack)
 }
 
-type ReceivedMessageHandler interface {
+type Handler interface {
 	ServeRequest(msg Message)
 	ServeError(conn Connection, err error)
 }
@@ -47,6 +47,7 @@ type Connection interface {
 	GetPeerKey() key.PubKey
 	GetID() ConnID
 	Start() error
+	Handle(handler Handler)
 }
 
 type GrpcConnection struct {
@@ -56,7 +57,7 @@ type GrpcConnection struct {
 	ip            string
 	streamWrapper StreamWrapper
 	stopFlag      int32
-	handle        ReceivedMessageHandler
+	handler       Handler
 	outChannl     chan *innerMessage
 	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
@@ -66,7 +67,7 @@ type GrpcConnection struct {
 func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper) (Connection, error) {
 
 	if streamWrapper == nil || peerKey == nil || priKey == nil {
-		return nil, errors.New("fail to create connection streamWrapper or handle is nil")
+		return nil, errors.New("fail to create connection streamWrapper or key is nil")
 	}
 
 	return &GrpcConnection{
@@ -93,6 +94,10 @@ func (conn *GrpcConnection) GetID() ConnID {
 
 func (conn *GrpcConnection) toDie() bool {
 	return atomic.LoadInt32(&(conn.stopFlag)) == int32(1)
+}
+
+func (conn *GrpcConnection) Handle(handler Handler) {
+	conn.handler = handler
 }
 
 func (conn *GrpcConnection) Send(payload []byte, protocol string, successCallBack func(interface{}), errCallBack func(error)) {
@@ -255,15 +260,15 @@ func (conn *GrpcConnection) Start() error {
 			conn.stopChannel <- stop
 			return nil
 		case err := <-errChan:
-			if conn.handle != nil {
-				conn.handle.ServeError(conn, err)
+			if conn.handler != nil {
+				conn.handler.ServeError(conn, err)
 			}
 			return err
 		case message := <-conn.readChannel:
 			if verify(message, conn.peerKey) {
-				if conn.handle != nil {
+				if conn.handler != nil {
 					m := Message{Envelope: message, Conn: conn, Data: message.Payload}
-					conn.handle.ServeRequest(m)
+					conn.handler.ServeRequest(m)
 				}
 			} else {
 				//

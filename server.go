@@ -12,6 +12,7 @@ import (
 	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"time"
 )
 
 type Server struct {
@@ -35,15 +36,15 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 		return err
 	}
 
-	if m, err := recvWithTimeout(3, streamServer); err == nil {
+	if m, err := RecvWithTimeout(3*time.Second, streamServer); err == nil {
 
-		valid, ip, peerKey := ValidateRequestPeerInfo(m)
+		valid, ip, peerKey := validateRequestPeerInfo(m)
 
 		if !valid {
 			return errors.New("fail to validate request peer info")
 		}
-
-		envelope, err := buildRequestPeerInfo(s.ip, s.pubKey)
+    
+		envelope, err := BuildRequestPeerInfo(s.ip, s.pubKey)
 
 		if err != nil {
 			return errors.New("fail to build info")
@@ -70,12 +71,25 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 	return nil
 }
 
-func ValidateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
+func validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
 
-	if envelope.GetType() != pb.Envelope_REQUEST_PEERINFO {
+	if envelope.GetType() != pb.Envelope_RESPONSE_PEERINFO {
 		log.Printf("Invaild message type")
 		return false, "", nil
 	}
+	return validatePeerInfo(envelope)
+}
+
+func validateResponsePeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
+
+	if envelope.GetType() != pb.Envelope_RESPONSE_PEERINFO {
+		log.Printf("Invaild message type")
+		return false, "", nil
+	}
+	return validatePeerInfo(envelope)
+}
+
+func validatePeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
 
 	log.Printf("Received payload [%s]", envelope.Payload)
 
@@ -103,8 +117,8 @@ type OnErrorHandler func(err error)
 
 func NewServer(key KeyOpts) *Server {
 	return &Server{
-		priKey: key.priKey,
-		pubKey: key.pubKey,
+		priKey: key.PriKey,
+		pubKey: key.PubKey,
 	}
 }
 

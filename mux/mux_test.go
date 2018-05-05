@@ -10,7 +10,7 @@ import (
 
 func TestNewMux(t *testing.T) {
 	//when
-	mux := NewMux()
+	mux := New()
 
 	//then
 	mux.Handle(Protocol("test1"), func(message bifrost.Message) {
@@ -32,7 +32,7 @@ func TestNewMux(t *testing.T) {
 
 func TestMux_Handle(t *testing.T) {
 	//when
-	mux := NewMux()
+	mux := New()
 
 	mux.Handle(Protocol("exist"), func(message bifrost.Message) {
 
@@ -48,7 +48,7 @@ func TestMux_Handle(t *testing.T) {
 func TestMux_ServeRequest(t *testing.T) {
 
 	//when
-	mux := NewMux()
+	mux := New()
 
 	mux.Handle(Protocol("exist"), func(message bifrost.Message) {
 		assert.Equal(t, message.Data, []byte("hello"))

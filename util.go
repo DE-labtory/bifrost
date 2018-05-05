@@ -34,9 +34,9 @@ func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts) (key.PubKey, error) 
 	return pubKey, nil
 }
 
-func recvWithTimeout(seconds int, stream Stream) (*pb.Envelope, error) {
+func RecvWithTimeout(timeout time.Duration, stream Stream) (*pb.Envelope, error) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	c := make(chan *pb.Envelope, 1)
@@ -63,11 +63,11 @@ func recvWithTimeout(seconds int, stream Stream) (*pb.Envelope, error) {
 }
 
 type KeyOpts struct {
-	priKey key.PriKey
-	pubKey key.PubKey
+	PriKey key.PriKey
+	PubKey key.PubKey
 }
 
-func buildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
+func BuildRequestPeerInfo(ip string, pubKey key.PubKey) (*pb.Envelope, error) {
 	b, _ := pubKey.ToPEM()
 
 	pi := &PeerInfo{
