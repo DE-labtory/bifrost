@@ -22,7 +22,7 @@ func TestNewStreamHandler(t *testing.T) {
 	}
 
 	serverIP := "127.0.0.1:9999"
-	mockServer := &MockServer{ch: connectionHandler}
+	mockServer := &MockServer{Ch: connectionHandler}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
 	var opts []grpc.DialOption
@@ -51,7 +51,7 @@ func TestGrpcConnection_Send(t *testing.T) {
 
 	//given
 	path := "./key"
-	keyOpts := getKeyOpts(path)
+	keyOpts := GetKeyOpts(path)
 	defer os.RemoveAll(path)
 
 	mockStreamWrapper := MockStreamWrapper{}
@@ -60,10 +60,10 @@ func TestGrpcConnection_Send(t *testing.T) {
 		//then
 		assert.Equal(t, envelope.Protocol, "test1")
 		assert.Equal(t, envelope.Payload, []byte("jun"))
-		assert.True(t, verify(envelope, keyOpts.pubKey))
+		assert.True(t, verify(envelope, keyOpts.PubKey))
 	}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.priKey, keyOpts.pubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
 
 	assert.NoError(t, err)
 
@@ -81,12 +81,12 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 
 	//given
 	path := "./key"
-	keyOpts := getKeyOpts(path)
+	keyOpts := GetKeyOpts(path)
 	defer os.RemoveAll(path)
 
 	mockStreamWrapper := MockStreamWrapper{}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.priKey, keyOpts.pubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
 
 	assert.NoError(t, err)
 
@@ -100,14 +100,14 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 	k := conn.GetPeerKey()
 
 	//then
-	assert.Equal(t, k, keyOpts.pubKey)
+	assert.Equal(t, k, keyOpts.PubKey)
 }
 
 func TestGrpcConnection_Close(t *testing.T) {
 
 	//given
 	path := "./key"
-	keyOpts := getKeyOpts(path)
+	keyOpts := GetKeyOpts(path)
 	defer os.RemoveAll(path)
 
 	mockStreamWrapper := MockStreamWrapper{}
@@ -115,7 +115,7 @@ func TestGrpcConnection_Close(t *testing.T) {
 		assert.True(t, true)
 	}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.priKey, keyOpts.pubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
 
 	assert.NoError(t, err)
 

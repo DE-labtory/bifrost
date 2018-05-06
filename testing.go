@@ -1,110 +1,25 @@
 package bifrost
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
-
 	"net"
-
-	"time"
 
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
-
-type StreamServer struct {
-	countRecv int32
-	countSend int32
-	peerInfo  PeerInfo
-}
-
-func NewMockStreamServer(peerInfo PeerInfo) *StreamServer {
-	return &StreamServer{
-		countRecv: 0,
-		countSend: 0,
-		peerInfo:  peerInfo,
-	}
-}
-
-func (s *StreamServer) Send(envelope *pb.Envelope) error {
-	log.Print("Mock send func called")
-
-	s.countSend = s.countSend + 1
-
-	if s.countSend == 1 {
-		if envelope.Type == pb.Envelope_REQUEST_PEERINFO {
-			return nil
-		}
-		return errors.New("invalid protocol")
-	}
-
-	if s.countSend == 2 {
-		bool, _, _ := validateResponsePeerInfo(envelope)
-
-		if bool {
-			return nil
-		} else {
-			return errors.New("invaild peerinfo")
-		}
-	}
-	return nil
-}
-
-func (s *StreamServer) Recv() (*pb.Envelope, error) {
-
-	s.countRecv = s.countRecv + 1
-
-	if s.countRecv == 1 {
-		payload, _ := json.Marshal(s.peerInfo)
-
-		envelope := &pb.Envelope{}
-		envelope.Type = pb.Envelope_REQUEST_PEERINFO
-		envelope.Payload = payload
-		return envelope, nil
-	}
-
-	return nil, nil
-}
-
-func (StreamServer) SetHeader(metadata.MD) error {
-	panic("implement me")
-}
-
-func (StreamServer) SendHeader(metadata.MD) error {
-	panic("implement me")
-}
-
-func (StreamServer) SetTrailer(metadata.MD) {
-	panic("implement me")
-}
-
-func (StreamServer) Context() context.Context {
-	panic("implement me")
-}
-
-func (StreamServer) SendMsg(m interface{}) error {
-	panic("implement me")
-}
-
-func (StreamServer) RecvMsg(m interface{}) error {
-	panic("implement me")
-}
 
 type MockConnectionHandler func(stream pb.StreamService_BifrostStreamServer)
 type MockRecvHandler func(envelope *pb.Envelope)
 type MockCloseHandler func()
 
 type MockServer struct {
-	rh  MockRecvHandler
-	ch  MockConnectionHandler
-	clh MockCloseHandler
+	Rh  MockRecvHandler
+	Ch  MockConnectionHandler
+	Clh MockCloseHandler
 }
 
 type MockHandler struct{}
@@ -119,8 +34,8 @@ func (h MockHandler) ServeError(conn Connection, err error) {
 
 func (ms MockServer) BifrostStream(stream pb.StreamService_BifrostStreamServer) error {
 
-	if ms.ch != nil {
-		ms.ch(stream)
+	if ms.Ch != nil {
+		ms.Ch(stream)
 	}
 
 	for {
@@ -133,14 +48,14 @@ func (ms MockServer) BifrostStream(stream pb.StreamService_BifrostStreamServer) 
 		}
 
 		if err != nil {
-			if ms.clh != nil {
-				ms.clh()
+			if ms.Clh != nil {
+				ms.Clh()
 			}
 			return err
 		}
 
-		if ms.rh != nil {
-			ms.rh(envelope)
+		if ms.Rh != nil {
+			ms.Rh(envelope)
 		}
 	}
 }
@@ -170,7 +85,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	return s, lis
 }
 
-func getKeyOpts(path string) KeyOpts {
+func GetKeyOpts(path string) KeyOpts {
 
 	km, err := key.NewKeyManager(path)
 
@@ -188,29 +103,6 @@ func getKeyOpts(path string) KeyOpts {
 		PubKey: pub,
 		PriKey: pri,
 	}
-}
-
-func getServer(path string) *Server {
-
-	keyOpt := getKeyOpts(path)
-
-	s := NewServer(keyOpt)
-
-	return s
-}
-
-func dial(serverIP string) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
-
-	opts = append(opts, grpc.WithTimeout(3*time.Second))
-	grpc_conn, err := grpc.Dial(serverIP, opts...)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return grpc_conn, nil
 }
 
 type SendCallBack func(envelope *pb.Envelope)

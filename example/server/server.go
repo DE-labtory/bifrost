@@ -5,6 +5,7 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/mux"
+	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/heimdall/key"
 )
 
@@ -36,7 +37,7 @@ func main() {
 		log.Printf("%s", message.Data)
 	})
 
-	s := bifrost.NewServer(bifrost.KeyOpts{PriKey: pri, PubKey: pub})
+	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: pub})
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)

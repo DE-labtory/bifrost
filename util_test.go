@@ -34,7 +34,6 @@ func TestBuildResponsePeerInfo(t *testing.T) {
 
 	//given
 	km, err := key.NewKeyManager("~/key")
-	ip := "127.0.0.1"
 	assert.NoError(t, err)
 	defer os.RemoveAll("~/key")
 
@@ -42,7 +41,7 @@ func TestBuildResponsePeerInfo(t *testing.T) {
 	assert.NoError(t, err)
 
 	//when
-	envelope, err := buildResponsePeerInfo(ip, pub)
+	envelope, err := BuildResponsePeerInfo(pub)
 	assert.NoError(t, err)
 
 	//then

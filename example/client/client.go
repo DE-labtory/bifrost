@@ -1,15 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/heimdall/key"
-	"github.com/it-chain/bifrost/client"
-	"bufio"
-	"os"
-	"fmt"
 )
 
 var clientIp = "127.0.0.1:7778"
@@ -18,6 +18,7 @@ var DefaultMux *mux.DefaultMux
 
 //todo 아직깔끔하지않음 여러 수정필요
 func main() {
+
 	km, err := key.NewKeyManager("")
 
 	if err != nil {
@@ -51,18 +52,20 @@ func main() {
 		Creds:      nil,
 	}
 
-	conn , err := client.Dial(serverIp, clientOpt, grpcOpt)
+	conn, err := client.Dial(serverIp, clientOpt, grpcOpt)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	conn.Handle(DefaultMux)
+
 	go func() {
 		if err := conn.Start(); err != nil {
 			conn.Close()
 		}
 	}()
+
 	conn.Send([]byte("client join!!"), "join", nil, nil)
 
 	for {
