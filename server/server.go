@@ -218,11 +218,11 @@ func (s Server) Listen(ip string) {
 
 	lis, err := net.Listen("tcp", ip)
 
-	defer lis.Close()
-
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
+	defer lis.Close()
 
 	g := grpc.NewServer()
 
