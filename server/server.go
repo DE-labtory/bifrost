@@ -24,6 +24,7 @@ type Server struct {
 	priKey              key.PriKey
 	pubKey              key.PubKey
 	ip                  string
+	lis                 net.Listener
 }
 
 func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer) error {
@@ -236,4 +237,8 @@ func (s Server) Listen(ip string) {
 		g.Stop()
 		lis.Close()
 	}
+}
+
+func (s Server) Stop() {
+	s.lis.Close()
 }
