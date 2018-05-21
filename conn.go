@@ -37,7 +37,6 @@ func (m *Message) Respond(data []byte, protocol string, successCallBack func(int
 
 type Handler interface {
 	ServeRequest(msg Message)
-	ServeError(conn Connection, err error)
 }
 
 type Connection interface {
@@ -260,9 +259,6 @@ func (conn *GrpcConnection) Start() error {
 			conn.stopChannel <- stop
 			return nil
 		case err := <-errChan:
-			if conn.handler != nil {
-				conn.handler.ServeError(conn, err)
-			}
 			return err
 		case message := <-conn.readChannel:
 			if verify(message, conn.peerKey) {
