@@ -39,7 +39,7 @@ type GrpcOpts struct {
 // 서버와 연결 요청. 실패시 err. handshake 과정을 거침.
 func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Connection, error) {
 
-	var opts []grpc.DialOption
+	var opts []grpc.DialOption //required options
 
 	if grpcOpts.TlsEnabled {
 		opts = append(opts, grpc.WithTransportCredentials(grpcOpts.Creds))
@@ -54,6 +54,8 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 		return nil, err
 	}
 
+	// create stream wrapper
+	// inside stream wrapper, call main rpc service method BifrostStream()
 	streamWrapper, err := bifrost.NewClientStreamWrapper(gconn)
 
 	if err != nil {
