@@ -1,6 +1,6 @@
 # Bifrost
 
-<p align="center"><img src="./image/bifrost.jpeg" width="171px" height="171px"></p>
+<p align="center"><img src="./images/bifrost.jpeg" width="171px" height="171px"></p>
 
 
 
