@@ -234,7 +234,7 @@ func (s *Server) Listen(ip string) {
 	s.lis = lis
 	log.Println("Listen... on: [%s]", ip)
 	if err := g.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Println("failed to serve: %v", err)
 		g.Stop()
 		lis.Close()
 	}
