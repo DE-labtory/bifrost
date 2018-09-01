@@ -2,25 +2,16 @@ package bifrost
 
 import (
 	"github.com/it-chain/bifrost/conn"
-	"github.com/it-chain/heimdall/key"
-	b58 "github.com/jbenet/go-base58"
+	"github.com/it-chain/heimdall"
+	"crypto/ecdsa"
 )
 
 //Identitiy of Connection
 type ID string
 
 //Create ID from Public Key
-func FromPubKey(key key.PubKey) ID {
-
-	encoded := b58.Encode(key.SKI())
-	return ID(encoded)
-}
-
-//Create ID from Pri Key
-func FromPriKey(key key.PriKey) ID {
-
-	pub, _ := key.PublicKey()
-	return FromPubKey(pub)
+func FromPubKey(key *ecdsa.PublicKey) ID {
+	return ID(heimdall.PubKeyToKeyID(key))
 }
 
 func (id ID) String() string {
@@ -29,10 +20,10 @@ func (id ID) String() string {
 
 type HostInfo struct {
 	conn.ConnInfo
-	PriKey key.PriKey
+	PriKey *ecdsa.PrivateKey
 }
 
-func NewHostInfo(address conn.Address, pubKey key.PubKey, priKey key.PriKey) HostInfo {
+func NewHostInfo(address conn.Address, pubKey *ecdsa.PublicKey, priKey *ecdsa.PrivateKey) HostInfo {
 
 	id := FromPubKey(pubKey)
 
@@ -48,15 +39,10 @@ func (hostInfo HostInfo) GetPublicInfo() *conn.PublicConnInfo {
 	publicConnInfo.Id = hostInfo.Id.ToString()
 	publicConnInfo.Address = hostInfo.Address
 
-	b, err := hostInfo.PubKey.ToPEM()
-
-	if err != nil {
-		return nil
-	}
+	b := heimdall.PubKeyToBytes(hostInfo.PubKey)
 
 	publicConnInfo.Pubkey = b
-	publicConnInfo.KeyType = hostInfo.PubKey.Type()
-	publicConnInfo.KeyGenOpt = hostInfo.PubKey.Algorithm()
+	publicConnInfo.CurveOpt = heimdall.CurveToCurveOpt(hostInfo.PubKey.Curve)
 
 	return publicConnInfo
 }

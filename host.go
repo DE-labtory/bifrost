@@ -9,13 +9,11 @@ import (
 	"sync"
 	"time"
 
-	"crypto/sha512"
-
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/stream"
-	"github.com/it-chain/heimdall/auth"
+	"github.com/it-chain/heimdall"
 	"google.golang.org/grpc"
 )
 
@@ -46,18 +44,14 @@ type BifrostHost struct {
 	info                HostInfo
 	server              *grpc.Server
 	onConnectionHandler OnConnectionHandler
-	auth                auth.Auth
 }
 
 func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
-
-	auth, _ := auth.NewAuth()
 
 	host := &BifrostHost{
 		mux:                 mux,
 		info:                myConnInfo,
 		onConnectionHandler: onConnectionHandler,
-		auth:                auth,
 	}
 
 	return host
@@ -267,17 +261,9 @@ func (bih BifrostHost) createSignedEnvelope(protocol string, data interface{}) (
 		return nil, err
 	}
 
-	pub, err := bih.info.PubKey.ToPEM()
+	pub := heimdall.PubKeyToBytes(bih.info.PubKey)
 
-	if err != nil {
-		return nil, err
-	}
-
-	hash := sha512.New()
-	hash.Write(payload)
-	digest := hash.Sum(nil)
-
-	sig, err := bih.auth.Sign(bih.info.PriKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+	sig, err := heimdall.Sign(bih.info.PriKey, payload, nil, heimdall.SHA384)
 
 	if err != nil {
 		return nil, err
