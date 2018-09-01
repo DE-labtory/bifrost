@@ -7,3 +7,4 @@ import:
 - package: github.com/stretchr/testify
   version: v1.2.1
 - package: github.com/it-chain/heimdall
+  version: v0.2.0

@@ -1,6 +1,10 @@
-hash: 7be96a70aa991d8293305aeae3a67465b49726677642a1b539d260405723b78d
-updated: 2018-04-18T17:41:56.185285+09:00
+hash: 17239edba3b24ddb449b04221f73818e8fc6de1ad8b738f938ed13831e4d111c
+updated: 2018-08-31T18:02:33.816712+09:00
 imports:
+- name: github.com/btcsuite/btcutil
+  version: ab6388e0c60ae4834a1f57511e20c17b5f78be4b
+  subpackages:
+  - base58
 - name: github.com/golang/protobuf
   version: e09c5db296004fbe3f74490e84dcd62c3c5ddb1b
   subpackages:
@@ -10,16 +14,27 @@ imports:
   - ptypes/any
   - ptypes/duration
   - ptypes/timestamp
-- name: github.com/it-chain/heimdall
-  version: 855be675269dd68a16cb4fa0729f322b64f9ec09
+- name: github.com/google/gops
+  version: 89672dbe3c4ba97d53af7e839e8097e1ccbb4977
   subpackages:
-  - key
+  - agent
+  - internal
+  - signal
+- name: github.com/it-chain/heimdall
+  version: 4d3faeb635599f0419100924a6da72074e4742d5
 - name: github.com/jbenet/go-base58
   version: 6237cf65f3a6f7111cd8a42be3590df99a66bc7d
+- name: github.com/kardianos/osext
+  version: ae77be60afb1dcacde03767a8c37337fad28ac14
 - name: github.com/stretchr/testify
   version: 12b6f73e6084dad08a7c6e575284b177ecafbc71
   subpackages:
   - assert
+- name: golang.org/x/crypto
+  version: 182538f80094b6a8efaade63a8fd8e0d9d5843dd
+  subpackages:
+  - pbkdf2
+  - scrypt
 - name: golang.org/x/net
   version: d41e8174641f662c5a2d1c7a5f9e828788eb8706
   subpackages:
