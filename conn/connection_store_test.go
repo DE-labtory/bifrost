@@ -32,7 +32,7 @@ func (m MockReceivedHandler) ServeRequest(msg OutterMessage) {
 
 }
 
-func (m MockReceivedHandler) ServeError(err error) {
+func (m MockReceivedHandler) ServeError(conn Connection, err error) {
 
 }
 

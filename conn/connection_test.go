@@ -33,7 +33,7 @@ func (h Handler) ServeRequest(message OutterMessage) {
 
 }
 
-func (h Handler) ServeError(err error) {
+func (h Handler) ServeError(conn Connection, err error) {
 
 }
 
