@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -13,10 +12,10 @@ import (
 	"github.com/it-chain/bifrost/conn"
 	mux2 "github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/key"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"github.com/it-chain/heimdall"
 )
 
 type MockServer struct {
@@ -24,11 +23,8 @@ type MockServer struct {
 
 func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 
-	km, err := key.NewKeyManager("~/key2")
-
-	defer os.RemoveAll("~/key2")
-
-	_, pub, err := km.GenerateKey(key.RSA4096)
+	pri, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	pub := &pri.PublicKey
 
 	envelope := &pb.Envelope{}
 	envelope.Protocol = REQUEST_CONNINFO
@@ -46,18 +42,20 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 		log.Fatalf(err.Error())
 	}
 
-	b, err := pub.ToPEM()
+	b := heimdall.PubKeyToBytes(pub)
 
 	pci := conn.PublicConnInfo{}
 	pci.Id = "test1"
 	pci.Address = conn.Address{IP: "127.0.0.1"}
 	pci.Pubkey = b
-	pci.KeyGenOpt = pub.Algorithm()
-	pci.KeyType = pub.Type()
+	pci.CurveOpt = heimdall.CurveToCurveOpt(pub.Curve)
 
 	envelope2 := &pb.Envelope{}
 	envelope2.Protocol = CONNECTION_ESTABLISH
 	payload, err := json.Marshal(pci)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 	envelope2.Payload = payload
 
 	err = stream.Send(envelope2)
@@ -110,16 +108,9 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 	mockServer := &MockServer{}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	defer func() {
-		server1.Stop()
-		listner1.Close()
-	}()
-
-	km, err := key.NewKeyManager("~/key")
-
-	defer os.RemoveAll("~/key")
-
-	priv, pub, err := km.GenerateKey(key.RSA4096)
+	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	assert.Nil(t, err)
+	pub := &priv.PublicKey
 
 	myconnectionInfo := NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
@@ -127,22 +118,21 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 	host := New(myconnectionInfo, mux, nil)
 
 	connection, err := host.ConnectToPeer(Address{Ip: "127.0.0.1:9999"})
-
 	assert.Nil(t, err)
 	log.Printf("Sending data...")
 	connection.Send(&pb.Envelope{Payload: []byte("test1")}, nil, nil)
 
-	assert.Nil(t, err)
 	assert.Equal(t, "test1", connection.GetConnInfo().Id.ToString())
+
+	time.Sleep(2 * time.Second)
+	server1.Stop()
+	listner1.Close()
 }
 
 func TestBifrostHost_Stream(t *testing.T) {
 
-	km, err := key.NewKeyManager("~/key")
-
-	defer os.RemoveAll("~/key")
-
-	priv, pub, err := km.GenerateKey(key.RSA4096)
+	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	pub := &priv.PublicKey
 
 	myconnectionInfo := NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()

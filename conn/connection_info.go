@@ -5,7 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/it-chain/heimdall/key"
+	"github.com/it-chain/heimdall"
+	"crypto/ecdsa"
 )
 
 type ID string
@@ -47,10 +48,10 @@ func ToAddress(ipv4 string) (Address, error) {
 type ConnInfo struct {
 	Id      ID
 	Address Address
-	PubKey  key.PubKey
+	PubKey  *ecdsa.PublicKey
 }
 
-func NewConnInfo(id string, address Address, pubKey key.PubKey) ConnInfo {
+func NewConnInfo(id string, address Address, pubKey *ecdsa.PublicKey) ConnInfo {
 	return ConnInfo{
 		Id:      ID(id),
 		Address: address,
@@ -62,13 +63,12 @@ type PublicConnInfo struct {
 	Id        string
 	Address   Address
 	Pubkey    []byte
-	KeyType   key.KeyType
-	KeyGenOpt key.KeyGenOpts
+	CurveOpt  heimdall.CurveOpts
 }
 
 func FromPublicConnInfo(publicConnInfo PublicConnInfo) (*ConnInfo, error) {
 
-	pubKey, err := ByteToPubKey(publicConnInfo.Pubkey, publicConnInfo.KeyGenOpt, publicConnInfo.KeyType)
+	pubKey, err := heimdall.BytesToPubKey(publicConnInfo.Pubkey, publicConnInfo.CurveOpt)
 
 	if err != nil {
 		return nil, err
@@ -79,20 +79,4 @@ func FromPublicConnInfo(publicConnInfo PublicConnInfo) (*ConnInfo, error) {
 		Address: publicConnInfo.Address,
 		PubKey:  pubKey,
 	}, nil
-}
-
-func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts, keyType key.KeyType) (key.PubKey, error) {
-
-	k, err := key.PEMToPublicKey(byteKey)
-
-	if err != nil {
-		return nil, err
-	}
-
-	pub, err := key.MatchPublicKeyOpt(k, keyGenOpt)
-	if err != nil {
-		return nil, err
-	}
-
-	return pub, nil
 }
