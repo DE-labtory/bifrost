@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestFromPublicConnInfo(t *testing.T) {
 
 	pri, err := heimdall.GenerateKey(heimdall.SECP384R1)

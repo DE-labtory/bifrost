@@ -1,9 +1,10 @@
 package bifrost
 
 import (
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/heimdall"
-	"crypto/ecdsa"
 )
 
 //Identitiy of Connection
