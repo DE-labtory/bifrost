@@ -2,17 +2,19 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
-	"encoding/json"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/conn"
+
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall"
-	"crypto/ecdsa"
 )
 
 func CreateHost(ip string, mux *mux.Mux, pub *ecdsa.PublicKey, pri *ecdsa.PrivateKey) *bifrost.BifrostHost {
@@ -50,7 +52,6 @@ func Sign(envelope *pb.Envelope, priKey *ecdsa.PrivateKey) *pb.Envelope {
 }
 
 func main() {
-
 
 	defer os.RemoveAll("~/key")
 

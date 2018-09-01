@@ -5,8 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/it-chain/heimdall"
 	"crypto/ecdsa"
+
+	"github.com/it-chain/heimdall"
 )
 
 type ID string
@@ -60,10 +61,10 @@ func NewConnInfo(id string, address Address, pubKey *ecdsa.PublicKey) ConnInfo {
 }
 
 type PublicConnInfo struct {
-	Id        string
-	Address   Address
-	Pubkey    []byte
-	CurveOpt  heimdall.CurveOpts
+	Id       string
+	Address  Address
+	Pubkey   []byte
+	CurveOpt heimdall.CurveOpts
 }
 
 func FromPublicConnInfo(publicConnInfo PublicConnInfo) (*ConnInfo, error) {

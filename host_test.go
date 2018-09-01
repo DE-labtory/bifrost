@@ -12,10 +12,10 @@ import (
 	"github.com/it-chain/bifrost/conn"
 	mux2 "github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/heimdall"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"github.com/it-chain/heimdall"
 )
 
 type MockServer struct {

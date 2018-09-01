@@ -9,13 +9,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"crypto/ecdsa"
+
 	"github.com/google/gops/agent"
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/heimdall"
-	"crypto/ecdsa"
 )
 
 func CreateHost(ip string, mux *mux.Mux, pub *ecdsa.PublicKey, pri *ecdsa.PrivateKey) *bifrost.BifrostHost {
