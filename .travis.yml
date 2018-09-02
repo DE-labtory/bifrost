@@ -1,0 +1,58 @@
+# This is a weird way of telling Travis to use the fast container-based test
+# runner instead of the slow VM-based runner.
+sudo: false
+
+language: go
+
+# Only the last two Go releases are supported by the Go team with security
+# updates. Any older versions be considered deprecated. Don't bother testing
+# with them.
+go:
+  - 1.9.x
+  - 1.x
+
+# Enable testing on specific operating system
+os:
+  - linux
+
+# Only clone the most recent commit.
+git:
+  depth: 1
+
+
+# install additional dependencies required by your project such as Ubuntu packages or custom services
+before_install:
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - go get golang.org/x/tools/cmd/goimports
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+
+# install any dependencies required
+install: true
+
+# Don't email me the results of the test runs.
+notifications:
+  email: false
+
+# Anything in before_script that returns a nonzero exit code will flunk the
+# build and immediately stop. It's sorta like having set -e enabled in bash.
+# Make sure golangci-lint is vendored by running
+#   dep ensure -add github.com/golangci/golangci-lint/cmd/golangci-lint
+# ...and adding this to your Gopkg.toml file.
+#   required = ["github.com/golangci/golangci-lint/cmd/golangci-lint"]
+before_script:
+#  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | bash -s -- -b $GOPATH/bin v1.10.1
+
+# run the build script
+# script always runs to completion (set +e). If we have linter issues AND a
+# failing test, we want to see both. Configure golangci-lint with a
+# .golangci.yml file at the top level of your repo.
+script:
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash ./travis/run_on_pull_requests; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./travis/run_on_non_pull_requests; fi'
+
+# additional steps when your build succeeds (such as building documentation, or deploying to a custom server)
+# after_success:
+
+# additional steps when your build fails  (such as uploading log files)
+# after_failure:
