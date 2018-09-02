@@ -28,7 +28,8 @@ before_install:
   - go get github.com/mattn/goveralls
 
 # install any dependencies required
-install: true
+install:
+  - dep ensure
 
 # Don't email me the results of the test runs.
 notifications:
@@ -56,3 +57,7 @@ script:
 
 # additional steps when your build fails  (such as uploading log files)
 # after_failure:
+
+env:
+  global:
+    secure: f9GDwoky2lszRflg1fPGitmAV++ey1cKG16NlSwE+0kk1SU7W0gtY2ne8bnjZ9AHf0lFaVXQamVo8BiDGGIh7WGYDzBEosSe8v3ltCe+lOHeAM1IMJiluZC5OvAg0gpKiymirgbao+1UjXvwMNb++vofNjMKoW+esGAAmPQqDdqk8D9aK0UH3GKkkgvIDYZvx9dnGFK60lN3hoMPdh7SfQxweOHVM2rCXGFIT+LaOraofDv9dTKtcrgezCCXgsjnYP7rQ8QFDuem9SGxmh5TSWh5df99zedpLAxeAbm9q0IUazpVUHFh5JCfin8jUIKCBH0roYVLK06a8xtXGlWQQ4dGWehFjHUfJE9f77uUZPnZQCZaZnBk+CiSBPkjhjjtR1dnZzz9w//G5dgc8DOOxKBuNXV3fJK0LdghciWFo6kPHf+4bPFp8TD1XnhqOjEF4vz6cZoufLn7RpfRrBp5/5Wda9qsf3TcA18CHE4Fg7dUJdG+xXm/4Yh0370kclkxGJDfTiq4APJFlCnzJ6w4p6Q2ONZsafzolYsoh/fabuoSzYg9bkDlxkQPzmVVeNy8Ff0h8InFThCaLRKSmg8/n4vOUobsv2ngMiKJ+hcwaIo6r8+UtTjOoIAoHyF0WaN4Aw6otz5c6VeQoZrc+WiOtMv441xx3EFmpV5GL3YTtF8=
