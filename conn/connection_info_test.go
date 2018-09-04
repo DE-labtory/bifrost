@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package conn
+package conn_test
 
 import (
 	"testing"
 
+	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/heimdall"
 	"github.com/stretchr/testify/assert"
 )
@@ -30,14 +31,14 @@ func TestFromPublicConnInfo(t *testing.T) {
 
 	b := heimdall.PubKeyToBytes(pub)
 
-	pci := PublicConnInfo{}
+	pci := conn.PublicConnInfo{}
 	pci.Id = "test1"
-	pci.Address = Address{IP: "127.0.0.1"}
+	pci.Address = conn.Address{IP: "127.0.0.1"}
 	pci.Pubkey = b
 	pci.CurveOpt = heimdall.CurveToCurveOpt(pub.Curve)
 
 	//when
-	connInfo, err := FromPublicConnInfo(pci)
+	connInfo, err := conn.FromPublicConnInfo(pci)
 
 	//then
 	assert.NoError(t, err)
