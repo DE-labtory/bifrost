@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package bifrost
+package bifrost_test
 
 import (
 	"encoding/json"
@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/conn"
 	mux2 "github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
@@ -43,7 +44,7 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 	pub := &pri.PublicKey
 
 	envelope := &pb.Envelope{}
-	envelope.Protocol = REQUEST_CONNINFO
+	envelope.Protocol = bifrost.REQUEST_CONNINFO
 	err = stream.Send(envelope)
 
 	if err != nil {
@@ -67,7 +68,7 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 	pci.CurveOpt = heimdall.CurveToCurveOpt(pub.Curve)
 
 	envelope2 := &pb.Envelope{}
-	envelope2.Protocol = CONNECTION_ESTABLISH
+	envelope2.Protocol = bifrost.CONNECTION_ESTABLISH
 	payload, err := json.Marshal(pci)
 	if err != nil {
 		log.Fatalf(err.Error())
@@ -128,12 +129,12 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 	assert.Nil(t, err)
 	pub := &priv.PublicKey
 
-	myconnectionInfo := NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
-	host := New(myconnectionInfo, mux, nil)
+	host := bifrost.New(myconnectionInfo, mux, nil)
 
-	connection, err := host.ConnectToPeer(Address{Ip: "127.0.0.1:9999"})
+	connection, err := host.ConnectToPeer(bifrost.Address{Ip: "127.0.0.1:9999"})
 	assert.Nil(t, err)
 	log.Printf("Sending data...")
 	connection.Send(&pb.Envelope{Payload: []byte("test1")}, nil, nil)
@@ -150,7 +151,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
 	pub := &priv.PublicKey
 
-	myconnectionInfo := NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
 	mux := mux2.NewMux()
 
 	var OnConnectionHandler = func(connection conn.Connection) {
@@ -158,7 +159,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 		assert.Equal(t, connection.GetConnInfo().Address.IP, "127.0.0.1:8888")
 	}
 
-	serverHost := New(myconnectionInfo, mux, OnConnectionHandler)
+	serverHost := bifrost.New(myconnectionInfo, mux, OnConnectionHandler)
 	serverIP := "127.0.0.1:8888"
 	server1, listner1 := ListenMockServer(serverHost, serverIP)
 
@@ -167,9 +168,9 @@ func TestBifrostHost_Stream(t *testing.T) {
 		listner1.Close()
 	}()
 
-	clientHost := New(myconnectionInfo, mux, nil)
+	clientHost := bifrost.New(myconnectionInfo, mux, nil)
 
-	connection, err := clientHost.ConnectToPeer(Address{Ip: serverIP})
+	connection, err := clientHost.ConnectToPeer(bifrost.Address{Ip: serverIP})
 
 	fmt.Println(connection)
 
