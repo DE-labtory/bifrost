@@ -31,7 +31,7 @@ type ErrorFunc func(conn conn.Connection, err error)
 
 type Mux struct {
 	sync.RWMutex
-	registerHandled map[Protocol]*Handle
+	RegisterHandled map[Protocol]*Handle
 	errorFunc       ErrorFunc
 }
 
@@ -41,7 +41,7 @@ type Handle struct {
 
 func NewMux() *Mux {
 	return &Mux{
-		registerHandled: make(map[Protocol]*Handle),
+		RegisterHandled: make(map[Protocol]*Handle),
 	}
 }
 
@@ -50,22 +50,22 @@ func (mux *Mux) Handle(protocol Protocol, handler HandlerFunc) error {
 	mux.Lock()
 	defer mux.Unlock()
 
-	_, ok := mux.registerHandled[protocol]
+	_, ok := mux.RegisterHandled[protocol]
 
 	if ok {
 		return errors.New("already exist protocol")
 	}
 
-	mux.registerHandled[protocol] = &Handle{handler}
+	mux.RegisterHandled[protocol] = &Handle{handler}
 	return nil
 }
 
-func (mux *Mux) match(protocol Protocol) HandlerFunc {
+func (mux *Mux) Match(protocol Protocol) HandlerFunc {
 
 	mux.Lock()
 	defer mux.Unlock()
 
-	handle, ok := mux.registerHandled[protocol]
+	handle, ok := mux.RegisterHandled[protocol]
 
 	if ok {
 		return handle.handlerFunc
@@ -78,7 +78,7 @@ func (mux *Mux) ServeRequest(msg conn.OutterMessage) {
 
 	protocol := msg.Envelope.Protocol
 
-	handleFunc := mux.match(Protocol(protocol))
+	handleFunc := mux.Match(Protocol(protocol))
 
 	if handleFunc != nil {
 		handleFunc(msg)
