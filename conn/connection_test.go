@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package conn
+package conn_test
 
 import (
 	"fmt"
@@ -25,6 +25,7 @@ import (
 
 	"time"
 
+	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/stream"
 	"github.com/stretchr/testify/assert"
@@ -45,11 +46,11 @@ type MockServer struct {
 
 type Handler struct{}
 
-func (h Handler) ServeRequest(message OutterMessage) {
+func (h Handler) ServeRequest(message conn.OutterMessage) {
 
 }
 
-func (h Handler) ServeError(conn Connection, err error) {
+func (h Handler) ServeError(conn conn.Connection, err error) {
 
 }
 
@@ -118,14 +119,14 @@ func TestNewStreamHandler(t *testing.T) {
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
 	address := stream.Address{IP: serverIP}
-	grpc_conn, err := stream.NewClientConn(address, false, nil)
+	grpcConn, err := stream.NewClientConn(address, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	ctx, _ := context.WithCancel(context.Background())
-	streamServiceClient := pb.NewStreamServiceClient(grpc_conn)
+	streamServiceClient := pb.NewStreamServiceClient(grpcConn)
 	_, err = streamServiceClient.Stream(ctx)
 
 	defer func() {
@@ -154,19 +155,19 @@ func TestStreamHandler_Send(t *testing.T) {
 	}()
 
 	address := stream.Address{IP: serverIP}
-	grpc_conn, err := stream.NewClientConn(address, false, nil)
+	grpcConn, err := stream.NewClientConn(address, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	streamWrapper, err := stream.NewClientStreamWrapper(grpc_conn)
+	streamWrapper, err := stream.NewClientStreamWrapper(grpcConn)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	conn, err := NewConnection(ConnInfo{}, streamWrapper, Handler{})
+	testConn, err := conn.NewConnection(conn.ConnInfo{}, streamWrapper, Handler{})
 
 	if err != nil {
 		fmt.Errorf("error")
@@ -184,7 +185,7 @@ func TestStreamHandler_Send(t *testing.T) {
 	envelope.Payload = []byte("hello")
 
 	//then
-	conn.Send(envelope, success, fail)
+	testConn.Send(envelope, success, fail)
 
 	time.Sleep(2 * time.Second)
 }
@@ -209,7 +210,7 @@ func TestStreamHandler_Close(t *testing.T) {
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
 	address := stream.Address{IP: serverIP}
-	grpc_conn, err := stream.NewClientConn(address, false, nil)
+	grpcConn, err := stream.NewClientConn(address, false, nil)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -222,17 +223,17 @@ func TestStreamHandler_Close(t *testing.T) {
 
 	//need to wait to connect
 	time.Sleep(1 * time.Second)
-	streamWrapper, err := stream.NewClientStreamWrapper(grpc_conn)
+	streamWrapper, err := stream.NewClientStreamWrapper(grpcConn)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	time.Sleep(1 * time.Second)
-	conn, err := NewConnection(ConnInfo{}, streamWrapper, Handler{})
+	testConn, err := conn.NewConnection(conn.ConnInfo{}, streamWrapper, Handler{})
 
 	//then
-	conn.Close()
+	testConn.Close()
 	//result
 	time.Sleep(3 * time.Second)
 	assert.Equal(t, closed, true)

@@ -22,12 +22,12 @@ type ConnectionID string
 
 type ConnectionStore struct {
 	sync.RWMutex
-	connMap map[ID]Connection
+	ConnMap map[ID]Connection
 }
 
 func NewConnectionStore() *ConnectionStore {
 	return &ConnectionStore{
-		connMap: make(map[ID]Connection),
+		ConnMap: make(map[ID]Connection),
 	}
 }
 
@@ -37,14 +37,14 @@ func (connStore ConnectionStore) AddConnection(conn Connection) {
 
 	connID := ID(conn.GetConnInfo().Id)
 
-	_, ok := connStore.connMap[connID]
+	_, ok := connStore.ConnMap[connID]
 
 	//exist
 	if ok {
 		return
 	}
 
-	connStore.connMap[connID] = conn
+	connStore.ConnMap[connID] = conn
 }
 
 func (connStore ConnectionStore) DeleteConnection(connID ID) {
@@ -58,12 +58,12 @@ func (connStore ConnectionStore) DeleteConnection(connID ID) {
 	}
 
 	conn.Close()
-	delete(connStore.connMap, connID)
+	delete(connStore.ConnMap, connID)
 }
 
 func (connStore ConnectionStore) GetConnection(connID ID) Connection {
 
-	conn, ok := connStore.connMap[connID]
+	conn, ok := connStore.ConnMap[connID]
 
 	//exist
 	if ok {

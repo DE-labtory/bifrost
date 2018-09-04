@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package conn
+package conn_test
 
 import (
 	"testing"
 
+	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/stream"
 	"github.com/stretchr/testify/assert"
@@ -44,84 +45,84 @@ func (m MockStreamWrapper) GetStream() stream.Stream {
 type MockReceivedHandler struct {
 }
 
-func (m MockReceivedHandler) ServeRequest(msg OutterMessage) {
+func (m MockReceivedHandler) ServeRequest(msg conn.OutterMessage) {
 
 }
 
-func (m MockReceivedHandler) ServeError(conn Connection, err error) {
+func (m MockReceivedHandler) ServeError(conn conn.Connection, err error) {
 
 }
 
 func TestNewConnectionStore(t *testing.T) {
-	connStore := NewConnectionStore()
-	assert.NotNil(t, connStore.connMap)
+	connStore := conn.NewConnectionStore()
+	assert.NotNil(t, connStore.ConnMap)
 }
 
 func TestConnectionStore_AddConnection(t *testing.T) {
 	//given
-	connStore := NewConnectionStore()
+	connStore := conn.NewConnectionStore()
 	msw := MockStreamWrapper{}
 	mrh := MockReceivedHandler{}
 
-	connInfo := ConnInfo{}
-	connInfo.Id = ID("ASD")
+	connInfo := conn.ConnInfo{}
+	connInfo.Id = conn.ID("ASD")
 
-	conn, err := NewConnection(connInfo, msw, mrh)
+	testConn, err := conn.NewConnection(connInfo, msw, mrh)
 
 	if err != nil {
 
 	}
 
 	//when
-	connStore.AddConnection(conn)
+	connStore.AddConnection(testConn)
 
 	//then
-	assert.Equal(t, 1, len(connStore.connMap))
+	assert.Equal(t, 1, len(connStore.ConnMap))
 }
 
 func TestConnectionStore_DeleteConnection(t *testing.T) {
 	//given
-	connStore := NewConnectionStore()
+	connStore := conn.NewConnectionStore()
 	msw := MockStreamWrapper{}
 	mrh := MockReceivedHandler{}
 
-	connInfo := ConnInfo{}
-	connInfo.Id = ID("ASD")
+	connInfo := conn.ConnInfo{}
+	connInfo.Id = conn.ID("ASD")
 
-	conn, err := NewConnection(connInfo, msw, mrh)
+	testConn, err := conn.NewConnection(connInfo, msw, mrh)
 
 	if err != nil {
 
 	}
-	connStore.AddConnection(conn)
+	connStore.AddConnection(testConn)
 
 	//when
-	connStore.DeleteConnection(conn.GetConnInfo().Id)
+	connStore.DeleteConnection(testConn.GetConnInfo().Id)
 
 	//then
-	assert.Equal(t, 0, len(connStore.connMap))
+	assert.Equal(t, 0, len(connStore.ConnMap))
 }
 
 func TestConnectionStore_GetConnection(t *testing.T) {
 	//given
-	connStore := NewConnectionStore()
+	connStore := conn.NewConnectionStore()
 	msw := MockStreamWrapper{}
 	mrh := MockReceivedHandler{}
 
-	connInfo := ConnInfo{}
-	connInfo.Id = ID("ASD")
+	connInfo := conn.ConnInfo{}
+	connInfo.Id = conn.ID("ASD")
 
-	conn, err := NewConnection(connInfo, msw, mrh)
+	testConn, err := conn.NewConnection(connInfo, msw, mrh)
 
 	if err != nil {
 
 	}
 
-	connStore.AddConnection(conn)
+	connStore.AddConnection(testConn)
 
 	//when
-	fconn := connStore.GetConnection(conn.GetConnInfo().Id)
+	fconn := connStore.GetConnection(testConn.GetConnInfo().Id)
 
 	//then
-	assert.Equal(t, conn.GetConnInfo(), fconn.GetConnInfo())
+	assert.Equal(t, testConn.GetConnInfo(), fconn.GetConnInfo())
 }
