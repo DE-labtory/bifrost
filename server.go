@@ -37,7 +37,7 @@ func Listen(host *BifrostHost) {
 	pb.RegisterStreamServiceServer(s, host)
 	reflection.Register(s)
 
-	log.Println("Listen... on: [%s]", host.info.Address.IP)
+	log.Printf("Listen... on: [%v]", host.info.Address.IP)
 	func() {
 		if err := s.Serve(lis); err != nil {
 			log.Fatalf("failed to serve: %v", err)
