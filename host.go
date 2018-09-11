@@ -29,7 +29,6 @@ import (
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/stream"
-	"github.com/it-chain/heimdall"
 	"google.golang.org/grpc"
 )
 
@@ -56,18 +55,22 @@ func NewAddress(ipAddress string) Address {
 type OnConnectionHandler func(conn.Connection)
 
 type BifrostHost struct {
-	mux                 *mux.Mux
+	Mux                 *mux.Mux
 	info                HostInfo
 	server              *grpc.Server
 	onConnectionHandler OnConnectionHandler
+	Signer              Signer
+	Formatter           Formatter
 }
 
-func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler) *BifrostHost {
+func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHandler, signer Signer, formatter Formatter) *BifrostHost {
 
 	host := &BifrostHost{
-		mux:                 mux,
+		Mux:                 mux,
 		info:                myConnInfo,
 		onConnectionHandler: onConnectionHandler,
+		Signer:              signer,
+		Formatter:           formatter,
 	}
 
 	return host
@@ -76,9 +79,9 @@ func New(myConnInfo HostInfo, mux *mux.Mux, onConnectionHandler OnConnectionHand
 func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 	endPointAddress := stream.Address{IP: address.Ip}
-	grpc_conn, err := stream.NewClientConn(endPointAddress, false, nil)
+	grpcConn, err := stream.NewClientConn(endPointAddress, false, nil)
 
-	streamWrapper, err := stream.Connect(grpc_conn)
+	streamWrapper, err := stream.Connect(grpcConn)
 
 	if err != nil {
 		return nil, err
@@ -99,7 +102,8 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 
 	// 2.
 	if IsRequestConnInfoProtocol(envelope.GetProtocol()) {
-		info := bih.info.GetPublicInfo()
+
+		info := bih.getPublicInfo()
 
 		envelope, err := bih.createSignedEnvelope(REQUEST_CONNINFO, info)
 
@@ -123,16 +127,15 @@ func (bih BifrostHost) ConnectToPeer(address Address) (conn.Connection, error) {
 		}
 
 		if IsConnectionIstablishProtocol(envelope.GetProtocol()) {
-
 			log.Printf("Received payload [%s]", envelope.Payload)
 
-			connectedConnInfo, err := pubConnInfoToConnInfo(envelope.Payload)
+			connectedConnInfo, err := bih.pubConnInfoToConnInfo(envelope.Payload)
 
 			if err != nil {
 				return nil, err
 			}
 
-			conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
+			conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.Mux)
 
 			go func() {
 				if err = conn.Start(); err != nil {
@@ -170,16 +173,17 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 			return errors.New(fmt.Sprintf("Not a request connInfo protocol [%s]", m.GetProtocol()))
 		}
 
-		log.Printf("Received payload [%s]", envelope.Payload)
+		//log.Printf("Received payload [%s]", envelope.Payload)
+		log.Printf("Received payload [%s]", m.Payload)
 
-		info := bih.info.GetPublicInfo()
+		info := bih.getPublicInfo()
 		envelope, err := bih.createSignedEnvelope(CONNECTION_ESTABLISH, info)
 
 		if err = streamServer.Send(envelope); err != nil {
 			return err
 		}
 
-		connectedConnInfo, err := pubConnInfoToConnInfo(envelope.Payload)
+		connectedConnInfo, err := bih.pubConnInfoToConnInfo(envelope.Payload)
 
 		//validate connectedInfo
 		if err != nil {
@@ -189,7 +193,7 @@ func (bih BifrostHost) Stream(streamServer pb.StreamService_StreamServer) error 
 		_, cf := context.WithCancel(context.Background())
 		streamWrapper := stream.NewServerStreamWrapper(streamServer, cf)
 
-		conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.mux)
+		conn, err := conn.NewConnection(*connectedConnInfo, streamWrapper, bih.Mux)
 		defer conn.Close()
 
 		go func() {
@@ -251,7 +255,7 @@ func IsConnectionIstablishProtocol(protocol string) bool {
 	return false
 }
 
-func pubConnInfoToConnInfo(payload []byte) (*conn.ConnInfo, error) {
+func (bih BifrostHost) pubConnInfoToConnInfo(payload []byte) (*conn.ConnInfo, error) {
 
 	pubConnInfo := &conn.PublicConnInfo{}
 	err := json.Unmarshal(payload, pubConnInfo)
@@ -260,13 +264,13 @@ func pubConnInfoToConnInfo(payload []byte) (*conn.ConnInfo, error) {
 		return nil, err
 	}
 
-	connectedConnInfo, err := conn.FromPublicConnInfo(*pubConnInfo)
+	pubKey := bih.Formatter.FromByte(pubConnInfo.Pubkey, pubConnInfo.CurveOpt)
 
-	if err != nil {
-		return nil, err
-	}
-
-	return connectedConnInfo, nil
+	return &conn.ConnInfo{
+		Id:      conn.ID(pubConnInfo.Id),
+		Address: pubConnInfo.Address,
+		PubKey:  pubKey,
+	}, nil
 }
 
 func (bih BifrostHost) createSignedEnvelope(protocol string, data interface{}) (*pb.Envelope, error) {
@@ -277,9 +281,8 @@ func (bih BifrostHost) createSignedEnvelope(protocol string, data interface{}) (
 		return nil, err
 	}
 
-	pub := heimdall.PubKeyToBytes(bih.info.PubKey)
-
-	sig, err := heimdall.Sign(bih.info.PriKey, payload, nil, heimdall.SHA384)
+	pub := bih.Formatter.ToByte(bih.info.PubKey)
+	sig, err := bih.Signer.Sign()
 
 	if err != nil {
 		return nil, err
@@ -292,6 +295,19 @@ func (bih BifrostHost) createSignedEnvelope(protocol string, data interface{}) (
 	envelope.Signature = sig
 
 	return envelope, nil
+}
+
+func (bih BifrostHost) getPublicInfo() *conn.PublicConnInfo {
+	publicConnInfo := &conn.PublicConnInfo{}
+	publicConnInfo.Id = bih.info.Id.ToString()
+	publicConnInfo.Address = bih.info.Address
+
+	bytePubKey := bih.Formatter.ToByte(bih.info.PubKey)
+
+	publicConnInfo.Pubkey = bytePubKey
+	publicConnInfo.CurveOpt = bih.Formatter.GetCurveOpt(bih.info.PubKey)
+
+	return publicConnInfo
 }
 
 func (bih BifrostHost) handleError(err error) {
