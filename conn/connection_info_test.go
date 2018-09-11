@@ -17,32 +17,46 @@
 package conn_test
 
 import (
+	"crypto/ecdsa"
 	"testing"
 
 	"github.com/it-chain/bifrost/conn"
-	"github.com/it-chain/heimdall"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFromPublicConnInfo(t *testing.T) {
+func TestID_ToString(t *testing.T) {
+	id := conn.ID("testID")
+	strID := id.ToString()
+	assert.Equal(t, strID, "testID")
+}
 
-	pri, err := heimdall.GenerateKey(heimdall.SECP384R1)
-	pub := &pri.PublicKey
+func TestNewConnInfo(t *testing.T) {
+	id := "testID"
+	address := conn.Address{IP: "127.0.0.1:1111"}
+	pubKey := new(ecdsa.PublicKey)
 
-	b := heimdall.PubKeyToBytes(pub)
+	connInfo := conn.NewConnInfo(id, address, pubKey)
+	assert.Equal(t, connInfo.Id, conn.ID(id))
+	assert.Equal(t, connInfo.Address, address)
+	assert.Equal(t, connInfo.PubKey, pubKey)
+}
 
-	pci := conn.PublicConnInfo{}
-	pci.Id = "test1"
-	pci.Address = conn.Address{IP: "127.0.0.1"}
-	pci.Pubkey = b
-	pci.CurveOpt = heimdall.CurveToCurveOpt(pub.Curve)
+func TestToAddress(t *testing.T) {
+	ipv4Addr := "192.168.0.0:1234"
+	addrNoPort := "127.0.0.114324"
+	addrTooManyNumInIP := "127.0.0.114324"
+	addrTooManyNumInPort := "127.0.0.1:555555"
 
-	//when
-	connInfo, err := conn.FromPublicConnInfo(pci)
-
-	//then
+	address, err := conn.ToAddress(ipv4Addr)
 	assert.NoError(t, err)
-	assert.Equal(t, pub, connInfo.PubKey)
-	assert.Equal(t, pci.Id, string(connInfo.Id))
-	assert.Equal(t, pci.Address, connInfo.Address)
+	assert.Equal(t, ipv4Addr, address.IP)
+
+	address, err = conn.ToAddress(addrNoPort)
+	assert.Error(t, err)
+
+	address, err = conn.ToAddress(addrTooManyNumInIP)
+	assert.Error(t, err)
+
+	address, err = conn.ToAddress(addrTooManyNumInPort)
+	assert.Error(t, err)
 }
