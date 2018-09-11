@@ -27,17 +27,23 @@ import (
 
 	"crypto/ecdsa"
 
+	"crypto/elliptic"
+	"crypto/rand"
+
 	"github.com/google/gops/agent"
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/conn"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall"
+	"github.com/it-chain/bifrost/sample/echo"
 )
 
-func CreateHost(ip string, mux *mux.Mux, pub *ecdsa.PublicKey, pri *ecdsa.PrivateKey) *bifrost.BifrostHost {
+func CreateHost(ip string, mux *mux.Mux, pri *ecdsa.PrivateKey) *bifrost.BifrostHost {
+	formatter := echo.SimpleFormatter{}
+	idGetter := echo.SimpleIdGetter{IDPrefix: "ITTEST", PubKeyByte: formatter.ToByte(&pri.PublicKey)}
+	signer := echo.SimpleSigner{PriKey: pri, Message: nil}
 
-	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: ip}, pub, pri)
+	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: ip}, pri, &idGetter)
 
 	var ErrorHandler = func(conn conn.Connection, err error) {
 		log.Println(err.Error())
@@ -51,7 +57,7 @@ func CreateHost(ip string, mux *mux.Mux, pub *ecdsa.PublicKey, pri *ecdsa.Privat
 		log.Printf("New connections are connected [%s]", connection)
 	}
 
-	return bifrost.New(myconnectionInfo, mux, OnConnectionHandler)
+	return bifrost.New(myconnectionInfo, mux, OnConnectionHandler, &signer, &formatter)
 }
 
 func ReadFromConsole() string {
@@ -71,34 +77,36 @@ func BuildEnvelope(protocol mux.Protocol, data interface{}) *pb.Envelope {
 	return envelope
 }
 
-func Sign(envelope *pb.Envelope, priKey *ecdsa.PrivateKey) *pb.Envelope {
-	envelope.Signature, _ = heimdall.Sign(priKey, envelope.Payload, nil, heimdall.SHA384)
-
-	return envelope
-}
-
 func main() {
 	pprof.Lookup("goroutine").WriteTo(os.Stdout, 1)
 
 	defer os.RemoveAll("~/key")
 
-	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	generator := echo.SimpleGenerator{Curve: elliptic.P384(), Rand: rand.Reader}
+	priv, err := generator.GenerateKey()
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	var protocol mux.Protocol
 	protocol = "/echo/1.0"
-	mux := mux.NewMux()
-
-	mux.Handle(protocol, func(message conn.OutterMessage) {
-		log.Printf("Echoed [%s]", string(message.Envelope.Payload))
-		envelope := Sign(BuildEnvelope(protocol, string(message.Data)), priv)
-		message.Respond(envelope, nil, nil)
-	})
+	serverMux := mux.NewMux()
 
 	address := "127.0.0.1:8888"
-	host := CreateHost(address, mux, &priv.PublicKey, priv)
+	host := CreateHost(address, serverMux, priv)
+
+	host.Mux.Handle(protocol, func(message conn.OutterMessage) {
+		log.Printf("Echoed [%s]", string(message.Envelope.Payload))
+		envelope := BuildEnvelope(protocol, string(message.Data))
+		host.Signer.(*echo.SimpleSigner).Message = envelope.Payload
+		envelope.Signature, err = host.Signer.Sign()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		message.Respond(envelope, nil, nil)
+	})
 
 	if err := agent.Listen(agent.Options{}); err != nil {
 		log.Fatal(err)
