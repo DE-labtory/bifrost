@@ -38,7 +38,10 @@ type Address struct {
 func validIP4(ipAddress string) bool {
 	ipAddress = strings.Trim(ipAddress, " ")
 
-	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
+	// just ip address xxx.xxx.xxx.xxx
+	//re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)
+	// ip with port number xxx.xxx.xxx.xxx:xxxx(x)  -> port number can be 0~99999 (real port numbers are in 0~65535 -> unsigned short 2bytes)
+	re, _ := regexp.Compile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]){1}([:][0-9][0-9][0-9][0-9][0-9]?)$`)
 	if re.MatchString(ipAddress) {
 		return true
 	}
