@@ -18,7 +18,7 @@
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:d047efe8ba23eabd004e5a41c15f3ef6c2672155f89a3a1991be891d1cb74dbc"
+  digest = "1:5d1b5a25486fc7d4e133646d834f6fca7ba1cef9903d40e7aa786c41b89e9e91"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -29,10 +29,11 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "e09c5db296004fbe3f74490e84dcd62c3c5ddb1b"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
 
 [[projects]]
-  digest = "1:e22469bf84466c427efe488bdb825101c527ecfd79f7829f72505c5ec64a7c06"
+  digest = "1:aebccac5eae98c77bbdf314428fb06ec1c1b4bee91589c3624d7facba176b8a6"
   name = "github.com/google/gops"
   packages = [
     "agent",
@@ -42,14 +43,6 @@
   pruneopts = "UT"
   revision = "89672dbe3c4ba97d53af7e839e8097e1ccbb4977"
   version = "v0.3.5"
-
-[[projects]]
-  digest = "1:d128ffc321d4b6234d39c3de1d28782a015f4d9168114001ef3dd628b91748ea"
-  name = "github.com/it-chain/heimdall"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "4d3faeb635599f0419100924a6da72074e4742d5"
-  version = "v0.2.0"
 
 [[projects]]
   branch = "master"
@@ -68,26 +61,16 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:f85e109eda8f6080877185d1c39e98dd8795e1780c08beca28304b87fd855a1c"
+  digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
   pruneopts = "UT"
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:6821bdf5fd1822feef766cc899a293cfadae430feb926dd42cd19cb0a9970f61"
-  name = "golang.org/x/crypto"
-  packages = [
-    "pbkdf2",
-    "scrypt",
-  ]
-  pruneopts = "UT"
-  revision = "182538f80094b6a8efaade63a8fd8e0d9d5843dd"
-
-[[projects]]
-  digest = "1:548e8896334063c1d4259f8b3894d916d03fb13d6b35880367e46964b1fe8472"
+  digest = "1:deafe4ab271911fec7de5b693d7faae3f38796d9eb8622e2b9e7df42bb3dfea9"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -96,22 +79,27 @@
     "http2/hpack",
     "idna",
     "internal/timeseries",
-    "lex/httplex",
     "trace",
   ]
   pruneopts = "UT"
-  revision = "d41e8174641f662c5a2d1c7a5f9e828788eb8706"
+  revision = "161cd47e91fd58ac17490ef4d742dc98bb4cf60e"
 
 [[projects]]
-  digest = "1:9670d333e91c2426917fd213984dfa53d1cfda6d8ad4235765f42682fc07331c"
+  branch = "master"
+  digest = "1:6eb2645d74b43d9c87b51947df39f7c668a4f422cd512053f7f6f75bfaad0197"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "d0be0721c37eeb5299f245a996a483160fc36940"
+
+[[projects]]
+  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
   name = "golang.org/x/text"
   packages = [
     "collate",
     "collate/build",
     "internal/colltab",
     "internal/gen",
-    "internal/language",
-    "internal/language/compact",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
@@ -124,17 +112,19 @@
     "unicode/rangetable",
   ]
   pruneopts = "UT"
-  revision = "7922cc490dd5a7dbaa7fd5d6196b49db59ac042f"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [[projects]]
-  digest = "1:cd018653a358d4b743a9d3bee89e825521f2ab2f2ec0770164bf7632d8d73ab7"
+  branch = "master"
+  digest = "1:077c1c599507b3b3e9156d17d36e1e61928ee9b53a5b420f10f28ebd4a0b275c"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
   pruneopts = "UT"
-  revision = "7fd901a49ba6a7f87732eb344f6e3c5b19d1b200"
+  revision = "11092d34479b07829b72e10713b159248caf5dad"
 
 [[projects]]
-  digest = "1:61b7bc09ea5b8a02ef2a4b470541e53aaa6c12a26252400bacecc0816b3c9af8"
+  digest = "1:76332e947f184a2dc091db40f22c7089ada36bbc577793074639695af85a10fd"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -146,9 +136,13 @@
     "credentials",
     "encoding",
     "encoding/proto",
-    "grpclb/grpc_lb_v1/messages",
     "grpclog",
     "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/envconfig",
+    "internal/grpcrand",
+    "internal/transport",
     "keepalive",
     "metadata",
     "naming",
@@ -161,19 +155,18 @@
     "stats",
     "status",
     "tap",
-    "transport",
   ]
   pruneopts = "UT"
-  revision = "8e4536a86ab602859c20df5ebfd0bd4228d08655"
-  version = "v1.10.0"
+  revision = "32fb0ac620c32ba40a4626ddf94d90d12cce3455"
+  version = "v1.14.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/btcsuite/btcutil/base58",
     "github.com/golang/protobuf/proto",
     "github.com/google/gops/agent",
-    "github.com/it-chain/heimdall",
     "github.com/stretchr/testify/assert",
     "golang.org/x/net/context",
     "google.golang.org/grpc",

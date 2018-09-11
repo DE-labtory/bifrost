@@ -18,27 +18,26 @@ package bifrost
 
 import (
 	"crypto/ecdsa"
-
-	"github.com/it-chain/bifrost/conn"
 )
 
-//Identitiy of Connection
-type ID string
-
-func (id ID) String() string {
-	return string(id)
+type Generator interface {
+	GenerateKey() (*ecdsa.PrivateKey, error)
 }
 
-type HostInfo struct {
-	conn.ConnInfo
-	PriKey *ecdsa.PrivateKey
+type IDGetter interface {
+	GetID(*ecdsa.PublicKey) ID
 }
 
-func NewHostInfo(address conn.Address, priKey *ecdsa.PrivateKey, idGetter IDGetter) HostInfo {
-	id := idGetter.GetID(&priKey.PublicKey)
+type Signer interface {
+	Sign() ([]byte, error)
+}
 
-	return HostInfo{
-		ConnInfo: conn.NewConnInfo(id.String(), address, &priKey.PublicKey),
-		PriKey:   priKey,
-	}
+type Verifier interface {
+	Verify() (bool, error)
+}
+
+type Formatter interface {
+	FromByte(pubKey []byte, curveOpt int) *ecdsa.PublicKey
+	ToByte(pubKey *ecdsa.PublicKey) []byte
+	GetCurveOpt(pubKey *ecdsa.PublicKey) int
 }

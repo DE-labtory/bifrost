@@ -28,20 +28,27 @@ import (
 
 	"crypto/ecdsa"
 
+	"crypto/elliptic"
+
+	"crypto/rand"
+
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall"
+	"github.com/it-chain/bifrost/sample/echo"
 )
 
-func CreateHost(ip string, mux *mux.Mux, pub *ecdsa.PublicKey, pri *ecdsa.PrivateKey) *bifrost.BifrostHost {
+func CreateHost(ip string, mux *mux.Mux, pri *ecdsa.PrivateKey) *bifrost.BifrostHost {
+	formatter := echo.SimpleFormatter{}
+	idGetter := echo.SimpleIdGetter{IDPrefix: "ITTEST", PubKeyByte: formatter.ToByte(&pri.PublicKey)}
+	signer := echo.SimpleSigner{PriKey: pri, Message: nil}
 
-	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: ip}, pub, pri)
+	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: ip}, pri, &idGetter)
 
 	var OnConnectionHandler = func(connection conn.Connection) {
 		log.Printf("New connections are connected [%s]", connection)
 	}
 
-	return bifrost.New(myconnectionInfo, mux, OnConnectionHandler)
+	return bifrost.New(myconnectionInfo, mux, OnConnectionHandler, &signer, &formatter)
 }
 
 func ReadFromConsole() string {
@@ -61,17 +68,12 @@ func BuildEnvelope(protocol mux.Protocol, data interface{}) *pb.Envelope {
 	return envelope
 }
 
-func Sign(envelope *pb.Envelope, priKey *ecdsa.PrivateKey) *pb.Envelope {
-	envelope.Signature, _ = heimdall.Sign(priKey, envelope.Payload, nil, heimdall.SHA384)
-
-	return envelope
-}
-
 func main() {
 
 	defer os.RemoveAll("~/key")
 
-	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	generator := echo.SimpleGenerator{Curve: elliptic.P384(), Rand: rand.Reader}
+	priv, err := generator.GenerateKey()
 
 	var protocol mux.Protocol
 	protocol = "/echo/1.0"
@@ -83,11 +85,9 @@ func main() {
 	})
 
 	address := "127.0.0.1:7777"
-	host := CreateHost(address, mux, &priv.PublicKey, priv)
+	host := CreateHost(address, mux, priv)
 
 	conn, err := host.ConnectToPeer(bifrost.NewAddress("127.0.0.1:8888"))
-
-	defer conn.Close()
 
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -95,7 +95,17 @@ func main() {
 
 	for {
 		input := ReadFromConsole()
-		envelope := Sign(BuildEnvelope(protocol, input), priv)
+
+		envelope := BuildEnvelope(protocol, input)
+
+		host.Signer.(*echo.SimpleSigner).Message = envelope.Payload
+		envelope.Signature, err = host.Signer.Sign()
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
 		conn.Send(envelope, nil, nil)
 	}
+
+	defer conn.Close()
 }

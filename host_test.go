@@ -25,22 +25,61 @@ import (
 	"testing"
 	"time"
 
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/conn"
 	mux2 "github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
+type MockGenerator struct {
+}
+
+func (generator MockGenerator) GenerateKey() (*ecdsa.PrivateKey, error) {
+	return new(ecdsa.PrivateKey), nil
+}
+
+type MockSigner struct {
+}
+
+func (signer *MockSigner) Sign() ([]byte, error) {
+	return []byte("signature"), nil
+}
+
+type MockFormatter struct {
+}
+
+func (formatter *MockFormatter) ToByte(*ecdsa.PublicKey) []byte {
+	return []byte("byte format of ecdsa public key")
+}
+
+func (formatter *MockFormatter) FromByte([]byte, int) *ecdsa.PublicKey {
+	return new(ecdsa.PublicKey)
+}
+
+func (formatter *MockFormatter) GetCurveOpt(pubKey *ecdsa.PublicKey) int {
+	return *new(int)
+}
+
+type MockIdGetter struct {
+}
+
+func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) bifrost.ID {
+	return *new(bifrost.ID)
+}
+
 type MockServer struct {
 }
 
 func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
+	mockGenerator := MockGenerator{}
+	mockFormatter := MockFormatter{}
 
-	pri, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	pri, err := mockGenerator.GenerateKey()
 	pub := &pri.PublicKey
 
 	envelope := &pb.Envelope{}
@@ -59,13 +98,13 @@ func (ms MockServer) Stream(stream pb.StreamService_StreamServer) error {
 		log.Fatalf(err.Error())
 	}
 
-	b := heimdall.PubKeyToBytes(pub)
+	b := mockFormatter.ToByte(pub)
 
 	pci := conn.PublicConnInfo{}
 	pci.Id = "test1"
 	pci.Address = conn.Address{IP: "127.0.0.1"}
 	pci.Pubkey = b
-	pci.CurveOpt = heimdall.CurveToCurveOpt(pub.Curve)
+	pci.CurveOpt = mockFormatter.GetCurveOpt(pub)
 
 	envelope2 := &pb.Envelope{}
 	envelope2.Protocol = bifrost.CONNECTION_ESTABLISH
@@ -125,14 +164,20 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 	mockServer := &MockServer{}
 	server1, listner1 := ListenMockServer(mockServer, serverIP)
 
-	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
+	mockGenerator := MockGenerator{}
+
+	priv, err := mockGenerator.GenerateKey()
 	assert.Nil(t, err)
-	pub := &priv.PublicKey
 
-	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	idGetter := MockIdGetter{}
+	address, err := conn.ToAddress("127.0.0.1:8888")
+	assert.NoError(t, err)
+	myconnectionInfo := bifrost.NewHostInfo(address, priv, &idGetter)
 	mux := mux2.NewMux()
+	mockSigner := &MockSigner{}
+	mockFormatter := &MockFormatter{}
 
-	host := bifrost.New(myconnectionInfo, mux, nil)
+	host := bifrost.New(myconnectionInfo, mux, nil, mockSigner, mockFormatter)
 
 	connection, err := host.ConnectToPeer(bifrost.Address{Ip: "127.0.0.1:9999"})
 	assert.Nil(t, err)
@@ -148,18 +193,24 @@ func TestBifrostHost_ConnectToPeer(t *testing.T) {
 
 func TestBifrostHost_Stream(t *testing.T) {
 
-	priv, err := heimdall.GenerateKey(heimdall.SECP384R1)
-	pub := &priv.PublicKey
+	mockGenerator := MockGenerator{}
 
-	myconnectionInfo := bifrost.NewHostInfo(conn.Address{IP: "127.0.0.1:8888"}, pub, priv)
+	priv, err := mockGenerator.GenerateKey()
+
+	idGetter := MockIdGetter{}
+	address, err := conn.ToAddress("127.0.0.1:8888")
+	assert.NoError(t, err)
+	myconnectionInfo := bifrost.NewHostInfo(address, priv, &idGetter)
 	mux := mux2.NewMux()
+	mockSigner := &MockSigner{}
+	mockFormatter := &MockFormatter{}
 
 	var OnConnectionHandler = func(connection conn.Connection) {
 		log.Printf("New connections are connected [%s]", connection)
 		assert.Equal(t, connection.GetConnInfo().Address.IP, "127.0.0.1:8888")
 	}
 
-	serverHost := bifrost.New(myconnectionInfo, mux, OnConnectionHandler)
+	serverHost := bifrost.New(myconnectionInfo, mux, OnConnectionHandler, mockSigner, mockFormatter)
 	serverIP := "127.0.0.1:8888"
 	server1, listner1 := ListenMockServer(serverHost, serverIP)
 
@@ -168,7 +219,7 @@ func TestBifrostHost_Stream(t *testing.T) {
 		listner1.Close()
 	}()
 
-	clientHost := bifrost.New(myconnectionInfo, mux, nil)
+	clientHost := bifrost.New(myconnectionInfo, mux, nil, mockSigner, mockFormatter)
 
 	connection, err := clientHost.ConnectToPeer(bifrost.Address{Ip: serverIP})
 
