@@ -30,10 +30,6 @@
   version = "0.3.5"
 
 [[constraint]]
-  name = "github.com/it-chain/heimdall"
-  version = "0.2.0"
-
-[[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
