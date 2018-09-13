@@ -21,6 +21,13 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+type MockKeyLoader struct {
+}
+
+func (keystore *MockKeyLoader) LoadKey(pwd string) (*ecdsa.PrivateKey, error) {
+	return new(ecdsa.PrivateKey), nil
+}
+
 type MockGenerator struct {
 }
 
@@ -38,7 +45,7 @@ func (signer *MockSigner) Sign(message []byte) ([]byte, error) {
 type MockVerifier struct {
 }
 
-func (verifier *MockVerifier) Verify(pubKey *ecdsa.PublicKey, signature []byte, message []byte) (bool, error) {
+func (verifier *MockVerifier) Verify(peerKey *ecdsa.PublicKey, signature []byte, message []byte) (bool, error) {
 	return true, nil
 }
 
@@ -60,8 +67,8 @@ func (formatter *MockFormatter) GetCurveOpt(pubKey *ecdsa.PublicKey) int {
 type MockIdGetter struct {
 }
 
-func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) bifrost.ConnID {
-	return *new(bifrost.ConnID)
+func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) bifrost.KeyID {
+	return *new(bifrost.KeyID)
 }
 
 type StreamServer struct {
@@ -93,9 +100,9 @@ func (s *StreamServer) Send(envelope *pb.Envelope) error {
 	mockServer := GetServer()
 
 	if s.countSend == 2 {
-		bool, _, _ := mockServer.ValidateResponsePeerInfo(envelope)
+		valid, _, _ := mockServer.ValidateResponsePeerInfo(envelope)
 
-		if bool {
+		if valid {
 			return nil
 		} else {
 			return errors.New("invaild peerinfo")
@@ -254,8 +261,10 @@ func GetServer() *Server {
 	mockFormatter := MockFormatter{}
 	mockSigner := MockSigner{}
 	mockVerifier := MockVerifier{}
+	//mockKeyloader := MockKeyLoader{}
+	mockCrypto := bifrost.Crypto{IDGetter: &mockIdGetter, Signer: &mockSigner, Verifier: &mockVerifier, Formatter: &mockFormatter}
 
-	s := New(keyOpt, &mockIdGetter, &mockFormatter, &mockSigner, &mockVerifier)
+	s := New(keyOpt, mockCrypto)
 
 	return s
 }

@@ -55,8 +55,8 @@ func (formatter *MockFormatter) GetCurveOpt(pubKey *ecdsa.PublicKey) int {
 type MockIdGetter struct {
 }
 
-func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) ConnID {
-	return *new(ConnID)
+func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) KeyID {
+	return *new(KeyID)
 }
 
 type MockConnectionHandler func(stream pb.StreamService_BifrostStreamServer)

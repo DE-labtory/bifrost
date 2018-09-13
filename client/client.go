@@ -27,7 +27,6 @@ const (
 // Server 와 연결시 사용되는 Client option
 type ClientOpts struct {
 	Ip     string
-	PriKey *ecdsa.PrivateKey
 	PubKey *ecdsa.PublicKey
 }
 
@@ -38,7 +37,7 @@ type GrpcOpts struct {
 }
 
 // 서버와 연결 요청. 실패시 err. handshake 과정을 거침.
-func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, idGetter bifrost.IDGetter, formatter bifrost.Formatter, signer bifrost.Signer, verifier bifrost.Verifier) (bifrost.Connection, error) {
+func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, crypto bifrost.Crypto) (bifrost.Connection, error) {
 
 	var opts []grpc.DialOption //required options
 
@@ -63,13 +62,13 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, idGetter bi
 		return nil, err
 	}
 
-	serverPubKey, err := handShake(streamWrapper, clientOpts, formatter)
+	serverPubKey, err := handShake(streamWrapper, clientOpts, crypto.Formatter)
 
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := bifrost.NewConnection(serverIp, clientOpts.PriKey, serverPubKey, streamWrapper, idGetter, formatter, signer, verifier)
+	conn, err := bifrost.NewConnection(serverIp, serverPubKey, streamWrapper, crypto)
 
 	if err != nil {
 		return nil, err

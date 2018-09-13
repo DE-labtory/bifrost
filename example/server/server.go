@@ -37,9 +37,17 @@ func main() {
 
 	formatter := example.SimpleFormatter{}
 	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
-	signer := example.SimpleSigner{PriKey: pri}
+	err = generator.StoreKey(pri, "", "./.key", idGetter.GetID(&pri.PublicKey))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	keyLoader := example.SimpleKeyLoader{KeyDirPath: "./.key", KeyID: idGetter.GetID(&pri.PublicKey)}
+	signer := example.SimpleSigner{KeyLoader: &keyLoader}
 	verifier := example.SimpleVerifier{}
-	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: &pri.PublicKey}, &idGetter, &formatter, &signer, &verifier)
+	crypto := bifrost.Crypto{IDGetter: &idGetter, Verifier: &verifier, Signer: &signer, Formatter: &formatter}
+
+	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: &pri.PublicKey}, crypto)
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)

@@ -41,7 +41,6 @@ func main() {
 
 	clientOpt := client.ClientOpts{
 		Ip:     clientIp,
-		PriKey: pri,
 		PubKey: &pri.PublicKey,
 	}
 
@@ -52,9 +51,17 @@ func main() {
 
 	formatter := example.SimpleFormatter{}
 	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
-	signer := example.SimpleSigner{PriKey: pri}
-	verifier := example.SimpleVerifier{}
-	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, &idGetter, &formatter, &signer, &verifier)
+
+	err = generator.StoreKey(pri, "", "./.key", idGetter.GetID(clientOpt.PubKey))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	keyLoader := example.SimpleKeyLoader{KeyDirPath: "./.key", KeyID: idGetter.GetID(clientOpt.PubKey)}
+	signer := example.SimpleSigner{KeyLoader: &keyLoader}
+	verifier := example.SimpleVerifier{KeyLoader: &keyLoader}
+	crypto := bifrost.Crypto{IDGetter: &idGetter, Formatter: &formatter, Signer: &signer, Verifier: &verifier}
+	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, crypto)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -77,4 +84,5 @@ func main() {
 		text, _ := reader.ReadString('\n')
 		conn.Send([]byte(text), "chat", nil, nil)
 	}
+
 }
