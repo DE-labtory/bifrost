@@ -33,9 +33,8 @@ type Generator interface {
 	GenerateKey() (*ecdsa.PrivateKey, error)
 }
 
-type Keystore interface {
-	StoreKey(priKey *ecdsa.PrivateKey, pwd string) error
-	LoadKey(keyID string, pwd string) (*ecdsa.PrivateKey, error)
+type KeyLoader interface {
+	LoadKey(pwd string) (*ecdsa.PrivateKey, error)
 }
 
 type IDGetter interface {
