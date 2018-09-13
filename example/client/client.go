@@ -9,6 +9,9 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 
+	"os/signal"
+	"syscall"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/example"
@@ -77,6 +80,18 @@ func main() {
 	}()
 
 	conn.Send([]byte("client join!!"), "join", nil, nil)
+
+	sigChan := make(chan os.Signal, 2)
+	signal.Notify(sigChan, syscall.SIGINT)
+
+	go func() {
+		sig := <-sigChan
+		switch sig {
+		case syscall.SIGINT:
+			os.RemoveAll("./.key")
+			os.Exit(0)
+		}
+	}()
 
 	for {
 		reader := bufio.NewReader(os.Stdin)
