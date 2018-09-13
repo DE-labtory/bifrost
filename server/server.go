@@ -232,9 +232,9 @@ func (s *Server) Listen(ip string) {
 	reflection.Register(g)
 
 	s.lis = lis
-	log.Println("Listen... on: [%s]", ip)
+	log.Printf("Listen... on: [%s]", ip)
 	if err := g.Serve(lis); err != nil {
-		log.Println("failed to serve: %v", err)
+		log.Printf("failed to serve: %v", err)
 		g.Stop()
 		lis.Close()
 	}
