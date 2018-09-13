@@ -6,6 +6,10 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/example"
 	"github.com/it-chain/bifrost/mux"
@@ -51,6 +55,18 @@ func main() {
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)
+
+	sigChan := make(chan os.Signal, 2)
+	signal.Notify(sigChan, syscall.SIGINT)
+
+	go func() {
+		sig := <-sigChan
+		switch sig {
+		case syscall.SIGINT:
+			os.RemoveAll("./.key")
+			os.Exit(0)
+		}
+	}()
 
 	s.Listen(ip)
 }
