@@ -20,6 +20,15 @@ import (
 	"crypto/ecdsa"
 )
 
+type KeyID string
+
+type Crypto struct {
+	IDGetter
+	Signer
+	Verifier
+	Formatter
+}
+
 type Generator interface {
 	GenerateKey() (*ecdsa.PrivateKey, error)
 }
@@ -30,7 +39,7 @@ type Keystore interface {
 }
 
 type IDGetter interface {
-	GetID(*ecdsa.PublicKey) ConnID
+	GetID(pubKey *ecdsa.PublicKey) KeyID
 }
 
 type Signer interface {
