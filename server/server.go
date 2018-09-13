@@ -22,14 +22,10 @@ import (
 type Server struct {
 	onConnectionHandler OnConnectionHandler
 	onErrorHandler      OnErrorHandler
-	priKey              *ecdsa.PrivateKey
 	pubKey              *ecdsa.PublicKey
 	ip                  string
 	lis                 net.Listener
-	idGetter            bifrost.IDGetter
-	formatter           bifrost.Formatter
-	signer              bifrost.Signer
-	verifier            bifrost.Verifier
+	bifrost.Crypto
 }
 
 func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer) error {
@@ -48,7 +44,7 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 		return err
 	}
 
-	conn, err := bifrost.NewConnection(ip, s.priKey, pub, streamWrapper, s.idGetter, s.formatter, s.signer, s.verifier)
+	conn, err := bifrost.NewConnection(ip, pub, streamWrapper, s.Crypto)
 
 	if s.onConnectionHandler != nil {
 		s.onConnectionHandler(conn)
@@ -97,7 +93,7 @@ func requestInfo(streamWrapper bifrost.StreamWrapper) error {
 
 func (s Server) sendInfo(streamWrapper bifrost.StreamWrapper, pubKey *ecdsa.PublicKey) error {
 
-	envelope, err := bifrost.BuildResponsePeerInfo(pubKey, s.formatter)
+	envelope, err := bifrost.BuildResponsePeerInfo(pubKey, s.Crypto.Formatter)
 
 	if err != nil {
 		return errors.New("fail to build info")
@@ -131,7 +127,7 @@ func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (*ecdsa.Publi
 		return nil, err
 	}
 
-	pubKey := s.formatter.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
+	pubKey := s.Crypto.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
 
 	return pubKey, nil
 }
@@ -167,7 +163,7 @@ func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.Pu
 		return false, "", nil
 	}
 
-	pubKey := s.formatter.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
+	pubKey := s.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
 
 	return true, peerInfo.IP, pubKey
 }
@@ -186,14 +182,10 @@ func extractRemoteAddress(stream pb.StreamService_BifrostStreamServer) string {
 type OnConnectionHandler func(connection bifrost.Connection)
 type OnErrorHandler func(err error)
 
-func New(key bifrost.KeyOpts, idGetter bifrost.IDGetter, formatter bifrost.Formatter, signer bifrost.Signer, verifier bifrost.Verifier) *Server {
+func New(key bifrost.KeyOpts, crypto bifrost.Crypto) *Server {
 	return &Server{
-		priKey:    key.PriKey,
-		pubKey:    key.PubKey,
-		idGetter:  idGetter,
-		formatter: formatter,
-		signer:    signer,
-		verifier:  verifier,
+		pubKey: key.PubKey,
+		Crypto: crypto,
 	}
 }
 

@@ -1,7 +1,6 @@
 package bifrost
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"sync"
@@ -50,7 +49,6 @@ type Connection interface {
 
 type GrpcConnection struct {
 	ID            ConnID
-	key           *ecdsa.PrivateKey
 	peerKey       *ecdsa.PublicKey
 	ip            string
 	streamWrapper StreamWrapper
@@ -60,30 +58,25 @@ type GrpcConnection struct {
 	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
 	sync.RWMutex
-	keyFormatter Formatter
-	signer       Signer
-	verifier     Verifier
+	Crypto
 }
 
-func NewConnection(ip string, priKey *ecdsa.PrivateKey, peerKey *ecdsa.PublicKey, streamWrapper StreamWrapper,
-	idGetter IDGetter, keyFormatter Formatter, signer Signer, verifier Verifier) (Connection, error) {
+func NewConnection(ip string, peerKey *ecdsa.PublicKey, streamWrapper StreamWrapper,
+	crypto Crypto) (Connection, error) {
 
-	if streamWrapper == nil || peerKey == nil || priKey == nil {
-		return nil, errors.New("fail to create connection streamWrapper or key is nil")
+	if streamWrapper == nil || peerKey == nil {
+		return nil, errors.New("fail to create connection streamWrapper or peerKey is nil")
 	}
 
 	return &GrpcConnection{
-		ID:            idGetter.GetID(peerKey),
-		key:           priKey,
+		ID:            ConnID(crypto.GetID(peerKey)),
 		peerKey:       peerKey,
 		ip:            ip,
 		streamWrapper: streamWrapper,
 		outChannl:     make(chan *innerMessage, 200),
 		readChannel:   make(chan *pb.Envelope, 200),
 		stopChannel:   make(chan struct{}, 1),
-		keyFormatter:  keyFormatter,
-		signer:        signer,
-		verifier:      verifier,
+		Crypto:        crypto,
 	}, nil
 }
 
@@ -110,7 +103,7 @@ func (conn *GrpcConnection) Send(payload []byte, protocol string, successCallBac
 	conn.Lock()
 	defer conn.Unlock()
 
-	signedEnvelope, err := conn.build(protocol, payload, conn.key)
+	signedEnvelope, err := conn.build(protocol, payload)
 
 	if err != nil {
 		go errCallBack(errors.New(fmt.Sprintf("fail to sign envelope [%s]", err.Error())))
@@ -126,44 +119,25 @@ func (conn *GrpcConnection) Send(payload []byte, protocol string, successCallBac
 	conn.outChannl <- m
 }
 
-//todo signer opts from config
-func (conn *GrpcConnection) build(protocol string, payload []byte, priKey *ecdsa.PrivateKey) (*pb.Envelope, error) {
+func (conn *GrpcConnection) build(protocol string, payload []byte) (*pb.Envelope, error) {
 
-	sig, err := conn.signer.Sign(payload)
-
+	sig, err := conn.Sign(payload)
 	if err != nil {
 		return nil, err
 	}
-
-	pubKey := &priKey.PublicKey
-
-	if err != nil {
-		return nil, err
-	}
-
-	b := conn.keyFormatter.ToByte(pubKey)
 
 	envelope := &pb.Envelope{}
 	envelope.Signature = sig
 	envelope.Payload = payload
 	envelope.Type = pb.Envelope_NORMAL
 	envelope.Protocol = protocol
-	envelope.Pubkey = b
+	envelope.Pubkey = []byte("key")
 
 	return envelope, nil
 }
 
-//todo signer opts from config
-func (conn *GrpcConnection) Verify(envelope *pb.Envelope, pubKey *ecdsa.PublicKey) bool {
-
-	b := conn.keyFormatter.ToByte(pubKey)
-
-	if !bytes.Equal(envelope.Pubkey, b) {
-		log.Printf("Pubkey is different")
-		return false
-	}
-
-	flag, err := conn.verifier.Verify(conn.peerKey, envelope.Signature, envelope.Payload)
+func (conn *GrpcConnection) Verify(envelope *pb.Envelope) bool {
+	flag, err := conn.Crypto.Verify(conn.peerKey, envelope.Signature, envelope.Payload)
 
 	if err != nil {
 		log.Printf(err.Error())
@@ -255,7 +229,7 @@ func (conn *GrpcConnection) Start() error {
 		case err := <-errChan:
 			return err
 		case message := <-conn.readChannel:
-			if conn.Verify(message, conn.peerKey) {
+			if conn.Verify(message) {
 				if conn.handler != nil {
 					m := Message{Envelope: message, Conn: conn, Data: message.Payload}
 					conn.handler.ServeRequest(m)

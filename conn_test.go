@@ -57,15 +57,16 @@ func TestGrpcConnection_Send(t *testing.T) {
 	mockFormatter := MockFormatter{}
 	mockSigner := MockSigner{}
 	mockVerifier := MockVerifier{}
+	crypto := Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper, &mockIDGetter, &mockFormatter, &mockSigner, &mockVerifier)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
 
 	mockStreamWrapper.sendCallBack = func(envelope *pb.Envelope) {
 
 		//then
 		assert.Equal(t, envelope.Protocol, "test1")
 		assert.Equal(t, envelope.Payload, []byte("jun"))
-		assert.True(t, conn.(*GrpcConnection).Verify(envelope, keyOpts.PubKey))
+		assert.True(t, conn.(*GrpcConnection).Verify(envelope))
 	}
 
 	assert.NoError(t, err)
@@ -90,8 +91,9 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 	mockFormatter := MockFormatter{}
 	mockSigner := MockSigner{}
 	mockVerifier := MockVerifier{}
+	crypto := Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper, &mockIDGetter, &mockFormatter, &mockSigner, &mockVerifier)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
 
 	assert.NoError(t, err)
 
@@ -121,8 +123,9 @@ func TestGrpcConnection_Close(t *testing.T) {
 	mockFormatter := MockFormatter{}
 	mockSigner := MockSigner{}
 	mockVerifier := MockVerifier{}
+	crypto := Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper, &mockIDGetter, &mockFormatter, &mockSigner, &mockVerifier)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
 
 	assert.NoError(t, err)
 

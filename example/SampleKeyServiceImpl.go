@@ -25,17 +25,17 @@ import (
 	"io"
 	"math/big"
 
-	"encoding/json"
-
 	"io/ioutil"
-	"os"
-
 	"path/filepath"
 
 	"errors"
 	"strings"
 
 	"log"
+
+	"os"
+
+	"crypto/x509"
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/it-chain/bifrost"
@@ -74,12 +74,36 @@ type SimpleGenerator struct {
 	Rand  io.Reader
 }
 
-func (generator SimpleGenerator) GenerateKey() (*ecdsa.PrivateKey, error) {
+func (generator *SimpleGenerator) GenerateKey() (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(generator.Curve, generator.Rand)
 }
 
+func (generator *SimpleGenerator) StoreKey(priKey *ecdsa.PrivateKey, pwd string, keyDirPath string, keyID bifrost.KeyID) error {
+	priKeyBytes, err := x509.MarshalECPrivateKey(priKey)
+	if err != nil {
+		return err
+	}
+
+	if _, err := os.Stat(keyDirPath); os.IsNotExist(err) {
+		err = os.MkdirAll(keyDirPath, 0755)
+		if err != nil {
+			return err
+		}
+	}
+
+	keyFilePath := filepath.Join(keyDirPath, string(keyID))
+	if _, err := os.Stat(keyFilePath); os.IsNotExist(err) {
+		err = ioutil.WriteFile(keyFilePath, priKeyBytes, 0700)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 type SimpleSigner struct {
-	PriKey *ecdsa.PrivateKey
+	bifrost.KeyLoader
 }
 
 func (signer *SimpleSigner) Sign(message []byte) ([]byte, error) {
@@ -87,7 +111,13 @@ func (signer *SimpleSigner) Sign(message []byte) ([]byte, error) {
 	hash.Write(message)
 	digest := hash.Sum(nil)
 
-	r, s, err := ecdsa.Sign(rand.Reader, signer.PriKey, digest)
+	priKey, err := signer.LoadKey("")
+	if err != nil {
+		log.Println("load error", err.Error())
+		return nil, err
+	}
+
+	r, s, err := ecdsa.Sign(rand.Reader, priKey, digest)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +133,11 @@ func (signer *SimpleSigner) Sign(message []byte) ([]byte, error) {
 }
 
 type SimpleVerifier struct {
+	bifrost.KeyLoader
 }
 
-func (verifier *SimpleVerifier) Verify(pubKey *ecdsa.PublicKey, signature, message []byte) (bool, error) {
+func (verifier *SimpleVerifier) Verify(peerKey *ecdsa.PublicKey, signature, message []byte) (bool, error) {
+
 	hash := sha512.New384()
 	hash.Write(message)
 	digest := hash.Sum(nil)
@@ -122,64 +154,49 @@ func (verifier *SimpleVerifier) Verify(pubKey *ecdsa.PublicKey, signature, messa
 		return false, errors.New("invalid values follow signature")
 	}
 
-	return ecdsa.Verify(pubKey, digest, ecdsaSig.R, ecdsaSig.S), nil
+	return ecdsa.Verify(peerKey, digest, ecdsaSig.R, ecdsaSig.S), nil
 }
 
 type SimpleIdGetter struct {
-	IDPrefix  string
-	Formatter bifrost.Formatter
+	IDPrefix string
+	bifrost.Formatter
 }
 
-func (idGetter *SimpleIdGetter) GetID(pubKey *ecdsa.PublicKey) bifrost.ConnID {
+func (idGetter *SimpleIdGetter) GetID(pubKey *ecdsa.PublicKey) bifrost.KeyID {
 	hash := sha512.New512_256()
-	hash.Write(idGetter.Formatter.ToByte(pubKey))
+	hash.Write(idGetter.ToByte(pubKey))
 
-	return bifrost.ConnID(idGetter.IDPrefix + base58.Encode(hash.Sum(nil)))
+	return bifrost.KeyID(idGetter.IDPrefix + base58.Encode(hash.Sum(nil)))
 }
 
-type SimpleKeystore struct {
-	keyDirPath string
+type SimpleKeyLoader struct {
+	KeyDirPath string
+	KeyID      bifrost.KeyID
 }
 
-func (keystore *SimpleKeystore) StoreKey(priKey *ecdsa.PrivateKey, pwd string) error {
-	priKeyBytes, err := json.Marshal(priKey)
-	if err != nil {
-		return err
-	}
-
-	keyFilePath := filepath.Join(keystore.keyDirPath, "simple_key")
-	if _, err := os.Stat(keyFilePath); os.IsNotExist(err) {
-		err = ioutil.WriteFile(keyFilePath, priKeyBytes, 0700)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (keystore *SimpleKeystore) LoadKey(keyID string, pwd string) (*ecdsa.PrivateKey, error) {
+func (keyLoader *SimpleKeyLoader) LoadKey(pwd string) (*ecdsa.PrivateKey, error) {
 	var keyPath string
+	var loadedKey *ecdsa.PrivateKey
 
-	files, err := ioutil.ReadDir(keystore.keyDirPath)
+	files, err := ioutil.ReadDir(keyLoader.KeyDirPath)
 	if err != nil {
 		return nil, errors.New("invalid keystore path - failed to read directory path")
 	}
 
 	for _, file := range files {
-		if strings.Compare(file.Name(), keyID) == 0 {
-			keyPath = filepath.Join(keystore.keyDirPath, file.Name())
+		if strings.Compare(file.Name(), string(keyLoader.KeyID)) == 0 {
+			keyPath = filepath.Join(keyLoader.KeyDirPath, file.Name())
 			break
 		}
 	}
 
-	jsonKeyBytes, err := ioutil.ReadFile(keyPath)
+	priKeyBytes, err := ioutil.ReadFile(keyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	loadedKey := new(ecdsa.PrivateKey)
-	if err = json.Unmarshal(jsonKeyBytes, loadedKey); err != nil {
+	loadedKey, err = x509.ParseECPrivateKey(priKeyBytes)
+	if err != nil {
 		return nil, err
 	}
 
