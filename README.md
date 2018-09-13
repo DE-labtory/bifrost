@@ -1,8 +1,8 @@
 # Bifrost
-[![Build Status](https://travis-ci.org/it-chain/bifrost.svg?branch=develop)](https://travis-ci.org/it-chain/bifrost)
+[![Build Status](https://travis-ci.org/it-chain/bifrost.svg?branch=master)](https://travis-ci.org/it-chain/bifrost)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Language](https://img.shields.io/badge/language-go-orange.svg)](https://golang.org)
-[![Coverage Status](https://coveralls.io/repos/github/it-chain/bifrost/badge.svg?branch=develop)](https://coveralls.io/github/it-chain/bifrost?branch=develop)
+[![Coverage Status](https://coveralls.io/repos/github/it-chain/bifrost/badge.svg?branch=master)](https://coveralls.io/github/it-chain/bifrost?branch=master)
 
 <p align="center"><img src="./images/bifrost.jpeg" width="171px" height="171px"></p>
 
