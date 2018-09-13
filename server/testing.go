@@ -12,13 +12,57 @@ import (
 
 	"time"
 
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
 )
+
+type MockGenerator struct {
+}
+
+func (generator MockGenerator) GenerateKey() (*ecdsa.PrivateKey, error) {
+	return new(ecdsa.PrivateKey), nil
+}
+
+type MockSigner struct {
+}
+
+func (signer *MockSigner) Sign(message []byte) ([]byte, error) {
+	return []byte("signature"), nil
+}
+
+type MockVerifier struct {
+}
+
+func (verifier *MockVerifier) Verify(pubKey *ecdsa.PublicKey, signature []byte, message []byte) (bool, error) {
+	return true, nil
+}
+
+type MockFormatter struct {
+}
+
+func (formatter *MockFormatter) ToByte(*ecdsa.PublicKey) []byte {
+	return []byte("byte format of ecdsa public key")
+}
+
+func (formatter *MockFormatter) FromByte([]byte, int) *ecdsa.PublicKey {
+	return new(ecdsa.PublicKey)
+}
+
+func (formatter *MockFormatter) GetCurveOpt(pubKey *ecdsa.PublicKey) int {
+	return *new(int)
+}
+
+type MockIdGetter struct {
+}
+
+func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) bifrost.ConnID {
+	return *new(bifrost.ConnID)
+}
 
 type StreamServer struct {
 	countRecv int32
@@ -46,8 +90,10 @@ func (s *StreamServer) Send(envelope *pb.Envelope) error {
 		return errors.New("invalid protocol")
 	}
 
+	mockServer := GetServer()
+
 	if s.countSend == 2 {
-		bool, _, _ := ValidateResponsePeerInfo(envelope)
+		bool, _, _ := mockServer.ValidateResponsePeerInfo(envelope)
 
 		if bool {
 			return nil
@@ -185,31 +231,31 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	return s, lis
 }
 
-func GetKeyOpts(path string) bifrost.KeyOpts {
+func GetKeyOpts() bifrost.KeyOpts {
 
-	km, err := key.NewKeyManager(path)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err := km.GenerateKey(key.RSA4096)
+	mockGenerator := MockGenerator{}
+	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	return bifrost.KeyOpts{
-		PubKey: pub,
+		PubKey: &pri.PublicKey,
 		PriKey: pri,
 	}
 }
 
-func GetServer(path string) *Server {
+func GetServer() *Server {
 
-	keyOpt := GetKeyOpts(path)
+	keyOpt := GetKeyOpts()
 
-	s := New(keyOpt)
+	mockIdGetter := MockIdGetter{}
+	mockFormatter := MockFormatter{}
+	mockSigner := MockSigner{}
+	mockVerifier := MockVerifier{}
+
+	s := New(keyOpt, &mockIdGetter, &mockFormatter, &mockSigner, &mockVerifier)
 
 	return s
 }

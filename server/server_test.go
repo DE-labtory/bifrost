@@ -3,23 +3,18 @@ package server
 import (
 	"encoding/json"
 	"log"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/key"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestServer_OnConnection(t *testing.T) {
 
 	//given
-	path := "./key"
-	defer os.RemoveAll(path)
-
-	s := GetServer(path)
+	s := GetServer()
 
 	assert.Nil(t, s.onConnectionHandler)
 
@@ -35,10 +30,7 @@ func TestServer_OnConnection(t *testing.T) {
 func TestServer_OnError(t *testing.T) {
 
 	//given
-	path := "./key"
-	defer os.RemoveAll(path)
-
-	s := GetServer(path)
+	s := GetServer()
 
 	assert.Nil(t, s.onErrorHandler)
 
@@ -54,27 +46,24 @@ func TestServer_OnError(t *testing.T) {
 func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 
 	//given
-	path := "./key"
-	km, err := key.NewKeyManager(path)
-	defer os.RemoveAll(path)
+	mockGenerator := MockGenerator{}
+	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	_, pub, err := km.GenerateKey(key.RSA4096)
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	b, _ := pub.ToPEM()
+	pub := &pri.PublicKey
+	mockFormatter := MockFormatter{}
+	b := mockFormatter.ToByte(pub)
 
 	peerInfo := &bifrost.PeerInfo{
-		Ip:        "127.0.0.1",
-		Pubkey:    b,
-		KeyGenOpt: pub.Algorithm(),
+		IP:       "127.0.0.1",
+		Pubkey:   b,
+		CurveOpt: mockFormatter.GetCurveOpt(pub),
 	}
+
+	mockServer := GetServer()
 
 	payload, _ := json.Marshal(peerInfo)
 
@@ -83,11 +72,11 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	envelope.Payload = payload
 
 	//when
-	flag, ip, peerKey := ValidateResponsePeerInfo(envelope)
+	flag, ip, peerKey := mockServer.ValidateResponsePeerInfo(envelope)
 
 	//then
 	assert.True(t, flag)
-	assert.Equal(t, peerInfo.Ip, ip)
+	assert.Equal(t, peerInfo.IP, ip)
 	assert.Equal(t, pub, peerKey)
 }
 
@@ -95,10 +84,12 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 
 	//given
 	peerInfo := &bifrost.PeerInfo{
-		Ip:        "127.0.0.1",
-		Pubkey:    []byte("123"),
-		KeyGenOpt: key.RSA2048,
+		IP:       "127.0.0.1",
+		Pubkey:   []byte("123"),
+		CurveOpt: 2,
 	}
+
+	mockServer := GetServer()
 
 	payload, _ := json.Marshal(peerInfo)
 
@@ -107,7 +98,7 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 	envelope.Payload = payload
 
 	//when
-	flag, _, _ := validateRequestPeerInfo(envelope)
+	flag, _, _ := mockServer.validateRequestPeerInfo(envelope)
 
 	//then
 	assert.False(t, flag)
@@ -115,27 +106,23 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 
 func TestServer_BifrostStream(t *testing.T) {
 
-	path := "./key"
-	path2 := "./key2"
+	s := GetServer()
 
-	km, err := key.NewKeyManager(path)
-	s := GetServer(path2)
-
-	defer os.RemoveAll(path)
-	defer os.RemoveAll(path2)
-
-	_, pub, err := km.GenerateKey(key.RSA4096)
+	mockGenerator := MockGenerator{}
+	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	b, _ := pub.ToPEM()
+	pub := &pri.PublicKey
+	mockFormatter := MockFormatter{}
+	b := mockFormatter.ToByte(pub)
 
 	peerInfo := &bifrost.PeerInfo{
-		Ip:        "127.0.0.1",
-		Pubkey:    b,
-		KeyGenOpt: pub.Algorithm(),
+		IP:       "127.0.0.1",
+		Pubkey:   b,
+		CurveOpt: mockFormatter.GetCurveOpt(pub),
 	}
 
 	mockStreamServer := NewMockStreamServer(*peerInfo)
@@ -147,11 +134,7 @@ func TestServer_BifrostStream(t *testing.T) {
 
 func TestServer_Listen(t *testing.T) {
 
-	path := "./key"
-
-	defer os.RemoveAll(path)
-
-	s := GetServer(path)
+	s := GetServer()
 
 	go s.Listen("127.0.0.1:7777")
 

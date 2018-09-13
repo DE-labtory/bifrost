@@ -5,34 +5,10 @@ import (
 	"encoding/json"
 	"time"
 
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/key"
-	b58 "github.com/jbenet/go-base58"
 )
-
-func FromPubKey(key key.PubKey) string {
-
-	encoded := b58.Encode(key.SKI())
-	return encoded
-}
-
-//Create ID from Pri Key
-func FromPriKey(key key.PriKey) string {
-
-	pub, _ := key.PublicKey()
-	return FromPubKey(pub)
-}
-
-func ByteToPubKey(byteKey []byte, keyGenOpt key.KeyGenOpts) (key.PubKey, error) {
-
-	pubKey, err := key.PEMToPublicKey(byteKey, keyGenOpt)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return pubKey, nil
-}
 
 func RecvWithTimeout(timeout time.Duration, stream Stream) (*pb.Envelope, error) {
 
@@ -63,16 +39,16 @@ func RecvWithTimeout(timeout time.Duration, stream Stream) (*pb.Envelope, error)
 }
 
 type KeyOpts struct {
-	PriKey key.PriKey
-	PubKey key.PubKey
+	PriKey *ecdsa.PrivateKey
+	PubKey *ecdsa.PublicKey
 }
 
-func BuildResponsePeerInfo(pubKey key.PubKey) (*pb.Envelope, error) {
-	b, _ := pubKey.ToPEM()
+func BuildResponsePeerInfo(pubKey *ecdsa.PublicKey, formatter Formatter) (*pb.Envelope, error) {
+	b := formatter.ToByte(pubKey)
 
 	pi := &PeerInfo{
-		Pubkey:    b,
-		KeyGenOpt: pubKey.Algorithm(),
+		Pubkey:   b,
+		CurveOpt: formatter.GetCurveOpt(pubKey),
 	}
 
 	payload, err := json.Marshal(pi)

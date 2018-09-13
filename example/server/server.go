@@ -3,10 +3,13 @@ package main
 import (
 	"log"
 
+	"crypto/elliptic"
+	"crypto/rand"
+
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/example"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/heimdall/key"
 )
 
 var ip = "127.0.0.1:7777"
@@ -15,13 +18,8 @@ var DefaultMux *mux.DefaultMux
 
 func main() {
 
-	km, err := key.NewKeyManager("")
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err := km.GenerateKey(key.RSA4096)
+	generator := example.SimpleGenerator{Curve: elliptic.P384(), Rand: rand.Reader}
+	pri, err := generator.GenerateKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -37,7 +35,11 @@ func main() {
 		log.Printf("%s", message.Data)
 	})
 
-	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: pub})
+	formatter := example.SimpleFormatter{}
+	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
+	signer := example.SimpleSigner{PriKey: pri}
+	verifier := example.SimpleVerifier{}
+	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: &pri.PublicKey}, &idGetter, &formatter, &signer, &verifier)
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)
