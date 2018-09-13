@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"os"
-
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -42,6 +40,7 @@ func TestNewStreamHandler(t *testing.T) {
 	defer func() {
 		server1.Stop()
 		listner1.Close()
+		grpc_conn.Close()
 	}()
 
 	time.Sleep(3 * time.Second)
@@ -49,21 +48,25 @@ func TestNewStreamHandler(t *testing.T) {
 
 func TestGrpcConnection_Send(t *testing.T) {
 
-	//given
-	path := "./key"
-	keyOpts := GetKeyOpts(path)
-	defer os.RemoveAll(path)
+	keyOpts := GetKeyOpts()
 
-	mockStreamWrapper := MockStreamWrapper{}
+	mockStreamWrapper := MockStreamWrapper{sendCallBack: func(envelope *pb.Envelope) {
+
+	}}
+	mockIDGetter := MockIdGetter{}
+	mockFormatter := MockFormatter{}
+	mockSigner := MockSigner{}
+	mockVerifier := MockVerifier{}
+
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper, &mockIDGetter, &mockFormatter, &mockSigner, &mockVerifier)
+
 	mockStreamWrapper.sendCallBack = func(envelope *pb.Envelope) {
 
 		//then
 		assert.Equal(t, envelope.Protocol, "test1")
 		assert.Equal(t, envelope.Payload, []byte("jun"))
-		assert.True(t, verify(envelope, keyOpts.PubKey))
+		assert.True(t, conn.(*GrpcConnection).Verify(envelope, keyOpts.PubKey))
 	}
-
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
 
 	assert.NoError(t, err)
 
@@ -80,13 +83,15 @@ func TestGrpcConnection_Send(t *testing.T) {
 func TestGrpcConnection_GetPeerKey(t *testing.T) {
 
 	//given
-	path := "./key"
-	keyOpts := GetKeyOpts(path)
-	defer os.RemoveAll(path)
+	keyOpts := GetKeyOpts()
 
 	mockStreamWrapper := MockStreamWrapper{}
+	mockIDGetter := MockIdGetter{}
+	mockFormatter := MockFormatter{}
+	mockSigner := MockSigner{}
+	mockVerifier := MockVerifier{}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper, &mockIDGetter, &mockFormatter, &mockSigner, &mockVerifier)
 
 	assert.NoError(t, err)
 
@@ -106,16 +111,18 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 func TestGrpcConnection_Close(t *testing.T) {
 
 	//given
-	path := "./key"
-	keyOpts := GetKeyOpts(path)
-	defer os.RemoveAll(path)
+	keyOpts := GetKeyOpts()
 
 	mockStreamWrapper := MockStreamWrapper{}
 	mockStreamWrapper.closeCallBack = func() {
 		assert.True(t, true)
 	}
+	mockIDGetter := MockIdGetter{}
+	mockFormatter := MockFormatter{}
+	mockSigner := MockSigner{}
+	mockVerifier := MockVerifier{}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper, &mockIDGetter, &mockFormatter, &mockSigner, &mockVerifier)
 
 	assert.NoError(t, err)
 

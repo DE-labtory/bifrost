@@ -6,10 +6,13 @@ import (
 	"log"
 	"os"
 
+	"crypto/elliptic"
+	"crypto/rand"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
+	"github.com/it-chain/bifrost/example"
 	"github.com/it-chain/bifrost/mux"
-	"github.com/it-chain/heimdall/key"
 )
 
 var clientIp = "127.0.0.1:7778"
@@ -19,13 +22,8 @@ var DefaultMux *mux.DefaultMux
 //todo 아직깔끔하지않음 여러 수정필요
 func main() {
 
-	km, err := key.NewKeyManager("")
-
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err := km.GenerateKey(key.RSA4096)
+	generator := example.SimpleGenerator{Curve: elliptic.P384(), Rand: rand.Reader}
+	pri, err := generator.GenerateKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -44,7 +42,7 @@ func main() {
 	clientOpt := client.ClientOpts{
 		Ip:     clientIp,
 		PriKey: pri,
-		PubKey: pub,
+		PubKey: &pri.PublicKey,
 	}
 
 	grpcOpt := client.GrpcOpts{
@@ -52,7 +50,11 @@ func main() {
 		Creds:      nil,
 	}
 
-	conn, err := client.Dial(serverIp, clientOpt, grpcOpt)
+	formatter := example.SimpleFormatter{}
+	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
+	signer := example.SimpleSigner{PriKey: pri}
+	verifier := example.SimpleVerifier{}
+	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, &idGetter, &formatter, &signer, &verifier)
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -62,6 +64,7 @@ func main() {
 
 	go func() {
 		if err := conn.Start(); err != nil {
+			log.Println("conn close")
 			conn.Close()
 		}
 	}()

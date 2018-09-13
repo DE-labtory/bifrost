@@ -2,7 +2,6 @@ package bifrost
 
 import (
 	"bytes"
-	"crypto/sha512"
 	"errors"
 	"fmt"
 	"sync"
@@ -10,9 +9,9 @@ import (
 
 	"log"
 
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/auth"
-	"github.com/it-chain/heimdall/key"
 )
 
 type ConnID = string
@@ -43,7 +42,7 @@ type Connection interface {
 	Send(data []byte, protocol string, successCallBack func(interface{}), errCallBack func(error))
 	Close()
 	GetIP() string
-	GetPeerKey() key.PubKey
+	GetPeerKey() *ecdsa.PublicKey
 	GetID() ConnID
 	Start() error
 	Handle(handler Handler)
@@ -51,8 +50,8 @@ type Connection interface {
 
 type GrpcConnection struct {
 	ID            ConnID
-	key           key.PriKey
-	peerKey       key.PubKey
+	key           *ecdsa.PrivateKey
+	peerKey       *ecdsa.PublicKey
 	ip            string
 	streamWrapper StreamWrapper
 	stopFlag      int32
@@ -61,16 +60,20 @@ type GrpcConnection struct {
 	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
 	sync.RWMutex
+	keyFormatter Formatter
+	signer       Signer
+	verifier     Verifier
 }
 
-func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper) (Connection, error) {
+func NewConnection(ip string, priKey *ecdsa.PrivateKey, peerKey *ecdsa.PublicKey, streamWrapper StreamWrapper,
+	idGetter IDGetter, keyFormatter Formatter, signer Signer, verifier Verifier) (Connection, error) {
 
 	if streamWrapper == nil || peerKey == nil || priKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or key is nil")
 	}
 
 	return &GrpcConnection{
-		ID:            FromPubKey(peerKey),
+		ID:            idGetter.GetID(peerKey),
 		key:           priKey,
 		peerKey:       peerKey,
 		ip:            ip,
@@ -78,13 +81,16 @@ func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapp
 		outChannl:     make(chan *innerMessage, 200),
 		readChannel:   make(chan *pb.Envelope, 200),
 		stopChannel:   make(chan struct{}, 1),
+		keyFormatter:  keyFormatter,
+		signer:        signer,
+		verifier:      verifier,
 	}, nil
 }
 
 func (conn *GrpcConnection) GetIP() string {
 	return conn.ip
 }
-func (conn *GrpcConnection) GetPeerKey() key.PubKey {
+func (conn *GrpcConnection) GetPeerKey() *ecdsa.PublicKey {
 	return conn.peerKey
 }
 func (conn *GrpcConnection) GetID() ConnID {
@@ -104,7 +110,7 @@ func (conn *GrpcConnection) Send(payload []byte, protocol string, successCallBac
 	conn.Lock()
 	defer conn.Unlock()
 
-	signedEnvelope, err := build(protocol, payload, conn.key)
+	signedEnvelope, err := conn.build(protocol, payload, conn.key)
 
 	if err != nil {
 		go errCallBack(errors.New(fmt.Sprintf("fail to sign envelope [%s]", err.Error())))
@@ -121,29 +127,21 @@ func (conn *GrpcConnection) Send(payload []byte, protocol string, successCallBac
 }
 
 //todo signer opts from config
-func build(protocol string, payload []byte, priKey key.PriKey) (*pb.Envelope, error) {
+func (conn *GrpcConnection) build(protocol string, payload []byte, priKey *ecdsa.PrivateKey) (*pb.Envelope, error) {
 
-	hash := sha512.New()
-	hash.Write(payload)
-	digest := hash.Sum(nil)
-
-	sig, err := auth.Sign(priKey, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+	sig, err := conn.signer.Sign(payload)
 
 	if err != nil {
 		return nil, err
 	}
 
-	pubKey, err := priKey.PublicKey()
+	pubKey := &priKey.PublicKey
 
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := pubKey.ToPEM()
-
-	if err != nil {
-		return nil, err
-	}
+	b := conn.keyFormatter.ToByte(pubKey)
 
 	envelope := &pb.Envelope{}
 	envelope.Signature = sig
@@ -156,20 +154,16 @@ func build(protocol string, payload []byte, priKey key.PriKey) (*pb.Envelope, er
 }
 
 //todo signer opts from config
-func verify(envelope *pb.Envelope, pubkey key.PubKey) bool {
+func (conn *GrpcConnection) Verify(envelope *pb.Envelope, pubKey *ecdsa.PublicKey) bool {
 
-	b, _ := pubkey.ToPEM()
+	b := conn.keyFormatter.ToByte(pubKey)
 
 	if !bytes.Equal(envelope.Pubkey, b) {
 		log.Printf("Pubkey is different")
 		return false
 	}
 
-	hash := sha512.New()
-	hash.Write(envelope.Payload)
-	digest := hash.Sum(nil)
-
-	flag, err := auth.Verify(pubkey, envelope.Signature, digest, auth.EQUAL_SHA512.SignerOptsToPSSOptions())
+	flag, err := conn.verifier.Verify(conn.peerKey, envelope.Signature, envelope.Payload)
 
 	if err != nil {
 		log.Printf(err.Error())
@@ -261,13 +255,13 @@ func (conn *GrpcConnection) Start() error {
 		case err := <-errChan:
 			return err
 		case message := <-conn.readChannel:
-			if verify(message, conn.peerKey) {
+			if conn.Verify(message, conn.peerKey) {
 				if conn.handler != nil {
 					m := Message{Envelope: message, Conn: conn, Data: message.Payload}
 					conn.handler.ServeRequest(m)
 				}
 			} else {
-				//
+				// todo: verify 결과 false인 경우
 			}
 		}
 	}

@@ -6,11 +6,58 @@ import (
 	"log"
 	"net"
 
+	"crypto/ecdsa"
+
+	"crypto/elliptic"
+	"crypto/rand"
+
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+type MockGenerator struct {
+}
+
+func (generator MockGenerator) GenerateKey() (*ecdsa.PrivateKey, error) {
+	return ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
+}
+
+type MockSigner struct {
+}
+
+func (signer *MockSigner) Sign(message []byte) ([]byte, error) {
+	return []byte("signature"), nil
+}
+
+type MockVerifier struct {
+}
+
+func (verifier *MockVerifier) Verify(key *ecdsa.PublicKey, signature []byte, message []byte) (bool, error) {
+	return true, nil
+}
+
+type MockFormatter struct {
+}
+
+func (formatter *MockFormatter) ToByte(*ecdsa.PublicKey) []byte {
+	return []byte("byte format of ecdsa public key")
+}
+
+func (formatter *MockFormatter) FromByte([]byte, int) *ecdsa.PublicKey {
+	return new(ecdsa.PublicKey)
+}
+
+func (formatter *MockFormatter) GetCurveOpt(pubKey *ecdsa.PublicKey) int {
+	return *new(int)
+}
+
+type MockIdGetter struct {
+}
+
+func (idGetter *MockIdGetter) GetID(key *ecdsa.PublicKey) ConnID {
+	return *new(ConnID)
+}
 
 type MockConnectionHandler func(stream pb.StreamService_BifrostStreamServer)
 type MockRecvHandler func(envelope *pb.Envelope)
@@ -85,22 +132,18 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	return s, lis
 }
 
-func GetKeyOpts(path string) KeyOpts {
+func GetKeyOpts() KeyOpts {
 
-	km, err := key.NewKeyManager(path)
+	geneartor := MockGenerator{}
 
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	pri, pub, err := km.GenerateKey(key.RSA4096)
+	pri, err := geneartor.GenerateKey()
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	return KeyOpts{
-		PubKey: pub,
+		PubKey: &pri.PublicKey,
 		PriKey: pri,
 	}
 }

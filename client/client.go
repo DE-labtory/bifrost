@@ -8,9 +8,10 @@ import (
 	"errors"
 	"log"
 
+	"crypto/ecdsa"
+
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/heimdall/key"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -26,8 +27,8 @@ const (
 // Server 와 연결시 사용되는 Client option
 type ClientOpts struct {
 	Ip     string
-	PriKey key.PriKey
-	PubKey key.PubKey
+	PriKey *ecdsa.PrivateKey
+	PubKey *ecdsa.PublicKey
 }
 
 // Server 와 연결시 사용되는 grpc option.
@@ -37,7 +38,7 @@ type GrpcOpts struct {
 }
 
 // 서버와 연결 요청. 실패시 err. handshake 과정을 거침.
-func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Connection, error) {
+func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, idGetter bifrost.IDGetter, formatter bifrost.Formatter, signer bifrost.Signer, verifier bifrost.Verifier) (bifrost.Connection, error) {
 
 	var opts []grpc.DialOption //required options
 
@@ -62,13 +63,13 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 		return nil, err
 	}
 
-	serverPubKey, err := handShake(streamWrapper, clientOpts)
+	serverPubKey, err := handShake(streamWrapper, clientOpts, formatter)
 
 	if err != nil {
 		return nil, err
 	}
 
-	conn, err := bifrost.NewConnection(serverIp, clientOpts.PriKey, serverPubKey, streamWrapper)
+	conn, err := bifrost.NewConnection(serverIp, clientOpts.PriKey, serverPubKey, streamWrapper, idGetter, formatter, signer, verifier)
 
 	if err != nil {
 		return nil, err
@@ -78,7 +79,7 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts) (bifrost.Co
 }
 
 // handshake 함수, return : serverPubKey, err
-func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) (key.PubKey, error) {
+func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, formatter bifrost.Formatter) (*ecdsa.PublicKey, error) {
 
 	err := waitServer(streamWrapper)
 
@@ -88,14 +89,14 @@ func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) (key.
 		return nil, err
 	}
 
-	err = sendInfo(streamWrapper, clientOpts)
+	err = sendInfo(streamWrapper, clientOpts, formatter)
 	if err != nil {
 		log.Printf("Send info failed [%s]", err.Error())
 		streamWrapper.Close()
 		return nil, err
 	}
 
-	serverPubKey, err := getServerInfo(streamWrapper)
+	serverPubKey, err := getServerInfo(streamWrapper, formatter)
 
 	if err != nil {
 		log.Printf("Get server info failed [%s]", err.Error())
@@ -105,7 +106,7 @@ func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) (key.
 
 	log.Printf("handshake success")
 
-	return *serverPubKey, nil
+	return serverPubKey, nil
 }
 
 // handshake 첫번째 과정 함수. server 의 request peer info 메세지를 기다린다.
@@ -122,8 +123,8 @@ func waitServer(streamWrapper bifrost.StreamWrapper) error {
 }
 
 // handShake 두번째 과정 함수. client 의 peer info 메세지를 server 에게 전달한다.
-func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) error {
-	env, err := bifrost.BuildResponsePeerInfo(clientOpts.PubKey)
+func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, formatter bifrost.Formatter) error {
+	env, err := bifrost.BuildResponsePeerInfo(clientOpts.PubKey, formatter)
 
 	if err != nil {
 		return err
@@ -137,7 +138,7 @@ func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) error 
 }
 
 // handShake 세번째 과정 함수. server 의 peer info 메세지를 기다린다(Get 한다).
-func getServerInfo(streamWrapper bifrost.StreamWrapper) (*key.PubKey, error) {
+func getServerInfo(streamWrapper bifrost.StreamWrapper, formatter bifrost.Formatter) (*ecdsa.PublicKey, error) {
 	env, err := bifrost.RecvWithTimeout(3*time.Second, streamWrapper)
 
 	if err != nil {
@@ -152,11 +153,11 @@ func getServerInfo(streamWrapper bifrost.StreamWrapper) (*key.PubKey, error) {
 		return nil, err
 	}
 
-	serverPubKey, err := bifrost.ByteToPubKey(peerInfo.Pubkey, peerInfo.KeyGenOpt)
+	serverPubKey := formatter.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &serverPubKey, nil
+	return serverPubKey, nil
 }
