@@ -46,7 +46,7 @@ type Signer interface {
 }
 
 type Verifier interface {
-	Verify(pubKey *ecdsa.PublicKey, signature, message []byte) (bool, error)
+	Verify(peerKey *ecdsa.PublicKey, signature, message []byte) (bool, error)
 }
 
 type Formatter interface {
