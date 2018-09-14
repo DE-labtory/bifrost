@@ -1,6 +1,7 @@
 package bifrost
 
 import (
+	"bifrost/logger"
 	"fmt"
 	"io"
 	"net"
@@ -11,7 +12,7 @@ import (
 	"crypto/rand"
 
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/engine/common/logger"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )

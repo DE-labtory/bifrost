@@ -11,9 +11,8 @@ import (
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/example"
+	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/mux"
-
-	"github.com/it-chain/engine/common/logger"
 )
 
 var clientIp = "127.0.0.1:7778"

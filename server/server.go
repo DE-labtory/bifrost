@@ -12,8 +12,8 @@ import (
 	"crypto/ecdsa"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/engine/common/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"

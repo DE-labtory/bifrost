@@ -15,7 +15,8 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/engine/common/logger"
+
+	"github.com/it-chain/bifrost/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"

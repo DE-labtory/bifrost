@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bifrost/logger"
 	"time"
 
 	"context"
@@ -11,7 +12,7 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/engine/common/logger"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
