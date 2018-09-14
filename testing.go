@@ -3,7 +3,6 @@ package bifrost
 import (
 	"fmt"
 	"io"
-	"log"
 	"net"
 
 	"crypto/ecdsa"
@@ -12,6 +11,7 @@ import (
 	"crypto/rand"
 
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -112,7 +112,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	lis, err := net.Listen("tcp", ipAddress)
 
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Fatal(nil, err.Error())
 	}
 
 	s := grpc.NewServer()
@@ -123,7 +123,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+			logger.Fatal(nil, err.Error())
 			s.Stop()
 			lis.Close()
 		}
@@ -139,7 +139,7 @@ func GetKeyOpts() KeyOpts {
 	pri, err := geneartor.GenerateKey()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(nil, err.Error())
 	}
 
 	return KeyOpts{

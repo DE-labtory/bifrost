@@ -2,12 +2,12 @@ package server
 
 import (
 	"encoding/json"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +20,7 @@ func TestServer_OnConnection(t *testing.T) {
 
 	//when
 	s.OnConnection(func(conn bifrost.Connection) {
-		log.Printf("asd")
+		logger.Infof(nil, "test server on connection")
 	})
 
 	//then
@@ -36,7 +36,7 @@ func TestServer_OnError(t *testing.T) {
 
 	//when
 	s.OnError(func(err error) {
-		log.Printf("asd")
+		logger.Infof(nil, "test server on error")
 	})
 
 	//then
@@ -50,7 +50,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(nil, err.Error())
 	}
 
 	pub := &pri.PublicKey
@@ -112,7 +112,7 @@ func TestServer_BifrostStream(t *testing.T) {
 	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(nil, err.Error())
 	}
 
 	pub := &pri.PublicKey

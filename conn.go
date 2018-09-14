@@ -2,16 +2,16 @@ package bifrost
 
 import (
 	"bytes"
+
 	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
 
-	"log"
-
 	"crypto/ecdsa"
 
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type ConnID = string
@@ -159,14 +159,14 @@ func (conn *GrpcConnection) Verify(envelope *pb.Envelope, pubKey *ecdsa.PublicKe
 	b := conn.keyFormatter.ToByte(pubKey)
 
 	if !bytes.Equal(envelope.Pubkey, b) {
-		log.Printf("Pubkey is different")
+		logger.Infof(nil, "Pubkey is different")
 		return false
 	}
 
 	flag, err := conn.verifier.Verify(conn.peerKey, envelope.Signature, envelope.Payload)
 
 	if err != nil {
-		log.Printf(err.Error())
+		logger.Infof(nil, err.Error())
 		return false
 	}
 

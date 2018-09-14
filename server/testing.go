@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 
 	"net"
 
@@ -16,6 +15,7 @@ import (
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
@@ -79,7 +79,7 @@ func NewMockStreamServer(peerInfo bifrost.PeerInfo) *StreamServer {
 }
 
 func (s *StreamServer) Send(envelope *pb.Envelope) error {
-	log.Print("Mock send func called")
+	logger.Infof(nil, "Mock send func called")
 
 	s.countSend = s.countSend + 1
 
@@ -211,7 +211,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	lis, err := net.Listen("tcp", ipAddress)
 
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Fatal(nil, err.Error())
 	}
 
 	s := grpc.NewServer()
@@ -222,7 +222,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+			logger.Fatal(nil, err.Error())
 			s.Stop()
 			lis.Close()
 		}
@@ -237,7 +237,7 @@ func GetKeyOpts() bifrost.KeyOpts {
 	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(nil, err.Error())
 	}
 
 	return bifrost.KeyOpts{

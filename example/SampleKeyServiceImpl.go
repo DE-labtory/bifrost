@@ -35,10 +35,9 @@ import (
 	"errors"
 	"strings"
 
-	"log"
-
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type SimpleFormatter struct {
@@ -113,12 +112,12 @@ func (verifier *SimpleVerifier) Verify(pubKey *ecdsa.PublicKey, signature, messa
 	ecdsaSig := new(struct{ R, S *big.Int })
 	rest, err := asn1.Unmarshal(signature, ecdsaSig)
 	if err != nil {
-		log.Println("Verify - unmarshal error")
+		logger.Infof(nil, "Verify - unmarshal error")
 		return false, err
 	}
 
 	if len(rest) != 0 {
-		log.Println("Verify - rest error")
+		logger.Infof(nil, "Verify - rest error")
 		return false, errors.New("invalid values follow signature")
 	}
 

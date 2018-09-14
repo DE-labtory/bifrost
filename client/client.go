@@ -6,12 +6,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"log"
 
 	"crypto/ecdsa"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -84,14 +84,14 @@ func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, forma
 	err := waitServer(streamWrapper)
 
 	if err != nil {
-		log.Printf("Waiting server failed [%s]", err.Error())
+		logger.Infof(nil, "Waiting server failed [%s]", err.Error())
 		streamWrapper.Close()
 		return nil, err
 	}
 
 	err = sendInfo(streamWrapper, clientOpts, formatter)
 	if err != nil {
-		log.Printf("Send info failed [%s]", err.Error())
+		logger.Infof(nil, "Send info failed [%s]", err.Error())
 		streamWrapper.Close()
 		return nil, err
 	}
@@ -99,12 +99,12 @@ func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, forma
 	serverPubKey, err := getServerInfo(streamWrapper, formatter)
 
 	if err != nil {
-		log.Printf("Get server info failed [%s]", err.Error())
+		logger.Infof(nil, "Get server info failed [%s]", err.Error())
 		streamWrapper.Close()
 		return nil, err
 	}
 
-	log.Printf("handshake success")
+	logger.Infof(nil, "handshake success")
 
 	return serverPubKey, nil
 }

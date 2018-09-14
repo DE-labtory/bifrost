@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"crypto/elliptic"
 	"crypto/rand"
 
@@ -10,6 +8,7 @@ import (
 	"github.com/it-chain/bifrost/example"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/server"
+	"github.com/it-chain/engine/common/logger"
 )
 
 var ip = "127.0.0.1:7777"
@@ -22,17 +21,17 @@ func main() {
 	pri, err := generator.GenerateKey()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(nil, err.Error())
 	}
 
 	DefaultMux = mux.New()
 
 	DefaultMux.Handle("chat", func(message bifrost.Message) {
-		log.Printf("%s", message.Data)
+		logger.Infof(nil, "%s", message.Data)
 	})
 
 	DefaultMux.Handle("join", func(message bifrost.Message) {
-		log.Printf("%s", message.Data)
+		logger.Infof(nil, "%s", message.Data)
 	})
 
 	formatter := example.SimpleFormatter{}
@@ -58,5 +57,5 @@ func OnConnection(connection bifrost.Connection) {
 }
 
 func OnError(err error) {
-	log.Fatalln(err.Error())
+	logger.Fatal(nil, err.Error())
 }

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 
 	"crypto/elliptic"
@@ -13,6 +12,8 @@ import (
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/example"
 	"github.com/it-chain/bifrost/mux"
+
+	"github.com/it-chain/engine/common/logger"
 )
 
 var clientIp = "127.0.0.1:7778"
@@ -26,17 +27,17 @@ func main() {
 	pri, err := generator.GenerateKey()
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatalf(nil, "[main.go] generator.GenerateKey() - [Err]: [%s]", err.Error())
 	}
 
 	DefaultMux := mux.New()
 
 	DefaultMux.Handle("chat", func(message bifrost.Message) {
-		log.Printf("%s", message.Data)
+		logger.Infof(nil, "%s", message.Data)
 	})
 
 	DefaultMux.Handle("join", func(message bifrost.Message) {
-		log.Printf("%s", message.Data)
+		logger.Infof(nil, "%s", message.Data)
 	})
 
 	clientOpt := client.ClientOpts{
@@ -57,14 +58,14 @@ func main() {
 	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, &idGetter, &formatter, &signer, &verifier)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(nil, err.Error())
 	}
 
 	conn.Handle(DefaultMux)
 
 	go func() {
 		if err := conn.Start(); err != nil {
-			log.Println("conn close")
+			logger.Infof(nil, "conn close")
 			conn.Close()
 		}
 	}()
