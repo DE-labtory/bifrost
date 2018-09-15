@@ -79,10 +79,10 @@ func (mux *DefaultMux) ServeError(conn bifrost.Connection, err error) {
 	}
 }
 
-func (mux *DefaultMux) HandleError(errorfunc ErrorFunc) {
+func (mux *DefaultMux) HandleError(errorFunc ErrorFunc) {
 
 	mux.Lock()
 	defer mux.Unlock()
 
-	mux.errorFunc = errorfunc
+	mux.errorFunc = errorFunc
 }
