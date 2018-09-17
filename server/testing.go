@@ -240,7 +240,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 
 func GetKeyOpts() bifrost.KeyOpts {
 
-	mockGenerator := MockGenerator{}
+	mockGenerator := bifrost.MockGenerator{}
 	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
@@ -254,15 +254,8 @@ func GetKeyOpts() bifrost.KeyOpts {
 }
 
 func GetServer() *Server {
-
 	keyOpt := GetKeyOpts()
-
-	mockIdGetter := MockIdGetter{}
-	mockFormatter := MockFormatter{}
-	mockSigner := MockSigner{}
-	mockVerifier := MockVerifier{}
-	//mockKeyloader := MockKeyLoader{}
-	mockCrypto := bifrost.Crypto{IDGetter: &mockIdGetter, Signer: &mockSigner, Verifier: &mockVerifier, Formatter: &mockFormatter}
+	mockCrypto := bifrost.GetMockCrypto()
 
 	s := New(keyOpt, mockCrypto)
 
