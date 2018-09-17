@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+var ErrIPv4Format = errors.New("invalid IPv4 format")
+
 //Address to connect other peer
 type Address struct {
 	IP string
@@ -31,7 +33,7 @@ func ToAddress(ipv4 string) (Address, error) {
 	valid := validIP4(ipv4)
 
 	if !valid {
-		return Address{}, errors.New("invalid IP4 format")
+		return Address{}, ErrIPv4Format
 	}
 
 	return Address{
