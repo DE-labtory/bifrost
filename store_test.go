@@ -9,7 +9,7 @@ import (
 
 func TestConnectionStore_AddConnection(t *testing.T) {
 	testConnStroe := bifrost.NewConnectionStore()
-	testConn, err := bifrost.GetMockConnection("127.0.0.1")
+	testConn, err := bifrost.GetMockConnection("127.0.0.1:1234")
 	assert.NoError(t, err)
 
 	err = testConnStroe.AddConnection(testConn)
@@ -18,7 +18,7 @@ func TestConnectionStore_AddConnection(t *testing.T) {
 
 func TestConnectionStore_DeleteConnection(t *testing.T) {
 	testConnStore := bifrost.NewConnectionStore()
-	testConn, err := bifrost.GetMockConnection("127.0.0.1")
+	testConn, err := bifrost.GetMockConnection("127.0.0.1:1234")
 	assert.NoError(t, err)
 
 	err = testConnStore.AddConnection(testConn)
@@ -33,7 +33,7 @@ func TestConnectionStore_DeleteConnection(t *testing.T) {
 
 func TestConnectionStore_GetConnection(t *testing.T) {
 	testConnStore := bifrost.NewConnectionStore()
-	testConn, err := bifrost.GetMockConnection("127.0.0.1")
+	testConn, err := bifrost.GetMockConnection("127.0.0.1:1234")
 	assert.NoError(t, err)
 
 	err = testConnStore.AddConnection(testConn)

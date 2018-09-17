@@ -61,7 +61,7 @@ func TestGrpcConnection_Send(t *testing.T) {
 	}}
 	crypto := bifrost.GetMockCrypto()
 
-	conn, err := bifrost.NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
 
 	mockStreamWrapper.SendCallBack = func(envelope *pb.Envelope) {
 		//then
@@ -88,7 +88,7 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 	mockStreamWrapper := bifrost.MockStreamWrapper{}
 	crypto := bifrost.GetMockCrypto()
 
-	conn, err := bifrost.NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	go func() {
@@ -119,7 +119,7 @@ func TestGrpcConnection_Close(t *testing.T) {
 	}
 	crypto := bifrost.GetMockCrypto()
 
-	conn, err := bifrost.NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	go func() {
@@ -131,4 +131,16 @@ func TestGrpcConnection_Close(t *testing.T) {
 	// when
 	conn.Close()
 	wg.Wait()
+}
+
+func TestGrpcConnection_GetIP(t *testing.T) {
+	keyOpts := bifrost.GetKeyOpts()
+
+	mockStreamWrapper := bifrost.MockStreamWrapper{}
+	crypto := bifrost.GetMockCrypto()
+
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
+	assert.NoError(t, err)
+	ipAddr := conn.GetIP()
+	assert.Equal(t, bifrost.Address{IP: "127.0.0.1:1234"}, ipAddr)
 }

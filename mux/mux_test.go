@@ -30,7 +30,7 @@ func TestMux_ServeRequest(t *testing.T) {
 
 func TestMux_ServeError(t *testing.T) {
 	// given
-	targetIP := "127.0.0.1"
+	targetIP := "127.0.0.1:1234"
 	testMux := mux.New()
 
 	testMux.HandleError(func(conn bifrost.Connection, err error) {
