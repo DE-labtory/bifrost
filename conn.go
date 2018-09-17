@@ -14,6 +14,12 @@ import (
 
 type ConnID = string
 
+type PeerInfo struct {
+	IP       string
+	Pubkey   []byte
+	CurveOpt int
+}
+
 type innerMessage struct {
 	Envelope  *pb.Envelope
 	OnErr     func(error)
