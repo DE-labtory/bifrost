@@ -148,16 +148,45 @@ func GetKeyOpts() KeyOpts {
 	}
 }
 
+func GetMockCrypto() Crypto {
+	mockIDGetter := MockIdGetter{}
+	mockFormatter := MockFormatter{}
+	mockSigner := MockSigner{}
+	mockVerifier := MockVerifier{}
+
+	return Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
+}
+
+func GetMockConnection(targetIP string) (Connection, error) {
+	keyOpts := GetKeyOpts()
+	mockCrypto := GetMockCrypto()
+
+	mockStreamWrapper := MockStreamWrapper{}
+	mockStreamWrapper.CloseCallBack = func() {
+
+	}
+	mockStreamWrapper.SendCallBack = func(envelope *pb.Envelope) {
+
+	}
+
+	conn, err := NewConnection(targetIP, keyOpts.PubKey, mockStreamWrapper, mockCrypto)
+	if err != nil {
+		return nil, err
+	}
+
+	return conn, nil
+}
+
 type SendCallBack func(envelope *pb.Envelope)
 type CloseCallBack func()
 
 type MockStreamWrapper struct {
-	sendCallBack  SendCallBack
-	closeCallBack CloseCallBack
+	SendCallBack  SendCallBack
+	CloseCallBack CloseCallBack
 }
 
 func (msw MockStreamWrapper) Send(envelope *pb.Envelope) error {
-	msw.sendCallBack(envelope)
+	msw.SendCallBack(envelope)
 	return nil
 }
 
@@ -166,7 +195,7 @@ func (MockStreamWrapper) Recv() (*pb.Envelope, error) {
 }
 
 func (msw MockStreamWrapper) Close() {
-	msw.closeCallBack()
+	msw.CloseCallBack()
 }
 
 func (MockStreamWrapper) GetStream() Stream {
