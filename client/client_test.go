@@ -54,5 +54,5 @@ func TestDial(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	assert.Equal(t, testConn.GetIP(), serverIP)
+	assert.Equal(t, testConn.GetIP(), bifrost.Address{serverIP})
 }
