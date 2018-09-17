@@ -45,7 +45,7 @@ type Handler interface {
 type Connection interface {
 	Send(data []byte, protocol string, successCallBack func(interface{}), errCallBack func(error))
 	Close()
-	GetIP() string
+	GetIP() Address
 	GetPeerKey() *ecdsa.PublicKey
 	GetID() ConnID
 	Start() error
@@ -55,7 +55,7 @@ type Connection interface {
 type GrpcConnection struct {
 	ID            ConnID
 	peerKey       *ecdsa.PublicKey
-	ip            string
+	ip            Address
 	streamWrapper StreamWrapper
 	stopFlag      int32
 	handler       Handler
@@ -73,10 +73,15 @@ func NewConnection(ip string, peerKey *ecdsa.PublicKey, streamWrapper StreamWrap
 		return nil, errors.New("fail to create connection streamWrapper or peerKey is nil")
 	}
 
+	ipAddr, err := ToAddress(ip)
+	if err != nil {
+		return nil, err
+	}
+
 	return &GrpcConnection{
 		ID:            ConnID(crypto.GetID(peerKey)),
 		peerKey:       peerKey,
-		ip:            ip,
+		ip:            ipAddr,
 		streamWrapper: streamWrapper,
 		outChannl:     make(chan *innerMessage, 200),
 		readChannel:   make(chan *pb.Envelope, 200),
@@ -85,7 +90,7 @@ func NewConnection(ip string, peerKey *ecdsa.PublicKey, streamWrapper StreamWrap
 	}, nil
 }
 
-func (conn *GrpcConnection) GetIP() string {
+func (conn *GrpcConnection) GetIP() Address {
 	return conn.ip
 }
 func (conn *GrpcConnection) GetPeerKey() *ecdsa.PublicKey {
