@@ -6,11 +6,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"log"
-
 	"crypto/ecdsa"
 
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 )
 
 type ConnID = string
@@ -140,7 +139,7 @@ func (conn *GrpcConnection) Verify(envelope *pb.Envelope) bool {
 	flag, err := conn.Crypto.Verify(conn.peerKey, envelope.Signature, envelope.Payload)
 
 	if err != nil {
-		log.Printf(err.Error())
+		logger.Info(nil, fmt.Sprintf("[Bifrost] %s", err.Error()))
 		return false
 	}
 

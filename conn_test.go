@@ -2,11 +2,11 @@ package bifrost
 
 import (
 	"fmt"
-	"log"
 	"testing"
 	"time"
 
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/engine/common/logger"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -30,7 +30,7 @@ func TestNewStreamHandler(t *testing.T) {
 	grpc_conn, err := grpc.Dial(serverIP, opts...)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatalf(nil, err.Error())
 	}
 
 	ctx, _ := context.WithCancel(context.Background())
