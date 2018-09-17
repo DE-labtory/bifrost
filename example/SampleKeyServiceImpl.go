@@ -38,7 +38,7 @@ import (
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/engine/common/logger"
+	"github.com/it-chain/bifrost/logger"
 )
 
 type SimpleFormatter struct {
