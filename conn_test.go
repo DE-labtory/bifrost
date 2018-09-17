@@ -1,11 +1,12 @@
-package bifrost
+package bifrost_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
-	"github.com/it-chain/bifrost/logger"
+	"sync"
+
+	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -13,60 +14,60 @@ import (
 )
 
 func TestNewStreamHandler(t *testing.T) {
-
+	// given
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	var connectionHandler = func(stream pb.StreamService_BifrostStreamServer) {
 		//result
-		fmt.Print("connected")
+		t.Log("connected")
+		wg.Done()
 	}
 
 	serverIP := "127.0.0.1:9999"
-	mockServer := &MockServer{Ch: connectionHandler}
-	server1, listner1 := ListenMockServer(mockServer, serverIP)
+	mockServer := &bifrost.MockServer{Ch: connectionHandler}
+	server1, listener1 := bifrost.ListenMockServer(mockServer, serverIP)
+	assert.NotNil(t, server1)
+	assert.NotNil(t, listener1)
+
+	time.Sleep(3 * time.Second)
 
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithInsecure())
-
 	opts = append(opts, grpc.WithTimeout(3*time.Second))
-	grpc_conn, err := grpc.Dial(serverIP, opts...)
 
-	if err != nil {
-		logger.Fatalf(nil, err.Error())
-	}
+	grpc_conn, err := grpc.Dial(serverIP, opts...)
+	assert.NoError(t, err)
 
 	ctx, _ := context.WithCancel(context.Background())
 	streamServiceClient := pb.NewStreamServiceClient(grpc_conn)
 	_, err = streamServiceClient.BifrostStream(ctx)
+	assert.NoError(t, err)
 
 	defer func() {
 		server1.Stop()
-		listner1.Close()
+		listener1.Close()
 		grpc_conn.Close()
 	}()
 
-	time.Sleep(3 * time.Second)
+	wg.Wait()
 }
 
 func TestGrpcConnection_Send(t *testing.T) {
 
-	keyOpts := GetKeyOpts()
+	keyOpts := bifrost.GetKeyOpts()
 
-	mockStreamWrapper := MockStreamWrapper{sendCallBack: func(envelope *pb.Envelope) {
+	mockStreamWrapper := bifrost.MockStreamWrapper{SendCallBack: func(envelope *pb.Envelope) {
 
 	}}
-	mockIDGetter := MockIdGetter{}
-	mockFormatter := MockFormatter{}
-	mockSigner := MockSigner{}
-	mockVerifier := MockVerifier{}
-	crypto := Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
+	crypto := bifrost.GetMockCrypto()
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
 
-	mockStreamWrapper.sendCallBack = func(envelope *pb.Envelope) {
-
+	mockStreamWrapper.SendCallBack = func(envelope *pb.Envelope) {
 		//then
 		assert.Equal(t, envelope.Protocol, "test1")
 		assert.Equal(t, envelope.Payload, []byte("jun"))
-		assert.True(t, conn.(*GrpcConnection).Verify(envelope))
+		assert.True(t, conn.(*bifrost.GrpcConnection).Verify(envelope))
 	}
 
 	assert.NoError(t, err)
@@ -82,19 +83,12 @@ func TestGrpcConnection_Send(t *testing.T) {
 }
 
 func TestGrpcConnection_GetPeerKey(t *testing.T) {
-
 	//given
-	keyOpts := GetKeyOpts()
+	keyOpts := bifrost.GetKeyOpts()
+	mockStreamWrapper := bifrost.MockStreamWrapper{}
+	crypto := bifrost.GetMockCrypto()
 
-	mockStreamWrapper := MockStreamWrapper{}
-	mockIDGetter := MockIdGetter{}
-	mockFormatter := MockFormatter{}
-	mockSigner := MockSigner{}
-	mockVerifier := MockVerifier{}
-	crypto := Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
-
-	conn, err := NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
-
+	conn, err := bifrost.NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	go func() {
@@ -112,21 +106,20 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 
 func TestGrpcConnection_Close(t *testing.T) {
 
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	//given
-	keyOpts := GetKeyOpts()
+	keyOpts := bifrost.GetKeyOpts()
 
-	mockStreamWrapper := MockStreamWrapper{}
-	mockStreamWrapper.closeCallBack = func() {
+	mockStreamWrapper := bifrost.MockStreamWrapper{}
+	mockStreamWrapper.CloseCallBack = func() {
+		// then
 		assert.True(t, true)
+		wg.Done()
 	}
-	mockIDGetter := MockIdGetter{}
-	mockFormatter := MockFormatter{}
-	mockSigner := MockSigner{}
-	mockVerifier := MockVerifier{}
-	crypto := Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
+	crypto := bifrost.GetMockCrypto()
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
-
+	conn, err := bifrost.NewConnection("127.0.0.1", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	go func() {
@@ -135,5 +128,7 @@ func TestGrpcConnection_Close(t *testing.T) {
 		}
 	}()
 
+	// when
 	conn.Close()
+	wg.Wait()
 }

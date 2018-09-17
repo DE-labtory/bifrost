@@ -1,56 +1,22 @@
-package mux
+package mux_test
 
 import (
 	"testing"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewMux(t *testing.T) {
-	//when
-	mux := New()
-
-	//then
-	mux.Handle(Protocol("test1"), func(message bifrost.Message) {
-
-	})
-
-	err := mux.Handle(Protocol("test1"), func(message bifrost.Message) {
-
-	})
-
-	mux.Handle(Protocol("test3"), func(message bifrost.Message) {
-
-	})
-
-	//result
-	assert.Error(t, err, "Asd")
-	assert.Equal(t, len(mux.registerHandled), 2)
-}
-
-func TestMux_Handle(t *testing.T) {
-	//when
-	mux := New()
-
-	mux.Handle(Protocol("exist"), func(message bifrost.Message) {
-
-	})
-
-	hf := mux.match(Protocol("exist"))
-	hf2 := mux.match(Protocol("do not exist"))
-
-	assert.NotNil(t, hf)
-	assert.Nil(t, hf2)
-}
-
 func TestMux_ServeRequest(t *testing.T) {
 
-	//when
-	mux := New()
+	// given
+	testMux := mux.New()
 
-	mux.Handle(Protocol("exist"), func(message bifrost.Message) {
+	testMux.Handle(mux.Protocol("exist"), func(message bifrost.Message) {
+		// then
 		assert.Equal(t, message.Data, []byte("hello"))
 	})
 
@@ -58,5 +24,23 @@ func TestMux_ServeRequest(t *testing.T) {
 	message.Data = []byte("hello")
 	message.Envelope = &pb.Envelope{Protocol: "exist"}
 
-	mux.ServeRequest(message)
+	// when
+	testMux.ServeRequest(message)
+}
+
+func TestMux_ServeError(t *testing.T) {
+	// given
+	targetIP := "127.0.0.1"
+	testMux := mux.New()
+
+	testMux.HandleError(func(conn bifrost.Connection, err error) {
+		// then
+		assert.Equal(t, err.Error(), "testError")
+	})
+
+	conn, err := bifrost.GetMockConnection(targetIP)
+	assert.NoError(t, err)
+
+	// when
+	testMux.ServeError(conn, errors.New("testError"))
 }

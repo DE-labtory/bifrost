@@ -1,4 +1,4 @@
-package client
+package client_test
 
 import (
 	"testing"
@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/server"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,21 +21,15 @@ func TestDial(t *testing.T) {
 	pri, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
 	assert.NoError(t, err)
 
-	clientOpt := ClientOpts{
+	clientOpt := client.ClientOpts{
 		Ip:     clientIP,
 		PubKey: &pri.PublicKey,
 	}
 
-	grpcOpt := GrpcOpts{
+	grpcOpt := client.GrpcOpts{
 		TlsEnabled: false,
 		Creds:      nil,
 	}
-
-	mockIDGetter := bifrost.MockIdGetter{}
-	mockFormatter := bifrost.MockFormatter{}
-	mockSigner := bifrost.MockSigner{}
-	mockVerifier := bifrost.MockVerifier{}
-	crypto := bifrost.Crypto{IDGetter: &mockIDGetter, Formatter: &mockFormatter, Signer: &mockSigner, Verifier: &mockVerifier}
 
 	serverIP := "127.0.0.1:43213"
 	s := server.GetServer()
@@ -49,7 +44,7 @@ func TestDial(t *testing.T) {
 	time.Sleep(3 * time.Second)
 
 	// when
-	testConn, err := Dial(serverIP, clientOpt, grpcOpt, crypto)
+	testConn, err := client.Dial(serverIP, clientOpt, grpcOpt, bifrost.GetMockCrypto())
 	go func() {
 		defer testConn.Close()
 		if err := testConn.Start(); err != nil {
