@@ -22,6 +22,7 @@ type Server struct {
 	onConnectionHandler OnConnectionHandler
 	onErrorHandler      OnErrorHandler
 	priKey              key.PriKey
+	metaData            map[string]string
 	pubKey              key.PubKey
 	ip                  string
 	lis                 net.Listener
@@ -37,13 +38,13 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 	_, cf := context.WithCancel(context.Background())
 	streamWrapper := bifrost.NewServerStreamWrapper(streamServer, cf)
 
-	pub, err := handShake(streamWrapper, s.pubKey)
+	pub, metaData, err := handShake(streamWrapper, s.pubKey)
 
 	if err != nil {
 		return err
 	}
 
-	conn, err := bifrost.NewConnection(ip, s.priKey, pub, streamWrapper)
+	conn, err := bifrost.NewConnection(ip, s.priKey, pub, metaData, streamWrapper)
 
 	if s.onConnectionHandler != nil {
 		s.onConnectionHandler(conn)
@@ -52,32 +53,32 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 	return nil
 }
 
-func handShake(streamWrapper bifrost.StreamWrapper, pubKey key.PubKey) (key.PubKey, error) {
+func handShake(streamWrapper bifrost.StreamWrapper, pubKey key.PubKey) (key.PubKey, map[string]string, error) {
 
 	err := requestInfo(streamWrapper)
 
 	if err != nil {
 		streamWrapper.Close()
-		return nil, err
+		return nil, nil, err
 	}
 
-	pub, err := getClientInfo(streamWrapper)
+	pub, metaData, err := getClientInfo(streamWrapper)
 
 	if err != nil {
 		streamWrapper.Close()
-		return nil, err
+		return nil, nil, err
 	}
 
-	err = sendInfo(streamWrapper, pubKey)
+	err = sendInfo(streamWrapper, pubKey, metaData)
 
 	if err != nil {
 		streamWrapper.Close()
-		return nil, err
+		return nil, nil, err
 	}
 
 	log.Printf("handshake success")
 
-	return pub, nil
+	return pub, metaData, nil
 }
 
 func requestInfo(streamWrapper bifrost.StreamWrapper) error {
@@ -90,9 +91,9 @@ func requestInfo(streamWrapper bifrost.StreamWrapper) error {
 	return nil
 }
 
-func sendInfo(streamWrapper bifrost.StreamWrapper, pubKey key.PubKey) error {
+func sendInfo(streamWrapper bifrost.StreamWrapper, pubKey key.PubKey, metaData map[string]string) error {
 
-	envelope, err := bifrost.BuildResponsePeerInfo(pubKey)
+	envelope, err := bifrost.BuildResponsePeerInfo(pubKey, metaData)
 
 	if err != nil {
 		return errors.New("fail to build info")
@@ -105,17 +106,17 @@ func sendInfo(streamWrapper bifrost.StreamWrapper, pubKey key.PubKey) error {
 	return nil
 }
 
-func getClientInfo(streamWrapper bifrost.StreamWrapper) (key.PubKey, error) {
+func getClientInfo(streamWrapper bifrost.StreamWrapper) (key.PubKey, map[string]string, error) {
 
 	env, err := bifrost.RecvWithTimeout(3*time.Second, streamWrapper)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if env.GetType() != pb.Envelope_RESPONSE_PEERINFO {
 		log.Printf("Invaild message type")
-		return nil, errors.New("Invalid Message Type")
+		return nil, nil, errors.New("Invalid Message Type")
 	}
 
 	peerInfo := &bifrost.PeerInfo{}
@@ -123,16 +124,16 @@ func getClientInfo(streamWrapper bifrost.StreamWrapper) (key.PubKey, error) {
 	err = json.Unmarshal(env.Payload, peerInfo)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	pubKey, err := bifrost.ByteToPubKey(peerInfo.Pubkey, peerInfo.KeyGenOpt)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return pubKey, nil
+	return pubKey, peerInfo.MetaData, nil
 }
 
 func validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, key.PubKey) {
@@ -190,10 +191,11 @@ func extractRemoteAddress(stream pb.StreamService_BifrostStreamServer) string {
 type OnConnectionHandler func(connection bifrost.Connection)
 type OnErrorHandler func(err error)
 
-func New(key bifrost.KeyOpts) *Server {
+func New(key bifrost.KeyOpts, metaData map[string]string) *Server {
 	return &Server{
-		priKey: key.PriKey,
-		pubKey: key.PubKey,
+		priKey:   key.PriKey,
+		pubKey:   key.PubKey,
+		metaData: metaData,
 	}
 }
 

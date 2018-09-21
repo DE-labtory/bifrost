@@ -41,7 +41,7 @@ func TestBuildResponsePeerInfo(t *testing.T) {
 	assert.NoError(t, err)
 
 	//when
-	envelope, err := BuildResponsePeerInfo(pub)
+	envelope, err := BuildResponsePeerInfo(pub, nil)
 	assert.NoError(t, err)
 
 	//then

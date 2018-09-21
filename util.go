@@ -67,12 +67,13 @@ type KeyOpts struct {
 	PubKey key.PubKey
 }
 
-func BuildResponsePeerInfo(pubKey key.PubKey) (*pb.Envelope, error) {
+func BuildResponsePeerInfo(pubKey key.PubKey, metaData map[string]string) (*pb.Envelope, error) {
 	b, _ := pubKey.ToPEM()
 
 	pi := &PeerInfo{
 		Pubkey:    b,
 		KeyGenOpt: pubKey.Algorithm(),
+		MetaData:  metaData,
 	}
 
 	payload, err := json.Marshal(pi)

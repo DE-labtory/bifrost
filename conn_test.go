@@ -63,7 +63,7 @@ func TestGrpcConnection_Send(t *testing.T) {
 		assert.True(t, verify(envelope, keyOpts.PubKey))
 	}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, nil, mockStreamWrapper)
 
 	assert.NoError(t, err)
 
@@ -86,7 +86,7 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 
 	mockStreamWrapper := MockStreamWrapper{}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, nil, mockStreamWrapper)
 
 	assert.NoError(t, err)
 
@@ -115,7 +115,7 @@ func TestGrpcConnection_Close(t *testing.T) {
 		assert.True(t, true)
 	}
 
-	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, mockStreamWrapper)
+	conn, err := NewConnection("127.0.0.1", keyOpts.PriKey, keyOpts.PubKey, nil, mockStreamWrapper)
 
 	assert.NoError(t, err)
 
