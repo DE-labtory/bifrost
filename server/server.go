@@ -222,7 +222,7 @@ func (s *Server) Listen(ip string) {
 	lis, err := net.Listen("tcp", ip)
 
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		logger.Fatalf(nil, "Failed to listen: %v", err)
 	}
 
 	defer lis.Close()
@@ -232,17 +232,20 @@ func (s *Server) Listen(ip string) {
 	defer g.Stop()
 	pb.RegisterStreamServiceServer(g, s)
 	reflection.Register(g)
-	
+
 	s.lis = lis
 
-	log.Println("Listen... on: [%s]", ip)
+	logger.Info(nil, fmt.Sprintf("[Bifrost] Listen... on: [%s]", ip))
 	if err := g.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		logger.Info(nil, fmt.Sprintf("[Bifrost] Failed to serve: %v", err))
 		g.Stop()
 		lis.Close()
 	}
 }
 
-func (s Server) Stop() {
-	s.lis.Close()
+func (s *Server) Stop() {
+
+	if s.lis != nil {
+		s.lis.Close()
+	}
 }
