@@ -219,7 +219,7 @@ func (s *Server) OnError(handler OnErrorHandler) {
 
 func (s *Server) Listen(ip string) {
 
-	lis, err := net.Listen("tcp", ip)
+	lis, _ := net.Listen("tcp", ip)
 	defer lis.Close()
 
 	g := grpc.NewServer()
