@@ -220,11 +220,6 @@ func (s *Server) OnError(handler OnErrorHandler) {
 func (s *Server) Listen(ip string) {
 
 	lis, err := net.Listen("tcp", ip)
-
-	if err != nil {
-		logger.Fatalf(nil, "Failed to listen: %v", err)
-	}
-
 	defer lis.Close()
 
 	g := grpc.NewServer()
@@ -235,9 +230,9 @@ func (s *Server) Listen(ip string) {
 
 	s.lis = lis
 
-	logger.Info(nil, fmt.Sprintf("[Bifrost] Listen... on: [%s]", ip))
+	log.Println("[Bifrost] Listen... on: [%s]")
 	if err := g.Serve(lis); err != nil {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] Failed to serve: %v", err))
+		log.Println("[Bifrost] Fail to serve... on: [%s]")
 		g.Stop()
 		lis.Close()
 	}
