@@ -217,7 +217,7 @@ func (s *Server) OnError(handler OnErrorHandler) {
 	s.onErrorHandler = handler
 }
 
-func (s Server) Listen(ip string) {
+func (s *Server) Listen(ip string) {
 
 	lis, err := net.Listen("tcp", ip)
 
@@ -232,6 +232,8 @@ func (s Server) Listen(ip string) {
 	defer g.Stop()
 	pb.RegisterStreamServiceServer(g, s)
 	reflection.Register(g)
+	
+	s.lis = lis
 
 	log.Println("Listen... on: [%s]", ip)
 	if err := g.Serve(lis); err != nil {
