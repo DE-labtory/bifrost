@@ -47,6 +47,7 @@ type Connection interface {
 	GetID() ConnID
 	Start() error
 	Handle(handler Handler)
+	GetMetaData() map[string]string
 }
 
 type GrpcConnection struct {
