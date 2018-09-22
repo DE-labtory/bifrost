@@ -209,7 +209,7 @@ func GetServer(path string) *Server {
 
 	keyOpt := GetKeyOpts(path)
 
-	s := New(keyOpt)
+	s := New(keyOpt, nil)
 
 	return s
 }

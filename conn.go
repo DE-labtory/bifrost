@@ -53,6 +53,7 @@ type GrpcConnection struct {
 	ID            ConnID
 	key           key.PriKey
 	peerKey       key.PubKey
+	metaData      map[string]string
 	ip            string
 	streamWrapper StreamWrapper
 	stopFlag      int32
@@ -63,7 +64,7 @@ type GrpcConnection struct {
 	sync.RWMutex
 }
 
-func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapper StreamWrapper) (Connection, error) {
+func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, metaData map[string]string, streamWrapper StreamWrapper) (Connection, error) {
 
 	if streamWrapper == nil || peerKey == nil || priKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or key is nil")
@@ -73,6 +74,7 @@ func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapp
 		ID:            FromPubKey(peerKey),
 		key:           priKey,
 		peerKey:       peerKey,
+		metaData:      metaData,
 		ip:            ip,
 		streamWrapper: streamWrapper,
 		outChannl:     make(chan *innerMessage, 200),
@@ -81,12 +83,18 @@ func NewConnection(ip string, priKey key.PriKey, peerKey key.PubKey, streamWrapp
 	}, nil
 }
 
+func (conn *GrpcConnection) GetMetaData() map[string]string {
+	return conn.metaData
+}
+
 func (conn *GrpcConnection) GetIP() string {
 	return conn.ip
 }
+
 func (conn *GrpcConnection) GetPeerKey() key.PubKey {
 	return conn.peerKey
 }
+
 func (conn *GrpcConnection) GetID() ConnID {
 	return conn.ID
 }

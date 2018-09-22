@@ -37,7 +37,10 @@ func main() {
 		log.Printf("%s", message.Data)
 	})
 
-	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: pub})
+	metaData := make(map[string]string)
+	metaData["test"] = "test"
+
+	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: pub}, metaData)
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)

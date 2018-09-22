@@ -6,4 +6,5 @@ type PeerInfo struct {
 	Ip        string
 	Pubkey    []byte
 	KeyGenOpt key.KeyGenOpts
+	MetaData  map[string]string
 }

@@ -52,7 +52,10 @@ func main() {
 		Creds:      nil,
 	}
 
-	conn, err := client.Dial(serverIp, clientOpt, grpcOpt)
+	metaData := make(map[string]string)
+	metaData["test"] = "test"
+
+	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, metaData)
 
 	if err != nil {
 		log.Fatal(err.Error())
