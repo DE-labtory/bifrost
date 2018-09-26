@@ -33,6 +33,22 @@
   version = "v1.2.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:fc8c6e572c48333301455a5219851b5bf5dd831bf0397b4edfe0c0f34d1a6001"
+  name = "github.com/it-chain/iLogger"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3d4855e59818211a0ec2df9b0e9a242472f5878d"
+
+[[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -165,7 +181,8 @@
   input-imports = [
     "github.com/btcsuite/btcutil/base58",
     "github.com/golang/protobuf/proto",
-    "github.com/sirupsen/logrus",
+    "github.com/it-chain/iLogger",
+    "github.com/pkg/errors",
     "github.com/stretchr/testify/assert",
     "golang.org/x/net/context",
     "google.golang.org/grpc",

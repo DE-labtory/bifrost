@@ -14,8 +14,8 @@ import (
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
 	"github.com/it-chain/bifrost/example"
-	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/mux"
+	"github.com/it-chain/iLogger"
 )
 
 var clientIp = "127.0.0.1:7778"
@@ -29,17 +29,17 @@ func main() {
 	pri, err := generator.GenerateKey()
 
 	if err != nil {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] %s", err.Error()))
+		iLogger.Infof(nil, "[Bifrost] %s", err.Error())
 	}
 
 	DefaultMux := mux.New()
 
 	DefaultMux.Handle("chat", func(message bifrost.Message) {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] %s", message.Data))
+		iLogger.Infof(nil, "[Bifrost] %s", message.Data)
 	})
 
 	DefaultMux.Handle("join", func(message bifrost.Message) {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] %s", message.Data))
+		iLogger.Infof(nil, "[Bifrost] %s", message.Data)
 	})
 
 	clientOpt := client.ClientOpts{
@@ -57,7 +57,7 @@ func main() {
 
 	err = generator.StoreKey(pri, "", "./.key", idGetter.GetID(clientOpt.PubKey))
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	keyLoader := example.SimpleKeyLoader{KeyDirPath: "./.key", KeyID: idGetter.GetID(clientOpt.PubKey)}
@@ -67,14 +67,14 @@ func main() {
 	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, crypto)
 
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	conn.Handle(DefaultMux)
 
 	go func() {
 		if err := conn.Start(); err != nil {
-			logger.Info(nil, "[Bifrost] Conn close")
+			iLogger.Info(nil, "[Bifrost] Conn close")
 			conn.Close()
 		}
 	}()

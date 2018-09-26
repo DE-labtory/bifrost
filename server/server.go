@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 
 	"encoding/json"
@@ -13,8 +12,8 @@ import (
 	"crypto/ecdsa"
 
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/iLogger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/reflection"
@@ -77,7 +76,7 @@ func (s Server) handShake(streamWrapper bifrost.StreamWrapper, pubKey *ecdsa.Pub
 		return nil, err
 	}
 
-	logger.Info(nil, "[Bifrost] Handshake success")
+	iLogger.Info(nil, "[Bifrost] Handshake success")
 
 	return pub, nil
 }
@@ -116,7 +115,7 @@ func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (*ecdsa.Publi
 	}
 
 	if env.GetType() != pb.Envelope_RESPONSE_PEERINFO {
-		logger.Info(nil, "[Bifrost] Invaild message type")
+		iLogger.Info(nil, "[Bifrost] Invaild message type")
 		return nil, errors.New("invalid message type")
 	}
 
@@ -136,7 +135,7 @@ func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (*ecdsa.Publi
 func (s Server) validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.PublicKey) {
 
 	if envelope.GetType() != pb.Envelope_REQUEST_PEERINFO {
-		logger.Info(nil, "[Bifrost] Invaild message type")
+		iLogger.Info(nil, "[Bifrost] Invaild message type")
 		return false, "", nil
 	}
 	return s.ValidatePeerInfo(envelope)
@@ -145,7 +144,7 @@ func (s Server) validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, *e
 func (s Server) ValidateResponsePeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.PublicKey) {
 
 	if envelope.GetType() != pb.Envelope_RESPONSE_PEERINFO {
-		logger.Info(nil, "[Bifrost] Invaild message type")
+		iLogger.Info(nil, "[Bifrost] Invaild message type")
 		return false, "", nil
 	}
 	return s.ValidatePeerInfo(envelope)
@@ -153,14 +152,14 @@ func (s Server) ValidateResponsePeerInfo(envelope *pb.Envelope) (bool, string, *
 
 func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.PublicKey) {
 
-	logger.Info(nil, fmt.Sprintf("[Bifrost] Received payload [%s]", envelope.Payload))
+	iLogger.Infof(nil, "[Bifrost] Received payload [%s]", envelope.Payload)
 
 	peerInfo := &bifrost.PeerInfo{}
 
 	err := json.Unmarshal(envelope.Payload, peerInfo)
 
 	if err != nil {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] Fail to unmarshal message [%s]", err.Error()))
+		iLogger.Infof(nil, "[Bifrost] Fail to unmarshal message [%s]", err.Error())
 		return false, "", nil
 	}
 
@@ -211,6 +210,9 @@ func (s *Server) OnError(handler OnErrorHandler) {
 func (s *Server) Listen(ip string) {
 
 	lis, err := net.Listen("tcp", ip)
+	if err != nil {
+		iLogger.Infof(nil, "[Bifrost] Listen error: %s", err.Error())
+	}
 	defer lis.Close()
 
 	g := grpc.NewServer()
@@ -221,9 +223,9 @@ func (s *Server) Listen(ip string) {
 
 	s.lis = lis
 
-	log.Println("[Bifrost] Listen... on: [%s]")
+	iLogger.Infof(nil, "[Bifrost] Listen... on: [%s]", ip)
 	if err := g.Serve(lis); err != nil {
-		log.Println("[Bifrost] Listen... on: [%s]")
+		iLogger.Infof(nil, "[Bifrost] Listen... on: [%s]", ip)
 		g.Stop()
 		lis.Close()
 	}

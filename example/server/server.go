@@ -3,17 +3,15 @@ package main
 import (
 	"crypto/elliptic"
 	"crypto/rand"
-	"fmt"
-
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/example"
-	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/server"
+	"github.com/it-chain/iLogger"
 )
 
 var ip = "127.0.0.1:7777"
@@ -26,24 +24,24 @@ func main() {
 	pri, err := generator.GenerateKey()
 
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	DefaultMux = mux.New()
 
 	DefaultMux.Handle("chat", func(message bifrost.Message) {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] %s", message.Data))
+		iLogger.Infof(nil, "[Bifrost] %s", message.Data)
 	})
 
 	DefaultMux.Handle("join", func(message bifrost.Message) {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] %s", message.Data))
+		iLogger.Infof(nil, "[Bifrost] %s", message.Data)
 	})
 
 	formatter := example.SimpleFormatter{}
 	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
 	err = generator.StoreKey(pri, "", "./.key", idGetter.GetID(&pri.PublicKey))
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	keyLoader := example.SimpleKeyLoader{KeyDirPath: "./.key", KeyID: idGetter.GetID(&pri.PublicKey)}
@@ -82,5 +80,5 @@ func OnConnection(connection bifrost.Connection) {
 }
 
 func OnError(err error) {
-	logger.Fatalf(nil, err.Error())
+	iLogger.Fatalf(nil, err.Error())
 }
