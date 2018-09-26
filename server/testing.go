@@ -14,8 +14,8 @@ import (
 	"crypto/ecdsa"
 
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/pb"
+	"github.com/it-chain/iLogger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"
@@ -86,7 +86,7 @@ func NewMockStreamServer(peerInfo bifrost.PeerInfo) *StreamServer {
 }
 
 func (s *StreamServer) Send(envelope *pb.Envelope) error {
-	logger.Info(nil, "[Bifrost] Mock send func called")
+	iLogger.Info(nil, "[Bifrost] Mock send func called")
 
 	s.countSend = s.countSend + 1
 
@@ -218,7 +218,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 	lis, err := net.Listen("tcp", ipAddress)
 
 	if err != nil {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] Failed to listen: %v", err))
+		iLogger.Infof(nil, "[Bifrost] Failed to listen: %v", err.Error())
 	}
 
 	s := grpc.NewServer()
@@ -229,7 +229,7 @@ func ListenMockServer(mockServer pb.StreamServiceServer, ipAddress string) (*grp
 
 	go func() {
 		if err := s.Serve(lis); err != nil {
-			logger.Fatalf(nil, "failed to serve: %v", err)
+			iLogger.Fatalf(nil, "failed to serve: %v", err.Error())
 			s.Stop()
 			lis.Close()
 		}
@@ -244,7 +244,7 @@ func GetKeyOpts() bifrost.KeyOpts {
 	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	return bifrost.KeyOpts{

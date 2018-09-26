@@ -41,6 +41,10 @@
   name = "google.golang.org/grpc"
   version = "1.10.0"
 
+[[constraint]]
+  branch = "master"
+  name = "github.com/it-chain/iLogger"
+
 [prune]
   go-tests = true
   unused-packages = true

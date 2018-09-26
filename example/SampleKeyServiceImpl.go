@@ -22,7 +22,6 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"encoding/asn1"
-	"fmt"
 	"io"
 	"math/big"
 
@@ -38,7 +37,7 @@ import (
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/logger"
+	"github.com/it-chain/iLogger"
 )
 
 type SimpleFormatter struct {
@@ -113,7 +112,7 @@ func (signer *SimpleSigner) Sign(message []byte) ([]byte, error) {
 
 	priKey, err := signer.LoadKey("")
 	if err != nil {
-		logger.Info(nil, fmt.Sprintf("[Bifrost] Load error %s", err.Error()))
+		iLogger.Infof(nil, "[Bifrost] Load error %s", err.Error())
 		return nil, err
 	}
 
@@ -145,12 +144,12 @@ func (verifier *SimpleVerifier) Verify(peerKey *ecdsa.PublicKey, signature, mess
 	ecdsaSig := new(struct{ R, S *big.Int })
 	rest, err := asn1.Unmarshal(signature, ecdsaSig)
 	if err != nil {
-		logger.Info(nil, "[Bifrost] Verify - unmarshal error")
+		iLogger.Info(nil, "[Bifrost] Verify - unmarshal error")
 		return false, err
 	}
 
 	if len(rest) != 0 {
-		logger.Info(nil, "[Bifrost] Verify - rest error")
+		iLogger.Info(nil, "[Bifrost] Verify - rest error")
 		return false, errors.New("invalid values follow signature")
 	}
 

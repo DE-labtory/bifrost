@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/logger"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/bifrost/server"
+	"github.com/it-chain/iLogger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	mockGenerator := server.MockGenerator{}
 	pri, err := mockGenerator.GenerateKey()
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	pub := &pri.PublicKey
@@ -55,7 +55,7 @@ func TestServer_BifrostStream(t *testing.T) {
 	pri, err := mockGenerator.GenerateKey()
 
 	if err != nil {
-		logger.Fatalf(nil, err.Error())
+		iLogger.Fatalf(nil, err.Error())
 	}
 
 	pub := &pri.PublicKey
