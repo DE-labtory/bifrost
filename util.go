@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"crypto/ecdsa"
-
 	"github.com/it-chain/bifrost/pb"
 )
 
@@ -39,16 +37,17 @@ func RecvWithTimeout(timeout time.Duration, stream Stream) (*pb.Envelope, error)
 }
 
 type KeyOpts struct {
-	PriKey *ecdsa.PrivateKey
-	PubKey *ecdsa.PublicKey
+	PriKey Key
+	PubKey Key
 }
 
-func BuildResponsePeerInfo(pubKey *ecdsa.PublicKey, formatter Formatter) (*pb.Envelope, error) {
-	b := formatter.ToByte(pubKey)
+func BuildResponsePeerInfo(pubKey Key) (*pb.Envelope, error) {
+	b := pubKey.ToByte()
 
 	pi := &PeerInfo{
-		Pubkey:   b,
-		CurveOpt: formatter.GetCurveOpt(pubKey),
+		PubKeyBytes: b,
+		IsPrivate:   pubKey.IsPrivate(),
+		KeyGenOpt:   pubKey.KeyGenOpt(),
 	}
 
 	payload, err := json.Marshal(pi)

@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"crypto/ecdsa"
-
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
 
@@ -28,7 +26,7 @@ const (
 // Server 와 연결시 사용되는 Client option
 type ClientOpts struct {
 	Ip     string
-	PubKey *ecdsa.PublicKey
+	PubKey bifrost.Key
 }
 
 // Server 와 연결시 사용되는 grpc option.
@@ -63,7 +61,7 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, crypto bifr
 		return nil, err
 	}
 
-	serverPubKey, err := handShake(streamWrapper, clientOpts, crypto.Formatter)
+	serverPubKey, err := handShake(streamWrapper, clientOpts, crypto.KeyRecoverer)
 
 	if err != nil {
 		return nil, err
@@ -79,7 +77,7 @@ func Dial(serverIp string, clientOpts ClientOpts, grpcOpts GrpcOpts, crypto bifr
 }
 
 // handshake 함수, return : serverPubKey, err
-func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, formatter bifrost.Formatter) (*ecdsa.PublicKey, error) {
+func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, keyRecoverer bifrost.KeyRecoverer) (bifrost.Key, error) {
 
 	err := waitServer(streamWrapper)
 
@@ -89,14 +87,14 @@ func handShake(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, forma
 		return nil, err
 	}
 
-	err = sendInfo(streamWrapper, clientOpts, formatter)
+	err = sendInfo(streamWrapper, clientOpts)
 	if err != nil {
 		iLogger.Infof(nil, "[Bifrost] Send info failed [%s]", err.Error())
 		streamWrapper.Close()
 		return nil, err
 	}
 
-	serverPubKey, err := getServerInfo(streamWrapper, formatter)
+	serverPubKey, err := getServerInfo(streamWrapper, keyRecoverer)
 
 	if err != nil {
 		iLogger.Infof(nil, "[Bifrost] Get server info failed [%s]", err.Error())
@@ -123,8 +121,8 @@ func waitServer(streamWrapper bifrost.StreamWrapper) error {
 }
 
 // handShake 두번째 과정 함수. client 의 peer info 메세지를 server 에게 전달한다.
-func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, formatter bifrost.Formatter) error {
-	env, err := bifrost.BuildResponsePeerInfo(clientOpts.PubKey, formatter)
+func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts) error {
+	env, err := bifrost.BuildResponsePeerInfo(clientOpts.PubKey)
 
 	if err != nil {
 		return err
@@ -138,7 +136,7 @@ func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, format
 }
 
 // handShake 세번째 과정 함수. server 의 peer info 메세지를 기다린다(Get 한다).
-func getServerInfo(streamWrapper bifrost.StreamWrapper, formatter bifrost.Formatter) (*ecdsa.PublicKey, error) {
+func getServerInfo(streamWrapper bifrost.StreamWrapper, keyRecoverer bifrost.KeyRecoverer) (bifrost.Key, error) {
 	env, err := bifrost.RecvWithTimeout(3*time.Second, streamWrapper)
 
 	if err != nil {
@@ -153,7 +151,7 @@ func getServerInfo(streamWrapper bifrost.StreamWrapper, formatter bifrost.Format
 		return nil, err
 	}
 
-	serverPubKey := formatter.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
+	serverPubKey, err := keyRecoverer.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
 
 	if err != nil {
 		return nil, err
