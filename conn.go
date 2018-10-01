@@ -6,8 +6,6 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"crypto/ecdsa"
-
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/iLogger"
 )
@@ -15,9 +13,10 @@ import (
 type ConnID = string
 
 type PeerInfo struct {
-	IP       string
-	Pubkey   []byte
-	CurveOpt int
+	IP          string
+	PubKeyBytes []byte
+	IsPrivate   bool
+	KeyGenOpt   string
 }
 
 type innerMessage struct {
@@ -46,7 +45,7 @@ type Connection interface {
 	Send(data []byte, protocol string, successCallBack func(interface{}), errCallBack func(error))
 	Close()
 	GetIP() Address
-	GetPeerKey() *ecdsa.PublicKey
+	GetPeerKey() Key
 	GetID() ConnID
 	Start() error
 	Handle(handler Handler)
@@ -54,7 +53,7 @@ type Connection interface {
 
 type GrpcConnection struct {
 	ID            ConnID
-	peerKey       *ecdsa.PublicKey
+	peerKey       Key
 	ip            Address
 	streamWrapper StreamWrapper
 	stopFlag      int32
@@ -66,8 +65,7 @@ type GrpcConnection struct {
 	Crypto
 }
 
-func NewConnection(ip string, peerKey *ecdsa.PublicKey, streamWrapper StreamWrapper,
-	crypto Crypto) (Connection, error) {
+func NewConnection(ip string, peerKey Key, streamWrapper StreamWrapper, crypto Crypto) (Connection, error) {
 
 	if streamWrapper == nil || peerKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or peerKey is nil")
@@ -79,7 +77,7 @@ func NewConnection(ip string, peerKey *ecdsa.PublicKey, streamWrapper StreamWrap
 	}
 
 	return &GrpcConnection{
-		ID:            ConnID(crypto.GetID(peerKey)),
+		ID:            peerKey.ID(),
 		peerKey:       peerKey,
 		ip:            ipAddr,
 		streamWrapper: streamWrapper,
@@ -93,7 +91,7 @@ func NewConnection(ip string, peerKey *ecdsa.PublicKey, streamWrapper StreamWrap
 func (conn *GrpcConnection) GetIP() Address {
 	return conn.ip
 }
-func (conn *GrpcConnection) GetPeerKey() *ecdsa.PublicKey {
+func (conn *GrpcConnection) GetPeerKey() Key {
 	return conn.peerKey
 }
 func (conn *GrpcConnection) GetID() ConnID {

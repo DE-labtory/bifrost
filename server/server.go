@@ -9,8 +9,6 @@ import (
 
 	"time"
 
-	"crypto/ecdsa"
-
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/it-chain/iLogger"
@@ -22,7 +20,7 @@ import (
 type Server struct {
 	onConnectionHandler OnConnectionHandler
 	onErrorHandler      OnErrorHandler
-	pubKey              *ecdsa.PublicKey
+	pubKey              bifrost.Key
 	ip                  string
 	lis                 net.Listener
 	bifrost.Crypto
@@ -53,7 +51,7 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 	return nil
 }
 
-func (s Server) handShake(streamWrapper bifrost.StreamWrapper, pubKey *ecdsa.PublicKey) (*ecdsa.PublicKey, error) {
+func (s Server) handShake(streamWrapper bifrost.StreamWrapper) (bifrost.Key, error) {
 
 	err := requestInfo(streamWrapper)
 
@@ -91,9 +89,9 @@ func requestInfo(streamWrapper bifrost.StreamWrapper) error {
 	return nil
 }
 
-func (s Server) sendInfo(streamWrapper bifrost.StreamWrapper, pubKey *ecdsa.PublicKey) error {
+func (s Server) sendInfo(streamWrapper bifrost.StreamWrapper) error {
 
-	envelope, err := bifrost.BuildResponsePeerInfo(pubKey, s.Crypto.Formatter)
+	envelope, err := bifrost.BuildResponsePeerInfo(s.pubKey)
 
 	if err != nil {
 		return errors.New("fail to build info")
@@ -106,7 +104,7 @@ func (s Server) sendInfo(streamWrapper bifrost.StreamWrapper, pubKey *ecdsa.Publ
 	return nil
 }
 
-func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (*ecdsa.PublicKey, error) {
+func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (bifrost.Key, error) {
 
 	env, err := bifrost.RecvWithTimeout(3*time.Second, streamWrapper)
 
@@ -123,16 +121,15 @@ func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (*ecdsa.Publi
 
 	err = json.Unmarshal(env.Payload, peerInfo)
 
+	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
 	if err != nil {
 		return nil, err
 	}
 
-	pubKey := s.Crypto.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
-
 	return pubKey, nil
 }
 
-func (s Server) validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.PublicKey) {
+func (s Server) validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, bifrost.Key) {
 
 	if envelope.GetType() != pb.Envelope_REQUEST_PEERINFO {
 		iLogger.Info(nil, "[Bifrost] Invaild message type")
@@ -141,7 +138,7 @@ func (s Server) validateRequestPeerInfo(envelope *pb.Envelope) (bool, string, *e
 	return s.ValidatePeerInfo(envelope)
 }
 
-func (s Server) ValidateResponsePeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.PublicKey) {
+func (s Server) ValidateResponsePeerInfo(envelope *pb.Envelope) (bool, string, bifrost.Key) {
 
 	if envelope.GetType() != pb.Envelope_RESPONSE_PEERINFO {
 		iLogger.Info(nil, "[Bifrost] Invaild message type")
@@ -150,7 +147,7 @@ func (s Server) ValidateResponsePeerInfo(envelope *pb.Envelope) (bool, string, *
 	return s.ValidatePeerInfo(envelope)
 }
 
-func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.PublicKey) {
+func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, bifrost.Key) {
 
 	iLogger.Infof(nil, "[Bifrost] Received payload [%s]", envelope.Payload)
 
@@ -163,7 +160,7 @@ func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, *ecdsa.Pu
 		return false, "", nil
 	}
 
-	pubKey := s.FromByte(peerInfo.Pubkey, peerInfo.CurveOpt)
+	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
 
 	return true, peerInfo.IP, pubKey
 }
