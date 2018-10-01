@@ -120,6 +120,9 @@ func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (bifrost.Key,
 	peerInfo := &bifrost.PeerInfo{}
 
 	err = json.Unmarshal(env.Payload, peerInfo)
+	if err != nil {
+		return nil, err
+	}
 
 	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
 	if err != nil {
@@ -156,7 +159,7 @@ func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, bifrost.K
 	err := json.Unmarshal(envelope.Payload, peerInfo)
 
 	if err != nil {
-		iLogger.Infof(nil, "[Bifrost] Fail to unmarshal message [%s]", err.Error())
+		iLogger.Errorf(nil, "[Bifrost] Fail to unmarshal message [%s]", err.Error())
 		return false, "", nil
 	}
 
