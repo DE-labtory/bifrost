@@ -6,7 +6,10 @@ import (
 
 	"sync"
 
+	"os"
+
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
@@ -24,8 +27,9 @@ func TestNewStreamHandler(t *testing.T) {
 	}
 
 	serverIP := "127.0.0.1:9999"
-	mockServer := &bifrost.MockServer{Ch: connectionHandler}
-	server1, listener1 := bifrost.ListenMockServer(mockServer, serverIP)
+
+	mockServer := &mocks.MockServer{Ch: connectionHandler}
+	server1, listener1 := mocks.ListenMockServer(mockServer, serverIP)
 	assert.NotNil(t, server1)
 	assert.NotNil(t, listener1)
 
@@ -44,9 +48,9 @@ func TestNewStreamHandler(t *testing.T) {
 	assert.NoError(t, err)
 
 	defer func() {
+		grpc_conn.Close()
 		server1.Stop()
 		listener1.Close()
-		grpc_conn.Close()
 	}()
 
 	wg.Wait()
@@ -54,14 +58,22 @@ func TestNewStreamHandler(t *testing.T) {
 
 func TestGrpcConnection_Send(t *testing.T) {
 
-	keyOpts := bifrost.GetKeyOpts()
+	keyOpts := mocks.NewMockKeyOpts()
 
-	mockStreamWrapper := bifrost.MockStreamWrapper{SendCallBack: func(envelope *pb.Envelope) {
+	mockStreamWrapper := mocks.MockStreamWrapper{SendCallBack: func(envelope *pb.Envelope) {
 
 	}}
-	crypto := bifrost.GetMockCrypto()
+
+	err := mocks.MockStoreKey(keyOpts.PriKey, "./.test_private_key")
+	assert.NoError(t, err)
+	defer os.RemoveAll("./.test_private_key")
+
+	crypto := mocks.NewMockCrypto()
+	crypto.Signer.(*mocks.MockECDSASigner).KeyID = keyOpts.PubKey.ID()
+	crypto.Signer.(*mocks.MockECDSASigner).KeyDirPath = "./.test_private_key"
 
 	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
+	assert.NoError(t, err)
 
 	mockStreamWrapper.SendCallBack = func(envelope *pb.Envelope) {
 		//then
@@ -84,9 +96,9 @@ func TestGrpcConnection_Send(t *testing.T) {
 
 func TestGrpcConnection_GetPeerKey(t *testing.T) {
 	//given
-	keyOpts := bifrost.GetKeyOpts()
-	mockStreamWrapper := bifrost.MockStreamWrapper{}
-	crypto := bifrost.GetMockCrypto()
+	keyOpts := mocks.NewMockKeyOpts()
+	mockStreamWrapper := mocks.MockStreamWrapper{}
+	crypto := mocks.NewMockCrypto()
 
 	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
@@ -109,15 +121,15 @@ func TestGrpcConnection_Close(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	//given
-	keyOpts := bifrost.GetKeyOpts()
+	keyOpts := mocks.NewMockKeyOpts()
 
-	mockStreamWrapper := bifrost.MockStreamWrapper{}
+	mockStreamWrapper := mocks.MockStreamWrapper{}
 	mockStreamWrapper.CloseCallBack = func() {
 		// then
 		assert.True(t, true)
 		wg.Done()
 	}
-	crypto := bifrost.GetMockCrypto()
+	crypto := mocks.NewMockCrypto()
 
 	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
@@ -134,10 +146,10 @@ func TestGrpcConnection_Close(t *testing.T) {
 }
 
 func TestGrpcConnection_GetIP(t *testing.T) {
-	keyOpts := bifrost.GetKeyOpts()
+	keyOpts := mocks.NewMockKeyOpts()
 
-	mockStreamWrapper := bifrost.MockStreamWrapper{}
-	crypto := bifrost.GetMockCrypto()
+	mockStreamWrapper := mocks.MockStreamWrapper{}
+	crypto := mocks.NewMockCrypto()
 
 	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)

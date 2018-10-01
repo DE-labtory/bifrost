@@ -5,15 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"crypto/elliptic"
-	"crypto/rand"
-
 	"os/signal"
 	"syscall"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
-	"github.com/it-chain/bifrost/example"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/iLogger"
 )
@@ -21,16 +18,12 @@ import (
 var clientIp = "127.0.0.1:7778"
 var serverIp = "127.0.0.1:7777"
 var DefaultMux *mux.DefaultMux
+var testClientKeyDirPath = "./.test_client_key"
 
 //todo 아직깔끔하지않음 여러 수정필요
 func main() {
 
-	generator := example.SimpleGenerator{Curve: elliptic.P384(), Rand: rand.Reader}
-	pri, err := generator.GenerateKey()
-
-	if err != nil {
-		iLogger.Infof(nil, "[Bifrost] %s", err.Error())
-	}
+	keyPair := mocks.NewMockKeyOpts()
 
 	DefaultMux := mux.New()
 
@@ -44,7 +37,7 @@ func main() {
 
 	clientOpt := client.ClientOpts{
 		Ip:     clientIp,
-		PubKey: &pri.PublicKey,
+		PubKey: keyPair.PubKey,
 	}
 
 	grpcOpt := client.GrpcOpts{
@@ -52,20 +45,17 @@ func main() {
 		Creds:      nil,
 	}
 
-	formatter := example.SimpleFormatter{}
-	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
-
-	err = generator.StoreKey(pri, "", "./.key", idGetter.GetID(clientOpt.PubKey))
+	err := mocks.MockStoreKey(keyPair.PriKey, testClientKeyDirPath)
 	if err != nil {
 		iLogger.Fatalf(nil, err.Error())
 	}
 
-	keyLoader := example.SimpleKeyLoader{KeyDirPath: "./.key", KeyID: idGetter.GetID(clientOpt.PubKey)}
-	signer := example.SimpleSigner{KeyLoader: &keyLoader}
-	verifier := example.SimpleVerifier{KeyLoader: &keyLoader}
-	crypto := bifrost.Crypto{IDGetter: &idGetter, Formatter: &formatter, Signer: &signer, Verifier: &verifier}
-	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, crypto)
+	signer := mocks.MockECDSASigner{KeyID: keyPair.PubKey.ID(), KeyDirPath: testClientKeyDirPath}
+	verifier := mocks.MockECDSAVerifier{}
+	recoverer := mocks.MockECDSAKeyRecoverer{}
+	crypto := bifrost.Crypto{Signer: &signer, Verifier: &verifier, KeyRecoverer: &recoverer}
 
+	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, crypto)
 	if err != nil {
 		iLogger.Fatalf(nil, err.Error())
 	}
@@ -88,7 +78,7 @@ func main() {
 		sig := <-sigChan
 		switch sig {
 		case syscall.SIGINT:
-			os.RemoveAll("./.key")
+			os.RemoveAll(testClientKeyDirPath)
 			os.Exit(0)
 		}
 	}()

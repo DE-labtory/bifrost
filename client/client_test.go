@@ -3,27 +3,22 @@ package client_test
 import (
 	"testing"
 
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-
 	"time"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/client"
-	"github.com/it-chain/bifrost/server"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDial(t *testing.T) {
 	// given
 	clientIP := "127.0.0.1:12345"
-	pri, err := ecdsa.GenerateKey(elliptic.P384(), rand.Reader)
-	assert.NoError(t, err)
+	keyPair := mocks.NewMockKeyOpts()
 
 	clientOpt := client.ClientOpts{
 		Ip:     clientIP,
-		PubKey: &pri.PublicKey,
+		PubKey: keyPair.PubKey,
 	}
 
 	grpcOpt := client.GrpcOpts{
@@ -32,7 +27,7 @@ func TestDial(t *testing.T) {
 	}
 
 	serverIP := "127.0.0.1:43213"
-	s := server.GetServer()
+	s := mocks.NewMockServer()
 	s.OnConnection(func(connection bifrost.Connection) {
 		defer connection.Close()
 
@@ -44,7 +39,7 @@ func TestDial(t *testing.T) {
 	time.Sleep(3 * time.Second)
 
 	// when
-	testConn, err := client.Dial(serverIP, clientOpt, grpcOpt, bifrost.GetMockCrypto())
+	testConn, err := client.Dial(serverIP, clientOpt, grpcOpt, mocks.NewMockCrypto())
 	go func() {
 		defer testConn.Close()
 		if err := testConn.Start(); err != nil {

@@ -1,22 +1,20 @@
-package bifrost
+package bifrost_test
 
 import (
 	"testing"
 
+	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildResponsePeerInfo(t *testing.T) {
 	//given
-	mockGenerator := MockGenerator{}
-	pri, err := mockGenerator.GenerateKey()
-	assert.NoError(t, err)
-
-	mockFormatter := MockFormatter{}
+	keyOpt := mocks.NewMockKeyOpts()
 
 	//when
-	envelope, err := BuildResponsePeerInfo(&pri.PublicKey, &mockFormatter)
+	envelope, err := bifrost.BuildResponsePeerInfo(keyOpt.PubKey)
 	assert.NoError(t, err)
 
 	//then

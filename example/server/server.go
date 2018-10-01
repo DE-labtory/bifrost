@@ -1,14 +1,12 @@
 package main
 
 import (
-	"crypto/elliptic"
-	"crypto/rand"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/example"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/server"
 	"github.com/it-chain/iLogger"
@@ -17,15 +15,11 @@ import (
 var ip = "127.0.0.1:7777"
 
 var DefaultMux *mux.DefaultMux
+var testServerKeyDir = "./.test_server_key"
 
 func main() {
 
-	generator := example.SimpleGenerator{Curve: elliptic.P384(), Rand: rand.Reader}
-	pri, err := generator.GenerateKey()
-
-	if err != nil {
-		iLogger.Fatalf(nil, err.Error())
-	}
+	keyPair := mocks.NewMockKeyOpts()
 
 	DefaultMux = mux.New()
 
@@ -37,19 +31,17 @@ func main() {
 		iLogger.Infof(nil, "[Bifrost] %s", message.Data)
 	})
 
-	formatter := example.SimpleFormatter{}
-	idGetter := example.SimpleIdGetter{IDPrefix: "ITTEST", Formatter: &formatter}
-	err = generator.StoreKey(pri, "", "./.key", idGetter.GetID(&pri.PublicKey))
+	err := mocks.MockStoreKey(keyPair.PriKey, testServerKeyDir)
 	if err != nil {
-		iLogger.Fatalf(nil, err.Error())
+		iLogger.Fatal(nil, err.Error())
 	}
 
-	keyLoader := example.SimpleKeyLoader{KeyDirPath: "./.key", KeyID: idGetter.GetID(&pri.PublicKey)}
-	signer := example.SimpleSigner{KeyLoader: &keyLoader}
-	verifier := example.SimpleVerifier{}
-	crypto := bifrost.Crypto{IDGetter: &idGetter, Verifier: &verifier, Signer: &signer, Formatter: &formatter}
+	signer := mocks.MockECDSASigner{KeyID: keyPair.PubKey.ID(), KeyDirPath: testServerKeyDir}
+	verifier := mocks.MockECDSAVerifier{}
+	recoverer := mocks.MockECDSAKeyRecoverer{}
+	crypto := bifrost.Crypto{Verifier: &verifier, Signer: &signer, KeyRecoverer: &recoverer}
 
-	s := server.New(bifrost.KeyOpts{PriKey: pri, PubKey: &pri.PublicKey}, crypto)
+	s := server.New(keyPair, crypto)
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)
@@ -61,7 +53,7 @@ func main() {
 		sig := <-sigChan
 		switch sig {
 		case syscall.SIGINT:
-			os.RemoveAll("./.key")
+			os.RemoveAll(testServerKeyDir)
 			os.Exit(0)
 		}
 	}()
