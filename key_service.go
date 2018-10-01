@@ -16,29 +16,23 @@
 
 package bifrost
 
-import (
-	"crypto/ecdsa"
-)
-
-type KeyID string
+type KeyID = string
 
 type Crypto struct {
-	IDGetter
 	Signer
 	Verifier
-	Formatter
+	KeyRecoverer
 }
 
-type Generator interface {
-	GenerateKey() (*ecdsa.PrivateKey, error)
+type Key interface {
+	ID() KeyID
+	ToByte() []byte
+	KeyGenOpt() string
+	IsPrivate() bool
 }
 
-type KeyLoader interface {
-	LoadKey(pwd string) (*ecdsa.PrivateKey, error)
-}
-
-type IDGetter interface {
-	GetID(pubKey *ecdsa.PublicKey) KeyID
+type KeyRecoverer interface {
+	RecoverKeyFromByte(keyBytes []byte, isPrivateKey bool, keyGenOpt string) (Key, error)
 }
 
 type Signer interface {
@@ -46,11 +40,5 @@ type Signer interface {
 }
 
 type Verifier interface {
-	Verify(peerKey *ecdsa.PublicKey, signature, message []byte) (bool, error)
-}
-
-type Formatter interface {
-	FromByte(pubKey []byte, curveOpt int) *ecdsa.PublicKey
-	ToByte(pubKey *ecdsa.PublicKey) []byte
-	GetCurveOpt(pubKey *ecdsa.PublicKey) int
+	Verify(peerKey Key, signature, message []byte) (bool, error)
 }
