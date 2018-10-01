@@ -36,13 +36,13 @@ func (s Server) BifrostStream(streamServer pb.StreamService_BifrostStreamServer)
 	_, cf := context.WithCancel(context.Background())
 	streamWrapper := bifrost.NewServerStreamWrapper(streamServer, cf)
 
-	pub, err := s.handShake(streamWrapper, s.pubKey)
+	peerKey, err := s.handShake(streamWrapper)
 
 	if err != nil {
 		return err
 	}
 
-	conn, err := bifrost.NewConnection(ip, pub, streamWrapper, s.Crypto)
+	conn, err := bifrost.NewConnection(ip, peerKey, streamWrapper, s.Crypto)
 
 	if s.onConnectionHandler != nil {
 		s.onConnectionHandler(conn)
@@ -60,14 +60,14 @@ func (s Server) handShake(streamWrapper bifrost.StreamWrapper) (bifrost.Key, err
 		return nil, err
 	}
 
-	pub, err := s.getClientInfo(streamWrapper)
+	peerKey, err := s.getClientInfo(streamWrapper)
 
 	if err != nil {
 		streamWrapper.Close()
 		return nil, err
 	}
 
-	err = s.sendInfo(streamWrapper, pubKey)
+	err = s.sendInfo(streamWrapper)
 
 	if err != nil {
 		streamWrapper.Close()
@@ -76,7 +76,7 @@ func (s Server) handShake(streamWrapper bifrost.StreamWrapper) (bifrost.Key, err
 
 	iLogger.Info(nil, "[Bifrost] Handshake success")
 
-	return pub, nil
+	return peerKey, nil
 }
 
 func requestInfo(streamWrapper bifrost.StreamWrapper) error {
