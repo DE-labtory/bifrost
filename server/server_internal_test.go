@@ -17,72 +17,71 @@
 package server
 
 import (
-	"testing"
-
 	"encoding/json"
+	"testing"
 
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetKeyOpts(t *testing.T) {
-	// when
-	keyOpt := GetKeyOpts()
-
-	// then
-	assert.NotNil(t, keyOpt.PriKey)
-	assert.NotNil(t, keyOpt.PubKey)
-}
-
-func TestGetServer(t *testing.T) {
-	// when
-	s := GetServer()
-
-	// then
-	assert.NotNil(t, s.pubKey)
-	assert.NotNil(t, s.Crypto)
-	assert.Nil(t, s.onConnectionHandler)
-	assert.Nil(t, s.onErrorHandler)
-	assert.Empty(t, s.ip)
-	assert.Nil(t, s.lis)
-}
-
 func TestServer_OnConnection(t *testing.T) {
 	// given
-	s := GetServer()
+	keyOpt := bifrost.KeyOpts{
+		PubKey: *new(bifrost.Key),
+		PriKey: *new(bifrost.Key),
+	}
+
+	crypto := bifrost.Crypto{}
+
+	mockServer := New(keyOpt, crypto)
 
 	// when
-	s.OnConnection(func(conn bifrost.Connection) {
+	mockServer.OnConnection(func(conn bifrost.Connection) {
 
 	})
 
 	// then
-	assert.NotNil(t, s.onConnectionHandler)
+	assert.NotNil(t, mockServer.onConnectionHandler)
 }
 
 func TestServer_OnError(t *testing.T) {
 	// given
-	s := GetServer()
+	keyOpt := bifrost.KeyOpts{
+		PubKey: *new(bifrost.Key),
+		PriKey: *new(bifrost.Key),
+	}
+
+	crypto := bifrost.Crypto{}
+
+	mockServer := New(keyOpt, crypto)
 
 	// when
-	s.OnError(func(err error) {
+	mockServer.OnError(func(err error) {
 
 	})
 
 	// then
-	assert.NotNil(t, s.onErrorHandler)
+	assert.NotNil(t, mockServer.onErrorHandler)
 }
 
 func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 	// given
 	peerInfo := &bifrost.PeerInfo{
-		IP:       "127.0.0.1",
-		Pubkey:   []byte("123"),
-		CurveOpt: 2,
+		IP:          "127.0.0.1",
+		PubKeyBytes: []byte("123"),
+		IsPrivate:   false,
+		KeyGenOpt:   "P-384",
 	}
 
-	mockServer := GetServer()
+	keyOpt := bifrost.KeyOpts{
+		PubKey: *new(bifrost.Key),
+		PriKey: *new(bifrost.Key),
+	}
+
+	crypto := bifrost.Crypto{}
+
+	mockServer := New(keyOpt, crypto)
 
 	payload, _ := json.Marshal(peerInfo)
 

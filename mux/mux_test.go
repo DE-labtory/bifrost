@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/it-chain/bifrost/mux"
 	"github.com/it-chain/bifrost/pb"
 	"github.com/pkg/errors"
@@ -38,7 +39,7 @@ func TestMux_ServeError(t *testing.T) {
 		assert.Equal(t, err.Error(), "testError")
 	})
 
-	conn, err := bifrost.GetMockConnection(targetIP)
+	conn, err := mocks.NewMockConnection(targetIP)
 	assert.NoError(t, err)
 
 	// when

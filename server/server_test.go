@@ -6,31 +6,23 @@ import (
 	"time"
 
 	"github.com/it-chain/bifrost"
+	"github.com/it-chain/bifrost/mocks"
 	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/iLogger"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	// given
-	mockGenerator := server.MockGenerator{}
-	pri, err := mockGenerator.GenerateKey()
-	if err != nil {
-		iLogger.Fatalf(nil, err.Error())
-	}
-
-	pub := &pri.PublicKey
-	mockFormatter := server.MockFormatter{}
-	b := mockFormatter.ToByte(pub)
+	keyOpt := mocks.NewMockKeyOpts()
 
 	peerInfo := &bifrost.PeerInfo{
-		IP:       "127.0.0.1",
-		Pubkey:   b,
-		CurveOpt: mockFormatter.GetCurveOpt(pub),
+		IP:          "127.0.0.1",
+		PubKeyBytes: keyOpt.PubKey.ToByte(),
+		IsPrivate:   keyOpt.PubKey.IsPrivate(),
+		KeyGenOpt:   keyOpt.PubKey.KeyGenOpt(),
 	}
 
-	mockServer := server.GetServer()
+	mockServer := mocks.NewMockServer()
 
 	payload, _ := json.Marshal(peerInfo)
 
@@ -44,34 +36,26 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 	// then
 	assert.True(t, flag)
 	assert.Equal(t, peerInfo.IP, ip)
-	assert.Equal(t, pub, peerKey)
+	assert.Equal(t, keyOpt.PubKey, peerKey)
 }
 
 func TestServer_BifrostStream(t *testing.T) {
 	// given
-	s := server.GetServer()
+	s := mocks.NewMockServer()
 
-	mockGenerator := bifrost.MockGenerator{}
-	pri, err := mockGenerator.GenerateKey()
-
-	if err != nil {
-		iLogger.Fatalf(nil, err.Error())
-	}
-
-	pub := &pri.PublicKey
-	mockFormatter := bifrost.MockFormatter{}
-	b := mockFormatter.ToByte(pub)
+	keyOpt := mocks.NewMockKeyOpts()
 
 	peerInfo := &bifrost.PeerInfo{
-		IP:       "127.0.0.1",
-		Pubkey:   b,
-		CurveOpt: mockFormatter.GetCurveOpt(pub),
+		IP:          "127.0.0.1",
+		PubKeyBytes: keyOpt.PubKey.ToByte(),
+		IsPrivate:   keyOpt.PubKey.IsPrivate(),
+		KeyGenOpt:   keyOpt.PubKey.KeyGenOpt(),
 	}
 
-	mockStreamServer := server.NewMockStreamServer(*peerInfo)
+	mockStreamServer := mocks.NewMockStreamServer(*peerInfo)
 
 	// when
-	err = s.BifrostStream(mockStreamServer)
+	err := s.BifrostStream(mockStreamServer)
 
 	// then
 	assert.NoError(t, err)
@@ -79,7 +63,7 @@ func TestServer_BifrostStream(t *testing.T) {
 
 func TestServer_Listen(t *testing.T) {
 	// given
-	s := server.GetServer()
+	s := mocks.NewMockServer()
 
 	// when
 	go s.Listen("127.0.0.1:7777")
@@ -89,7 +73,7 @@ func TestServer_Listen(t *testing.T) {
 
 func TestServer_Stop(t *testing.T) {
 	// given
-	s := server.GetServer()
+	s := mocks.NewMockServer()
 	go s.Listen("127.0.0.1:7778")
 
 	time.Sleep(3 * time.Second)
