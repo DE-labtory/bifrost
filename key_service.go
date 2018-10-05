@@ -32,7 +32,7 @@ type Key interface {
 }
 
 type KeyRecoverer interface {
-	RecoverKeyFromByte(keyBytes []byte, isPrivateKey bool, keyGenOpt string) (Key, error)
+	RecoverKeyFromByte(keyBytes []byte, isPrivateKey bool) (Key, error)
 }
 
 type Signer interface {
