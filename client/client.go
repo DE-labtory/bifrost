@@ -151,7 +151,7 @@ func getServerInfo(streamWrapper bifrost.StreamWrapper, keyRecoverer bifrost.Key
 		return nil, err
 	}
 
-	serverPubKey, err := keyRecoverer.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
+	serverPubKey, err := keyRecoverer.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate)
 
 	if err != nil {
 		return nil, err
