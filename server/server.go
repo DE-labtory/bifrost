@@ -124,7 +124,7 @@ func (s Server) getClientInfo(streamWrapper bifrost.StreamWrapper) (bifrost.Key,
 		return nil, err
 	}
 
-	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
+	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (s Server) ValidatePeerInfo(envelope *pb.Envelope) (bool, string, bifrost.K
 		return false, "", nil
 	}
 
-	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate, peerInfo.KeyGenOpt)
+	pubKey, err := s.Crypto.RecoverKeyFromByte(peerInfo.PubKeyBytes, peerInfo.IsPrivate)
 
 	return true, peerInfo.IP, pubKey
 }

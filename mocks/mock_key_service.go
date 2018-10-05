@@ -32,6 +32,8 @@ import (
 	"crypto/sha512"
 	"encoding/asn1"
 
+	"crypto/x509"
+
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/it-chain/bifrost"
 	"github.com/it-chain/iLogger"
@@ -118,48 +120,25 @@ func (verifier *MockECDSAVerifier) Verify(peerKey bifrost.Key, signature []byte,
 type MockECDSAKeyRecoverer struct {
 }
 
-func (recoverer *MockECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPrivateKey bool, keyGenOpt string) (bifrost.Key, error) {
-	curve := curveFromString(keyGenOpt)
-
+func (recoverer *MockECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPrivateKey bool) (bifrost.Key, error) {
 	switch isPrivateKey {
 	case true:
-		priKey := new(MockPriKey)
-		priKey.internalPriKey = new(ecdsa.PrivateKey)
-
-		priKey.internalPriKey.PublicKey.Curve = curve
-
-		if 8*len(keyBytes) != priKey.internalPriKey.Params().BitSize {
-			return nil, errors.New("invalid key bytes length")
-		}
-		priKey.internalPriKey.D = new(big.Int).SetBytes(keyBytes)
-
-		if priKey.internalPriKey.D.Cmp(priKey.internalPriKey.Params().N) >= 0 {
-			return nil, errors.New("invalid private key size")
+		internalPriKey, err := x509.ParseECPrivateKey(keyBytes)
+		if err != nil {
+			return nil, err
 		}
 
-		if priKey.internalPriKey.D.Sign() <= 0 {
-			return nil, errors.New("invalid private key value")
-		}
+		pri := newMockPriKey(internalPriKey)
 
-		priKey.internalPriKey.PublicKey.X, priKey.internalPriKey.PublicKey.Y = priKey.internalPriKey.PublicKey.Curve.ScalarBaseMult(keyBytes)
-		if priKey.internalPriKey.PublicKey.X == nil {
-			return nil, errors.New("invalid public key value")
-		}
-
-		return priKey, nil
+		return pri, nil
 
 	case false:
-		x, y := elliptic.Unmarshal(curve, keyBytes)
-
-		if x == nil {
-			return nil, errors.New("invalid public key value")
+		internalPubKey, err := x509.ParsePKIXPublicKey(keyBytes)
+		if err != nil {
+			return nil, err
 		}
 
-		pub := new(MockPubKey)
-		pub.internalPubKey = new(ecdsa.PublicKey)
-		pub.internalPubKey.X = x
-		pub.internalPubKey.Y = y
-		pub.internalPubKey.Curve = curve
+		pub := newMockPubKey(internalPubKey.(*ecdsa.PublicKey))
 
 		return pub, nil
 	}
@@ -234,7 +213,7 @@ func mockLoadKey(keyID bifrost.KeyID, keyDirPath string) (bifrost.Key, error) {
 	}
 
 	mockKeyRecoverer := MockECDSAKeyRecoverer{}
-	key, err := mockKeyRecoverer.RecoverKeyFromByte(keyFile.KeyBytes, keyFile.IsPrivateKey, keyFile.KeyGenOpt)
+	key, err := mockKeyRecoverer.RecoverKeyFromByte(keyFile.KeyBytes, keyFile.IsPrivateKey)
 	if err != nil {
 		return nil, err
 	}
@@ -246,10 +225,16 @@ type MockPriKey struct {
 	internalPriKey *ecdsa.PrivateKey
 }
 
+func newMockPriKey(internalKey *ecdsa.PrivateKey) *MockPriKey {
+	return &MockPriKey{
+		internalPriKey: internalKey,
+	}
+}
+
 func (mockPriKey *MockPriKey) ID() bifrost.KeyID {
 	// get keyBytes from key
 	mockPub := &mockPriKey.internalPriKey.PublicKey
-	pubKeyBytes := elliptic.Marshal(mockPub.Curve, mockPub.X, mockPub.Y)
+	pubKeyBytes := newMockPubKey(mockPub).ToByte()
 
 	// get ski from keyBytes
 	hash := sha256.New()
@@ -260,7 +245,8 @@ func (mockPriKey *MockPriKey) ID() bifrost.KeyID {
 }
 
 func (mockPriKey *MockPriKey) ToByte() []byte {
-	return mockPriKey.internalPriKey.D.Bytes()
+	keyBytes, _ := x509.MarshalECPrivateKey(mockPriKey.internalPriKey)
+	return keyBytes
 }
 
 func (mockPriKey *MockPriKey) KeyGenOpt() string {
@@ -276,6 +262,12 @@ type MockPubKey struct {
 	internalPubKey *ecdsa.PublicKey
 }
 
+func newMockPubKey(internalKey *ecdsa.PublicKey) *MockPubKey {
+	return &MockPubKey{
+		internalPubKey: internalKey,
+	}
+}
+
 func (mockPubKey *MockPubKey) ID() bifrost.KeyID {
 	// get keyBytes from key
 	keyBytes := mockPubKey.ToByte()
@@ -289,7 +281,8 @@ func (mockPubKey *MockPubKey) ID() bifrost.KeyID {
 }
 
 func (mockPubKey *MockPubKey) ToByte() []byte {
-	return elliptic.Marshal(mockPubKey.internalPubKey.Curve, mockPubKey.internalPubKey.X, mockPubKey.internalPubKey.Y)
+	keyBytes, _ := x509.MarshalPKIXPublicKey(mockPubKey.internalPubKey)
+	return keyBytes
 }
 
 func (mockPubKey *MockPubKey) KeyGenOpt() string {
