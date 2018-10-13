@@ -34,7 +34,7 @@ func TestServer_OnConnection(t *testing.T) {
 
 	crypto := bifrost.Crypto{}
 
-	mockServer := New(keyOpt, crypto)
+	mockServer := New(keyOpt, crypto, nil)
 
 	// when
 	mockServer.OnConnection(func(conn bifrost.Connection) {
@@ -54,7 +54,7 @@ func TestServer_OnError(t *testing.T) {
 
 	crypto := bifrost.Crypto{}
 
-	mockServer := New(keyOpt, crypto)
+	mockServer := New(keyOpt, crypto, nil)
 
 	// when
 	mockServer.OnError(func(err error) {
@@ -81,7 +81,7 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 
 	crypto := bifrost.Crypto{}
 
-	mockServer := New(keyOpt, crypto)
+	mockServer := New(keyOpt, crypto, nil)
 
 	payload, _ := json.Marshal(peerInfo)
 

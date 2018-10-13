@@ -204,7 +204,7 @@ func NewMockServer() *server.Server {
 	mockCrypto := NewMockCrypto()
 	mockCrypto.Signer.(*MockECDSASigner).KeyID = keyOpt.PubKey.ID()
 
-	s := server.New(keyOpt, mockCrypto)
+	s := server.New(keyOpt, mockCrypto, nil)
 
 	return s
 }

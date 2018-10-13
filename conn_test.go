@@ -72,7 +72,7 @@ func TestGrpcConnection_Send(t *testing.T) {
 	crypto.Signer.(*mocks.MockECDSASigner).KeyID = keyOpts.PubKey.ID()
 	crypto.Signer.(*mocks.MockECDSASigner).KeyDirPath = "./.test_private_key"
 
-	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", nil, keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	mockStreamWrapper.SendCallBack = func(envelope *pb.Envelope) {
@@ -100,7 +100,7 @@ func TestGrpcConnection_GetPeerKey(t *testing.T) {
 	mockStreamWrapper := mocks.MockStreamWrapper{}
 	crypto := mocks.NewMockCrypto()
 
-	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", nil, keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	go func() {
@@ -131,7 +131,7 @@ func TestGrpcConnection_Close(t *testing.T) {
 	}
 	crypto := mocks.NewMockCrypto()
 
-	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", nil, keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 
 	go func() {
@@ -151,7 +151,7 @@ func TestGrpcConnection_GetIP(t *testing.T) {
 	mockStreamWrapper := mocks.MockStreamWrapper{}
 	crypto := mocks.NewMockCrypto()
 
-	conn, err := bifrost.NewConnection("127.0.0.1:1234", keyOpts.PubKey, mockStreamWrapper, crypto)
+	conn, err := bifrost.NewConnection("127.0.0.1:1234", nil, keyOpts.PubKey, mockStreamWrapper, crypto)
 	assert.NoError(t, err)
 	ipAddr := conn.GetIP()
 	assert.Equal(t, bifrost.Address{IP: "127.0.0.1:1234"}, ipAddr)

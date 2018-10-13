@@ -41,7 +41,7 @@ func main() {
 	recoverer := mocks.MockECDSAKeyRecoverer{}
 	crypto := bifrost.Crypto{Verifier: &verifier, Signer: &signer, KeyRecoverer: &recoverer}
 
-	s := server.New(keyPair, crypto)
+	s := server.New(keyPair, crypto, nil)
 
 	s.OnConnection(OnConnection)
 	s.OnError(OnError)
