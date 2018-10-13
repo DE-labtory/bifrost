@@ -48,6 +48,7 @@ type Connection interface {
 	GetIP() Address
 	GetPeerKey() Key
 	GetID() ConnID
+	GetMetaData() map[string]string
 	Start() error
 	Handle(handler Handler)
 }
