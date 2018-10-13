@@ -47,7 +47,6 @@ func BuildResponsePeerInfo(pubKey Key, metaData map[string]string) (*pb.Envelope
 	pi := &PeerInfo{
 		PubKeyBytes: b,
 		IsPrivate:   pubKey.IsPrivate(),
-		KeyGenOpt:   pubKey.KeyGenOpt(),
 		MetaData:    metaData,
 	}
 
