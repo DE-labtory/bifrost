@@ -27,7 +27,6 @@ type Crypto struct {
 type Key interface {
 	ID() KeyID
 	ToByte() []byte
-	KeyGenOpt() string
 	IsPrivate() bool
 }
 
