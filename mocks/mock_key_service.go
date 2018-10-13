@@ -164,7 +164,11 @@ func MockStoreKey(key bifrost.Key, keyDirPath string) error {
 	keyFilePath := filepath.Join(keyDirPath, key.ID())
 
 	// byte formatted key
-	keyBytes := key.ToByte()
+	keyBytes, err := key.ToByte()
+	if err != nil {
+		return err
+	}
+
 	isPrivateKey := key.IsPrivate()
 
 	// make json marshal
@@ -224,19 +228,21 @@ func newMockPriKey(internalKey *ecdsa.PrivateKey) *MockPriKey {
 func (mockPriKey *MockPriKey) ID() bifrost.KeyID {
 	// get keyBytes from key
 	mockPub := &mockPriKey.internalPriKey.PublicKey
-	pubKeyBytes := newMockPubKey(mockPub).ToByte()
+	keyBitString := elliptic.Marshal(mockPub.Curve, mockPub.X, mockPub.Y)
 
 	// get ski from keyBytes
 	hash := sha256.New()
-	hash.Write(pubKeyBytes)
-	ski := hash.Sum(nil)
+	hash.Write(keyBitString)
+	hashValue := hash.Sum(nil)
+
+	ski := make([]byte, 20)
+	ski = hashValue[:20]
 
 	return "IT" + base58.Encode(ski)
 }
 
-func (mockPriKey *MockPriKey) ToByte() []byte {
-	keyBytes, _ := x509.MarshalECPrivateKey(mockPriKey.internalPriKey)
-	return keyBytes
+func (mockPriKey *MockPriKey) ToByte() ([]byte, error) {
+	return x509.MarshalECPrivateKey(mockPriKey.internalPriKey)
 }
 
 func (mockPriKey *MockPriKey) KeyGenOpt() string {
@@ -260,19 +266,21 @@ func newMockPubKey(internalKey *ecdsa.PublicKey) *MockPubKey {
 
 func (mockPubKey *MockPubKey) ID() bifrost.KeyID {
 	// get keyBytes from key
-	keyBytes := mockPubKey.ToByte()
+	keyBitString := elliptic.Marshal(mockPubKey.internalPubKey.Curve, mockPubKey.internalPubKey.X, mockPubKey.internalPubKey.Y)
 
 	// get ski from keyBytes
 	hash := sha256.New()
-	hash.Write(keyBytes)
-	ski := hash.Sum(nil)
+	hash.Write(keyBitString)
+	hashValue := hash.Sum(nil)
+
+	ski := make([]byte, 20)
+	ski = hashValue[:20]
 
 	return "IT" + base58.Encode(ski)
 }
 
-func (mockPubKey *MockPubKey) ToByte() []byte {
-	keyBytes, _ := x509.MarshalPKIXPublicKey(mockPubKey.internalPubKey)
-	return keyBytes
+func (mockPubKey *MockPubKey) ToByte() ([]byte, error) {
+	return x509.MarshalPKIXPublicKey(mockPubKey.internalPubKey)
 }
 
 func (mockPubKey *MockPubKey) KeyGenOpt() string {
