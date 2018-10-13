@@ -14,7 +14,7 @@ func TestBuildResponsePeerInfo(t *testing.T) {
 	keyOpt := mocks.NewMockKeyOpts()
 
 	//when
-	envelope, err := bifrost.BuildResponsePeerInfo(keyOpt.PubKey)
+	envelope, err := bifrost.BuildResponsePeerInfo(keyOpt.PubKey, nil)
 	assert.NoError(t, err)
 
 	//then

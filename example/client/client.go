@@ -55,7 +55,7 @@ func main() {
 	recoverer := mocks.MockECDSAKeyRecoverer{}
 	crypto := bifrost.Crypto{Signer: &signer, Verifier: &verifier, KeyRecoverer: &recoverer}
 
-	conn, err := client.Dial(serverIp, clientOpt, grpcOpt, crypto)
+	conn, err := client.Dial(serverIp, nil, clientOpt, grpcOpt, crypto)
 	if err != nil {
 		iLogger.Fatalf(nil, err.Error())
 	}

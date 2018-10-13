@@ -17,6 +17,7 @@ type PeerInfo struct {
 	PubKeyBytes []byte
 	IsPrivate   bool
 	KeyGenOpt   string
+	MetaData    map[string]string
 }
 
 type innerMessage struct {
@@ -62,10 +63,11 @@ type GrpcConnection struct {
 	readChannel   chan *pb.Envelope
 	stopChannel   chan struct{}
 	sync.RWMutex
+	metaData map[string]string
 	Crypto
 }
 
-func NewConnection(ip string, peerKey Key, streamWrapper StreamWrapper, crypto Crypto) (Connection, error) {
+func NewConnection(ip string, metaData map[string]string, peerKey Key, streamWrapper StreamWrapper, crypto Crypto) (Connection, error) {
 
 	if streamWrapper == nil || peerKey == nil {
 		return nil, errors.New("fail to create connection streamWrapper or peerKey is nil")
@@ -85,15 +87,22 @@ func NewConnection(ip string, peerKey Key, streamWrapper StreamWrapper, crypto C
 		readChannel:   make(chan *pb.Envelope, 200),
 		stopChannel:   make(chan struct{}, 1),
 		Crypto:        crypto,
+		metaData:      metaData,
 	}, nil
+}
+
+func (conn *GrpcConnection) GetMetaData() map[string]string {
+	return conn.metaData
 }
 
 func (conn *GrpcConnection) GetIP() Address {
 	return conn.ip
 }
+
 func (conn *GrpcConnection) GetPeerKey() Key {
 	return conn.peerKey
 }
+
 func (conn *GrpcConnection) GetID() ConnID {
 	return conn.ID
 }

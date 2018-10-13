@@ -17,7 +17,7 @@ func NewMockConnection(targetIP string) (bifrost.Connection, error) {
 
 	}
 
-	conn, err := bifrost.NewConnection(targetIP, keyOpts.PubKey, mockStreamWrapper, mockCrypto)
+	conn, err := bifrost.NewConnection(targetIP, nil, keyOpts.PubKey, mockStreamWrapper, mockCrypto)
 	if err != nil {
 		return nil, err
 	}

@@ -39,7 +39,7 @@ func TestDial(t *testing.T) {
 	time.Sleep(3 * time.Second)
 
 	// when
-	testConn, err := client.Dial(serverIP, clientOpt, grpcOpt, mocks.NewMockCrypto())
+	testConn, err := client.Dial(serverIP, nil, clientOpt, grpcOpt, mocks.NewMockCrypto())
 	go func() {
 		defer testConn.Close()
 		if err := testConn.Start(); err != nil {

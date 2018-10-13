@@ -41,13 +41,14 @@ type KeyOpts struct {
 	PubKey Key
 }
 
-func BuildResponsePeerInfo(pubKey Key) (*pb.Envelope, error) {
+func BuildResponsePeerInfo(pubKey Key, metaData map[string]string) (*pb.Envelope, error) {
 	b := pubKey.ToByte()
 
 	pi := &PeerInfo{
 		PubKeyBytes: b,
 		IsPrivate:   pubKey.IsPrivate(),
 		KeyGenOpt:   pubKey.KeyGenOpt(),
+		MetaData:    metaData,
 	}
 
 	payload, err := json.Marshal(pi)
