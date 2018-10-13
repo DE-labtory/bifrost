@@ -42,7 +42,11 @@ type KeyOpts struct {
 }
 
 func BuildResponsePeerInfo(pubKey Key, metaData map[string]string) (*pb.Envelope, error) {
-	b := pubKey.ToByte()
+	b, err := pubKey.ToByte()
+
+	if err != nil {
+		return nil, err
+	}
 
 	pi := &PeerInfo{
 		PubKeyBytes: b,
