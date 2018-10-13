@@ -71,7 +71,6 @@ func TestServer_validateRequestPeerInfo_whenInValidPeerInfo(t *testing.T) {
 		IP:          "127.0.0.1",
 		PubKeyBytes: []byte("123"),
 		IsPrivate:   false,
-		KeyGenOpt:   "P-384",
 	}
 
 	keyOpt := bifrost.KeyOpts{

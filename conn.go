@@ -16,7 +16,6 @@ type PeerInfo struct {
 	IP          string
 	PubKeyBytes []byte
 	IsPrivate   bool
-	KeyGenOpt   string
 	MetaData    map[string]string
 }
 

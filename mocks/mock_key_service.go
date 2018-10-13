@@ -146,18 +146,9 @@ func (recoverer *MockECDSAKeyRecoverer) RecoverKeyFromByte(keyBytes []byte, isPr
 	return nil, errors.New("isPrivateKey value should be true or false")
 }
 
-func curveFromString(keyGenOpt string) elliptic.Curve {
-	switch keyGenOpt {
-	case "P-384":
-		return elliptic.P384()
-	}
-	return nil
-}
-
 type mockKeyFile struct {
 	KeyBytes     []byte
 	IsPrivateKey bool
-	KeyGenOpt    string
 }
 
 func MockStoreKey(key bifrost.Key, keyDirPath string) error {
@@ -175,10 +166,9 @@ func MockStoreKey(key bifrost.Key, keyDirPath string) error {
 	// byte formatted key
 	keyBytes := key.ToByte()
 	isPrivateKey := key.IsPrivate()
-	keyGenOpt := key.KeyGenOpt()
 
 	// make json marshal
-	jsonKeyFile, err := json.Marshal(mockKeyFile{KeyBytes: keyBytes, IsPrivateKey: isPrivateKey, KeyGenOpt: keyGenOpt})
+	jsonKeyFile, err := json.Marshal(mockKeyFile{KeyBytes: keyBytes, IsPrivateKey: isPrivateKey})
 	if err != nil {
 		return err
 	}

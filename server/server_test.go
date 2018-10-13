@@ -19,7 +19,6 @@ func TestServer_validateRequestPeerInfo_whenValidPeerInfo(t *testing.T) {
 		IP:          "127.0.0.1",
 		PubKeyBytes: keyOpt.PubKey.ToByte(),
 		IsPrivate:   keyOpt.PubKey.IsPrivate(),
-		KeyGenOpt:   keyOpt.PubKey.KeyGenOpt(),
 	}
 
 	mockServer := mocks.NewMockServer()
@@ -49,7 +48,6 @@ func TestServer_BifrostStream(t *testing.T) {
 		IP:          "127.0.0.1",
 		PubKeyBytes: keyOpt.PubKey.ToByte(),
 		IsPrivate:   keyOpt.PubKey.IsPrivate(),
-		KeyGenOpt:   keyOpt.PubKey.KeyGenOpt(),
 	}
 
 	mockStreamServer := mocks.NewMockStreamServer(*peerInfo)
