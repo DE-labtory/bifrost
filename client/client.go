@@ -122,7 +122,7 @@ func waitServer(streamWrapper bifrost.StreamWrapper) error {
 
 // handShake 두번째 과정 함수. client 의 peer info 메세지를 server 에게 전달한다.
 func sendInfo(streamWrapper bifrost.StreamWrapper, clientOpts ClientOpts, metaData map[string]string) error {
-	env, err := bifrost.BuildResponsePeerInfo(clientOpts.PubKey, metaData)
+	env, err := bifrost.BuildResponsePeerInfo(clientOpts.Ip, clientOpts.PubKey, metaData)
 
 	if err != nil {
 		return err
