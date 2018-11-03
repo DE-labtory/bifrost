@@ -11,10 +11,11 @@ import (
 
 func TestBuildResponsePeerInfo(t *testing.T) {
 	//given
+	ip := "127.0.0.1:2323"
 	keyOpt := mocks.NewMockKeyOpts()
 
 	//when
-	envelope, err := bifrost.BuildResponsePeerInfo(keyOpt.PubKey, nil)
+	envelope, err := bifrost.BuildResponsePeerInfo(ip, keyOpt.PubKey, nil)
 	assert.NoError(t, err)
 
 	//then

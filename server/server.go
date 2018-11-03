@@ -92,7 +92,7 @@ func requestInfo(streamWrapper bifrost.StreamWrapper) error {
 
 func (s Server) sendInfo(streamWrapper bifrost.StreamWrapper, metaData map[string]string) error {
 
-	envelope, err := bifrost.BuildResponsePeerInfo(s.pubKey, metaData)
+	envelope, err := bifrost.BuildResponsePeerInfo(s.ip, s.pubKey, metaData)
 
 	if err != nil {
 		return errors.New("fail to build info")
