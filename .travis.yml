@@ -8,7 +8,7 @@ language: go
 # updates. Any older versions be considered deprecated. Don't bother testing
 # with them.
 go:
-  - 1.10.x
+  - 1.11.x
 
 # Enable testing on specific operating system
 os:
@@ -21,14 +21,13 @@ git:
 
 # install additional dependencies required by your project such as Ubuntu packages or custom services
 before_install:
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
   - go get golang.org/x/tools/cmd/goimports
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
 # install any dependencies required
 install:
-  - dep ensure
+  - go mod vendor
 
 # Don't email me the results of the test runs.
 notifications:
@@ -59,4 +58,5 @@ script:
 
 env:
   global:
-    secure: ccc38Vgx782/BcdHY4opZNNOtVjNU9jXZl57N2aevht530hg+7Zyi9V34uJEn1H6Uwqi27E9MBwjVaUhGe8WmtNrZqCuUjWIOnvA7fyoqX4rdh12U2qkZWg42qI52EKLvxtRMXrWEk7LGUSpzwsy28eE6f2UZZ/R9uFMLmSQqd6xCl5fUKbksKwjqmJg8NmrDGwmVh2Az4jsEukfAUHEj6tFMlsDLZbdglSvoWAjXeJFQ15Bv0ADWWwqkxwo8oaHBqLtUoX/pA7fNJmx04oPiVyikTUFhdaxpXz+XvTCeekjboN4ffvCZfx/a+bol5/7xzV/CFKt6b02f8UWKXJfiIRJBdzHr/VVLuMYZ0RtM6QLfIjmb6p0QDa6KoQNg4ywQkoteToukvR3IY+24MbgIVHqM61H3LbFoBqNl/ohRILBrHJKkLTbWvFG6wJfJ7kIUQwMimsEBS0c17I9NUJYy2GGi0P8pjA2zjDI/CLimBJQviPOQ9805Db90itPDxcsFFwQfDGT8wVyeGmugWudOFfOM6pQs0yCuBJaw+0T9eVogGNKI/Wtw/AdpmT/ZRQ5iLDtX7t1xVWTo0p6sB0zNOiJiRqDHVZlOQTpBirsDtyMJUS/nQ341PJySA1w34sRbbrvRIbCQoO1aFn/7sVWKG8X2/u4u5KX8FJ3aEu9964=
+  - secure: ccc38Vgx782/BcdHY4opZNNOtVjNU9jXZl57N2aevht530hg+7Zyi9V34uJEn1H6Uwqi27E9MBwjVaUhGe8WmtNrZqCuUjWIOnvA7fyoqX4rdh12U2qkZWg42qI52EKLvxtRMXrWEk7LGUSpzwsy28eE6f2UZZ/R9uFMLmSQqd6xCl5fUKbksKwjqmJg8NmrDGwmVh2Az4jsEukfAUHEj6tFMlsDLZbdglSvoWAjXeJFQ15Bv0ADWWwqkxwo8oaHBqLtUoX/pA7fNJmx04oPiVyikTUFhdaxpXz+XvTCeekjboN4ffvCZfx/a+bol5/7xzV/CFKt6b02f8UWKXJfiIRJBdzHr/VVLuMYZ0RtM6QLfIjmb6p0QDa6KoQNg4ywQkoteToukvR3IY+24MbgIVHqM61H3LbFoBqNl/ohRILBrHJKkLTbWvFG6wJfJ7kIUQwMimsEBS0c17I9NUJYy2GGi0P8pjA2zjDI/CLimBJQviPOQ9805Db90itPDxcsFFwQfDGT8wVyeGmugWudOFfOM6pQs0yCuBJaw+0T9eVogGNKI/Wtw/AdpmT/ZRQ5iLDtX7t1xVWTo0p6sB0zNOiJiRqDHVZlOQTpBirsDtyMJUS/nQ341PJySA1w34sRbbrvRIbCQoO1aFn/7sVWKG8X2/u4u5KX8FJ3aEu9964=
+  - GO111MODULE=on

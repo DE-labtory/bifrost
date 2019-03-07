@@ -1,51 +1,35 @@
 #!/bin/bash
+
+# goimports test
 diff <(goimports -d $(find . -type f -name '*.go' -not -path "*/vendor/*")) <(printf "")
 
-echo "goimports processing..."
 if [ $? -ne 0 ]; then
-  echo "goimports format error" >&2
-  exit 1
+echo "goimports format error" >&2
+exit 1
 fi
 
-#echo "go vet processing...."
-#go vet -v ./...
-
-#if [ $? -ne 0 ]; then
-#  echo "go vet fail" >&2
-#  exit 1
-#fi
-
-#echo "golangci-lint run processing...."
-#golangci-lint run       # run a bunch of code checkers/linters in parallel
-
-#if [ $? -ne 0 ]; then
-#  echo "golangci-lint fail" >&2
-#  exit 1
-#fi
-
-echo "go test -p 1 -v ./... processing...."
-#echo "go test -p 1 -v -race ./... processing...."
-go test -p 1 -v ./... # Run all the tests
-#go test -p 1 -v -race ./... # Run all the tests with the race detector enabled
+# run go test
+go test -v -mod=vendor ./...
 
 if [ $? -ne 0 ]; then
-  echo "go test fail" >&2
-  exit 1
+echo "go test fail" >&2
+exit 1
 fi
 
-go test -p 1 ./... -covermode=count -coverprofile=coverage.out
-#go test -p 1 -race ./... -covermode=count -coverprofile=coverage.out
+# generate go test coverage file
+go test -v -mod=vendor ./... -covermode=count -coverprofile=coverage.out
 
 if [ $? -ne 0 ]; then
-  echo "go test coverage fail" >&2
-  exit 1
+echo "go test coverage fail" >&2
+exit 1
 fi
 
-goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+# notify to coveralls
+goveralls -coverprofile=coverage.out -service=travis-ci
 
 if [ $? -ne 0 ]; then
-  echo "go update test coverage fail" >&2
-  exit 1
+echo "go update test coverage fail" >&2
+exit 1
 fi
 
 exit 0
