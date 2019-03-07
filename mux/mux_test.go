@@ -3,10 +3,10 @@ package mux_test
 import (
 	"testing"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/mocks"
-	"github.com/it-chain/bifrost/mux"
-	"github.com/it-chain/bifrost/pb"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/mocks"
+	"github.com/DE-labtory/bifrost/mux"
+	"github.com/DE-labtory/bifrost/pb"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )

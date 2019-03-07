@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 
 	"os"
 
-	"github.com/it-chain/bifrost/mocks"
+	"github.com/DE-labtory/bifrost/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -5,11 +5,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/mocks"
-	"github.com/it-chain/bifrost/mux"
-	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/mocks"
+	"github.com/DE-labtory/bifrost/mux"
+	"github.com/DE-labtory/bifrost/server"
+	"github.com/DE-labtory/iLogger"
 )
 
 var ip = "127.0.0.1:7777"

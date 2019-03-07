@@ -3,8 +3,8 @@ package bifrost_test
 import (
 	"testing"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/mocks"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
