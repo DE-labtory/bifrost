@@ -34,9 +34,9 @@ import (
 
 	"crypto/x509"
 
-	"github.com/btcsuite/btcutil/base58"
 	"github.com/DE-labtory/bifrost"
 	"github.com/DE-labtory/iLogger"
+	"github.com/btcsuite/btcutil/base58"
 )
 
 func NewMockKeyPair() (pri bifrost.Key, pub bifrost.Key, err error) {
