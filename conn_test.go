@@ -8,9 +8,9 @@ import (
 
 	"os"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/mocks"
-	"github.com/it-chain/bifrost/pb"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/mocks"
+	"github.com/DE-labtory/bifrost/pb"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

@@ -11,10 +11,10 @@ import (
 
 	"time"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/server"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/pb"
+	"github.com/DE-labtory/bifrost/server"
+	"github.com/DE-labtory/iLogger"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/reflection"

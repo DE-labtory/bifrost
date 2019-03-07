@@ -6,8 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost/pb"
+	"github.com/DE-labtory/iLogger"
 )
 
 type ConnID = string

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/it-chain/bifrost/pb"
+	"github.com/DE-labtory/bifrost/pb"
 )
 
 func RecvWithTimeout(timeout time.Duration, stream Stream) (*pb.Envelope, error) {

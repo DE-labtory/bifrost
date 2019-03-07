@@ -1,8 +1,8 @@
 package mocks
 
 import (
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/pb"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/pb"
 )
 
 func NewMockConnection(targetIP string) (bifrost.Connection, error) {

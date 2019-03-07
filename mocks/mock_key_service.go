@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 It-chain
+ * Copyright 2018 DE-labtory
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import (
 	"crypto/x509"
 
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/iLogger"
 )
 
 func NewMockKeyPair() (pri bifrost.Key, pub bifrost.Key, err error) {

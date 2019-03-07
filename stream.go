@@ -3,7 +3,7 @@ package bifrost
 import (
 	"context"
 
-	"github.com/it-chain/bifrost/pb"
+	"github.com/DE-labtory/bifrost/pb"
 	"google.golang.org/grpc"
 )
 

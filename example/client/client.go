@@ -8,11 +8,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/it-chain/bifrost"
-	"github.com/it-chain/bifrost/client"
-	"github.com/it-chain/bifrost/mocks"
-	"github.com/it-chain/bifrost/mux"
-	"github.com/it-chain/iLogger"
+	"github.com/DE-labtory/bifrost"
+	"github.com/DE-labtory/bifrost/client"
+	"github.com/DE-labtory/bifrost/mocks"
+	"github.com/DE-labtory/bifrost/mux"
+	"github.com/DE-labtory/iLogger"
 )
 
 var clientIp = "127.0.0.1:7778"

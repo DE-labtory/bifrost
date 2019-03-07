@@ -1,8 +1,8 @@
 # Bifrost
-[![Build Status](https://travis-ci.org/it-chain/bifrost.svg?branch=master)](https://travis-ci.org/it-chain/bifrost)
+[![Build Status](https://travis-ci.org/DE-labtory/bifrost.svg?branch=master)](https://travis-ci.org/DE-labtory/bifrost)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Language](https://img.shields.io/badge/language-go-orange.svg)](https://golang.org)
-[![Coverage Status](https://coveralls.io/repos/github/it-chain/bifrost/badge.svg?branch=master)](https://coveralls.io/github/it-chain/bifrost?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/DE-labtory/bifrost/badge.svg?branch=master)](https://coveralls.io/github/DE-labtory/bifrost?branch=master)
 
 <p align="center"><img src="./images/bifrost.jpeg" width="171px" height="171px"></p>
 
@@ -16,7 +16,7 @@ Bifrost is a grpc-based P2P network library
 ### Installation
 
 ```
-go get -u github.com/it-chain/bifrost
+go get -u github.com/DE-labtory/bifrost
 ```
 
 ### Usage
@@ -25,8 +25,8 @@ go get -u github.com/it-chain/bifrost
 **Server**
 ```Go
 import (
-  "github.com/it-chain/bifrost/pb"
-	"github.com/it-chain/bifrost/server"
+  "github.com/DE-labtory/bifrost/pb"
+	"github.com/DE-labtory/bifrost/server"
 )
 
 // connection control
@@ -40,7 +40,7 @@ server.Listen(_gRPCatewayIP_)
 **Client**
 ```Go
 import (
-  "github.com/it-chain/bifrost/client"
+  "github.com/DE-labtory/bifrost/client"
 )
 connection, err := client.Dial(command.Address, clientOpt, grpcOpt) //흔히 cli 에서 이루어짐
 connection.send(payload []byte, protocol string, successCallBack func(interface{}), errCallBack func(error)) //connection GrpcConnection
